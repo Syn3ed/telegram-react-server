@@ -119,6 +119,7 @@ app.get('/mes/:userRequestId', async (req, res) => {
             {
               model: User,
               attributes: ['username', 'address']
+              
             }
           ]
         }
