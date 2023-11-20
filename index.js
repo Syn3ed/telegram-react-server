@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
@@ -20,8 +19,26 @@ const { User, UserRequest, Message, Role } = require('./src/BaseData/bdModel');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors()); 
+app.use(cors());
 app.use(bodyParser.json());
+
+
+app.post(`/replyToUser`, async (req, res) => {
+  const { queryId, userRequestId, username } = req.body;
+  try {
+    await bot.answerWebAppQuery(queryId, {
+      type: 'article',
+      id: queryId,
+      title: 'Успешная покупка',
+      input_message_content: {
+        message_text: `/lol`
+      }
+    })
+    return res.status(200).json({});
+  } catch (e) {
+    return res.status(500).json({})
+  }
+})
 
 app.get('/users', async (req, res) => {
   try {
@@ -43,7 +60,8 @@ app.get('/req', async (req, res) => {
       id: userRequest.id,
       status: userRequest.status,
       messageReq: userRequest.messageReq,
-      username: userRequest.User ? userRequest.User.username : null
+      username: userRequest.User ? userRequest.User.username : null,
+      category: userRequest.category
     }));
     res.json(formattedUserRequests);
   } catch (error) {
@@ -71,6 +89,42 @@ app.get('/req/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+app.get('/reqUser/:id', async (req, res) => {
+  try {
+    const userRequestId = req.params.id;
+
+    const user = await User.findOne({
+      where: { telegramId: userRequestId },
+      include: UserRequest,
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userRequests = user.UserRequests.map(userRequest => ({
+      id: userRequest.id,
+      status: userRequest.status,
+      messageReq: userRequest.messageReq,
+      username: userRequest.username,
+      category: userRequest.category
+    }));
+
+    const formattedUser = {
+      id: user.id,
+      username: user.username,
+      address: user.address,
+      userRequests: userRequests,
+    };
+
+    res.json(formattedUser.userRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 
 app.get('/mes', async (req, res) => {
@@ -119,7 +173,7 @@ app.get('/mes/:userRequestId', async (req, res) => {
             {
               model: User,
               attributes: ['username', 'address']
-              
+
             }
           ]
         }
@@ -170,25 +224,24 @@ const connectToDatabase = async () => {
   }
 };
 
-// connectToDatabase();
-
-// const connectToDatabase = async () => {
-//   try {
-//     await sequelize.authenticate();
-//     await sequelize.sync({ force: false }); // Добавлен параметр force: false
-//     console.log('Подключение к бд установлено');
-//   } catch (e) {
-//     console.error('Подключение к бд сломалось', e);
-//   }
-// };
 
 const startBot = async () => {
   await connectToDatabase();
+
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
+    console.log(msg)
+    if (msg.text === '/desMes') {
+      bot.sendMessage(msg.chat.id, 'lol')
+    }
     console.log('Подключение к бд установлено');
   });
   bot.on('message', async (msg) => {
+    if (msg?.web_app_data?.data) {
+      const datares = msg
+      datares.text = msg?.web_app_data?.data
+    }
+    //console.log(msg)  
     await commandHandler.handleMessage(msg);
   });
 
@@ -197,22 +250,3 @@ const startBot = async () => {
 
 startBot();
 
-
-
-
-// const { User, UserRequest, Message, Role } = require('./src/BaseData/bdModel');
-// const DatabaseService = require('./src/BaseData/bdService');
-// const databaseService = new DatabaseService(sequelize);
-
-// if (text === `/req`) {
-//   bot.sendMessage(chatId, `${appUrl}`, {
-//     reply_markup: {
-//       inline_keyboard: [
-//         [{ text: `list Request`, web_app: { url: appUrl } }]
-//       ]
-//     }
-//   });
-// }
-// else {
-//   bot.sendMessage(chatId, `${text}`)
-// }

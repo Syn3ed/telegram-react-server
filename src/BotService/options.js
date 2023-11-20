@@ -31,7 +31,8 @@ module.exports = {
    menuKeyboard: {
         reply_markup: {
             keyboard: [
-                [{ text: 'Мои заявки', callback_data: '/web' }, { text: 'Контакты', callback_data: '/webadres' }],
+                [{ text: 'Мои заявки', callback_data: '/webg' }, { text: 'Контакты', callback_data: '/webadres' }],
+                [{text: `Ваши Заявки`, web_app: { url: appUrl } }]
             ]
         }
     },

@@ -1,3 +1,5 @@
+require('dotenv').config();
+const appUrl = process.env.WEB_APP_URL;
 const { menuMain, menuSecond, menuKeyboard, menuKeyboardRemove, comandBot, menuSite } = require(`./options.js`)
 const DatabaseService = require(`../BaseData/bdService`);
 const sequelize = require(`../BaseData/bdConnect.js`)
@@ -14,7 +16,7 @@ class commandAndAnswer {
         this.addCommand('/create_request', this.handleCreateRequest);
         this.addCommand('/msg', this.handleMsg);
         this.addCommand('Мои заявки', this.handleSiteUser);
-        this.addCommand('/replyReq', this.ReplyToUser);
+        this.addCommand('/\/reply\s*:(\d+)/', this.ReplyToUser);
         this.bot.setMyCommands(comandBot)
     }
 
@@ -42,11 +44,25 @@ class commandAndAnswer {
 
     async handleSiteUser(msg) {
         const chatId = msg.chat.id;
-        await this.bot.sendMessage(chatId, `Ваши заявки`, menuSite);
+        console.log(appUrl + `/RequestUserList/${msg.chat.id}`)
+        await this.bot.sendMessage(chatId, `Ваши заявки`, {
+            reply_markup: {
+                inline_keyboard: [
+                    [{text: 'Ваши Заявки', web_app: {url: appUrl + `/RequestUserList/${msg.chat.id}`}}]
+                ]
+            }
+        });
     }
     async handleMenu(msg) {
         const chatId = msg.chat.id;
-        await this.bot.sendMessage(chatId, `Меню бота`, menuKeyboard);
+        await this.bot.sendMessage(chatId, `Меню бота`, {
+            reply_markup:{
+                keyboard:[
+                    [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` }}, { text: 'Контакты', callback_data: '/webadres' }],
+                    [{text: `Ваши Заявки`, web_app: { url: appUrl } }]
+                ]
+            }
+        });
     }
 
 
@@ -65,8 +81,9 @@ class commandAndAnswer {
         }
     }
 
+
+
     async ReplyToUser(msg) {
-        const userRequestIdRegex = /\/replyReq (\d+)/;
         const match = msg.text.match(userRequestIdRegex);
 
         if (match) {
@@ -80,7 +97,7 @@ class commandAndAnswer {
                     return;
                 }
 
-                await this.bot.sendMessage(msg.chat.id, 'Введите введите сообщение:');
+                await this.bot.sendMessage(msg.chat.id, 'Введите сообщение:');
 
                 const reply = await new Promise((resolve) => {
                     this.bot.once('text', (response) => resolve(response));
@@ -100,6 +117,7 @@ class commandAndAnswer {
             }
         }
     }
+
 
     async handleCreateRequest(msg) {
         try {
