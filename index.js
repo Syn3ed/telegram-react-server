@@ -225,6 +225,7 @@ app.post('/users', async (req, res) => {
   }
 });
 
+
 const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
