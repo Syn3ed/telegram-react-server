@@ -7,7 +7,7 @@ const sequelize = require('./src/BaseData/bdConnect');
 const DatabaseService = require(`./src/BaseData/bdService`)
 const { commandAndAnswer, callbackAnswer } = require('./src/BotService/botService');
 require('./src/BaseData/bdModel');
-const dbService = new DatabaseService(sequelize)
+const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
 const commandHandler = new commandAndAnswer(bot);
@@ -29,9 +29,25 @@ app.post(`/replyToUser`, async (req, res) => {
     await bot.answerWebAppQuery(queryId, {
       type: 'article',
       id: queryId,
-      title: 'Успешная покупка',
+      title: 'ResUs',
       input_message_content: {
-        message_text: `/lol`
+        message_text: `/resToUser ${userRequestId}`
+      }
+    })
+    return res.status(200).json({});
+  } catch (e) {
+    return res.status(500).json({})
+  }
+})
+app.post(`/replyToOperator`, async (req, res) => {
+  const { queryId, userRequestId, username } = req.body;
+  try {
+    await bot.answerWebAppQuery(queryId, {
+      type: 'article',
+      id: queryId,
+      title: 'ResOp',
+      input_message_content: {
+        message_text: `/resToOperator ${userRequestId}`
       }
     })
     return res.status(200).json({});
@@ -136,7 +152,7 @@ app.get('/mes', async (req, res) => {
           include: [
             {
               model: User,
-              attributes: ['username', 'address']
+              attributes: ['username']
             }
           ]
         }
@@ -149,7 +165,7 @@ app.get('/mes', async (req, res) => {
       status: message.UserRequest.status,
       messageReq: message.UserRequest.messageReq,
       username: message.UserRequest.User ? message.UserRequest.User.username : null,
-      address: message.UserRequest.User ? message.UserRequest.User.address : null,
+      address: message.UserRequest.address,
     }));
 
     res.json(formattedMessages);
@@ -187,7 +203,7 @@ app.get('/mes/:userRequestId', async (req, res) => {
       description: message.UserRequest.messageReq,
       subject: message.UserRequest.category,
       username: message.UserRequest.User ? message.UserRequest.User.username : null,
-      address: message.UserRequest.User ? message.UserRequest.User.address : null,
+      address: message.UserRequest.address ? message.UserRequest.address : null,
     }));
 
     res.json(formattedMessages);
@@ -224,16 +240,120 @@ const connectToDatabase = async () => {
   }
 };
 
+const createRoles = async () => {
+  try {
+    await Role.findOrCreate({ where: { name: 'Admin' } });
+    await Role.findOrCreate({ where: { name: 'User' } });
+    await Role.findOrCreate({ where: { name: 'Operator' } });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
 const startBot = async () => {
   await connectToDatabase();
+  // await createRoles();
+  bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const requestId = match[1];
+    const userRequestId = match[1];
+
+    try {
+      const userRequest = await dbManager.findReq(userRequestId);
+
+      if (!userRequest) {
+        bot.sendMessage(msg.chat.id, 'Заявка не найдена.');
+        return;
+      }
+
+      await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
+      const reply = await new Promise((resolve) => {
+        bot.once('text', (response) => resolve(response));
+      });
+
+      await dbManager.replyToUser(userRequestId, reply.text,msg.chat.id);
+
+      const userTelegramId = await dbManager.findUserToReq(userRequestId);
+      if (userTelegramId) {
+        bot.sendMessage(userTelegramId, `Новый ответ на вашу заявку: ${reply}`);
+      }
+      const messages = await Message.findAll({
+        where: { id: userRequestId },
+        include: [
+          {
+            model: UserRequest,
+            include: [
+              {
+                model: User,
+                attributes: ['username', 'address','telegramId']
+              }
+            ]
+          }
+        ]
+      });
+      
+      bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
+        reply_markup: {
+            inline_keyboard: [
+                [{text: 'Ваша Заявка', web_app: {url: appUrl + `/requests/${userRequestId}`}}]
+            ]
+        }
+    });
+      bot.sendMessage(msg.chat.id, 'Ответ успешно добавлен.');
+    } catch (error) {
+      console.error('Ошибка при ответе на заявку:', error);
+      bot.sendMessage(msg.chat.id, 'Произошла ошибка при ответе на заявку.');
+    }
+  });
+  bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
+    const userRequestId = match[1];
+
+    try {
+      const userRequest = await dbManager.findReq(userRequestId);
+      if (!userRequest) {
+        bot.sendMessage(msg.chat.id, 'Заявка не найдена.');
+        return;
+      }
+      await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
+      const reply = await new Promise((resolve) => {
+        bot.once('text', (response) => resolve(response));
+      });
+      const messages = await Message.findAll({
+        where: { id: userRequestId },
+        include: [
+          {
+            model: UserRequest,
+            include: [
+              {
+                model: User,
+                attributes: ['username', 'address','telegramId']
+              }
+            ]
+          }
+        ]
+      });
+      await console.log(messages[0].operatorId)
+      await dbManager.replyToOperator(userRequestId, reply.text,messages);
+  
+      await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
+        reply_markup: {
+            inline_keyboard: [
+                [{text: 'Пришел ответ от пользователя', web_app: {url: appUrl + `/requestsOperator/${userRequestId}`}}]
+            ]
+        }
+    });
+
+    } catch (error) {
+      
+
+    }
+  });
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
     console.log(msg)
-    if (msg.text === '/desMes') {
-      bot.sendMessage(msg.chat.id, 'lol')
-    }
     console.log('Подключение к бд установлено');
   });
   bot.on('message', async (msg) => {
@@ -241,7 +361,10 @@ const startBot = async () => {
       const datares = msg
       datares.text = msg?.web_app_data?.data
     }
-    //console.log(msg)  
+    console.log(msg)  
+    if (msg.text == '/lol') {
+      bot.sendMessage(msg.chat.id, 'lol')
+    }
     await commandHandler.handleMessage(msg);
   });
 

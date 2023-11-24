@@ -16,7 +16,7 @@ class commandAndAnswer {
         this.addCommand('/create_request', this.handleCreateRequest);
         this.addCommand('/msg', this.handleMsg);
         this.addCommand('Мои заявки', this.handleSiteUser);
-        this.addCommand('/\/reply\s*:(\d+)/', this.ReplyToUser);
+        this.addCommand('/\/resToOperators (\d+)/', this.ReplyToUser);
         this.bot.setMyCommands(comandBot)
     }
 
@@ -122,26 +122,22 @@ class commandAndAnswer {
     async handleCreateRequest(msg) {
         try {
             const chatId = msg.chat.id;
-
+            await this.bot.sendMessage(chatId, 'Введите ваш адрес:');
+            const addressResponse = await new Promise((resolve) => {
+                this.bot.once('text', (response) => resolve(response));
+            });
             await this.bot.sendMessage(chatId, 'Введите категорию заявки:');
-
             const categoryResponse = await new Promise((resolve) => {
                 this.bot.once('text', (response) => resolve(response));
             });
-
             await this.bot.sendMessage(chatId, 'Введите описание вашей заявки:');
-
             const descriptionResponse = await new Promise((resolve) => {
                 this.bot.once('text', (response) => resolve(response));
             });
-
             const description = descriptionResponse.text;
-
-
             const category = categoryResponse.text;
-
-            await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', description, category);
-
+            const address = addressResponse.text
+            await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', description, category,address);
             await this.bot.sendMessage(chatId, 'Заявка успешно создана!');
         } catch (error) {
             console.error('Ошибка при создании заявки:', error.message);

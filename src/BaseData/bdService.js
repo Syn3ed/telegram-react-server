@@ -31,7 +31,7 @@ class DatabaseService {
     }
   }
 
-  async createUserRequest(telegramId, status, messageReq, category) {
+  async createUserRequest(telegramId, status, messageReq, category,address) {
     try {
       const User = this.sequelize.models.User;
       const UserRequest = this.sequelize.models.UserRequest;
@@ -45,6 +45,7 @@ class DatabaseService {
         status,
         messageReq,
         category,
+        address,
         UserId: userId.id
       });
       await Message.create({
@@ -120,6 +121,51 @@ class DatabaseService {
       throw error;
     }
   }
+  async replyToUser(messageId, newText, newOperatorId) {
+    try {
+      const existingMessage = await Message.findByPk(messageId);
+  
+      if (!existingMessage) {
+        console.error('Сообщение не найдено.');
+        return;
+      }
+      
+      const operator = `\nОператор:\n`+newText
+      existingMessage.text = (existingMessage.text || '') + (operator || ''); 
+      existingMessage.operatorId = newOperatorId || existingMessage.operatorId;
+  
+      await existingMessage.save();
+  
+      console.log('Сообщение успешно обновлено:', existingMessage);
+      
+      return existingMessage;
+    } catch (error) {
+      console.error('Ошибка при обновлении сообщения:', error);
+      throw error;
+    }
+  }
+  async replyToOperator(messageId, newText, data) {
+    try {
+        const existingMessage = await Message.findByPk(messageId);
+
+        if (!existingMessage) {
+            throw new Error('Сообщение не найдено.');
+        }
+
+        const user = data[0]?.UserRequest?.User?.username;
+        const userText = `\n${user}:\n${newText}`;
+        
+        existingMessage.text = (existingMessage.text || '') + userText;
+        await existingMessage.save();
+
+      //  console.log('Сообщение успешно обновлено:', existingMessage);
+        return existingMessage;
+    } catch (error) {
+        throw error;
+    }
+}
+
+  
 }
 
 module.exports = DatabaseService;

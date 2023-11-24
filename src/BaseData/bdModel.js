@@ -32,7 +32,11 @@ const UserRequest = sequelize.define('UserRequest', {
     category: {
         type: DataTypes.STRING,
         allowNull: true
-    }
+    },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 }, {
     timestamps: false,
 });
@@ -40,8 +44,12 @@ const UserRequest = sequelize.define('UserRequest', {
 const Message = sequelize.define('Message', {
     text: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
     },
+    operatorId:{
+        type: DataTypes.TEXT,
+        allowNull: true,
+    }
 }, {
     timestamps: false
 });
