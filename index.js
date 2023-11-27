@@ -291,7 +291,7 @@ const startBot = async () => {
         bot.once('text', (response) => resolve(response));
       });
 
-      const userRequestStatus = await UserRequest.findByPk(userRequestId);
+      const userRequestStatus = await UserRequest.findByPk(requestId);
       if (userRequestStatus.status === 'ожидает ответа оператора') {
         await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
         const status = 'Заявка в обработке!';
