@@ -64,6 +64,16 @@ const Role = sequelize.define('Role', {
     timestamps: false
 });
 
+const Media = sequelize.define('Media', {
+    idMedia: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+    },
+}, {
+    timestamps: false
+});
+
 User.belongsTo(Role);
 Role.hasMany(User);
 
@@ -73,5 +83,7 @@ UserRequest.belongsTo(User);
 UserRequest.hasMany(Message);
 Message.belongsTo(UserRequest);
 
+UserRequest.hasMany(Media);
+Media.belongsTo(UserRequest);
 
-module.exports ={ User,UserRequest,Message,Role};
+module.exports ={ User,UserRequest,Message,Role,Media};

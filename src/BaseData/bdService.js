@@ -31,7 +31,29 @@ class DatabaseService {
     }
   }
 
-  async createUserRequest(telegramId, status, messageReq, category,address) {
+  async findToRole(nameRole) {
+    try {
+      const Role = this.sequelize.models.Role;
+      const operatorRole = await Role.findOne({ where: { name: `${nameRole}` } });
+      console.log(operatorRole)
+      return operatorRole
+    } catch (e) {
+      throw(e)
+    }
+  }
+
+async findToUserForRole(operatorRole){
+  try{
+    const User = this.sequelize.models.User;
+    const operatorUsers = await User.findAll({ where: { RoleId: operatorRole.id } });
+    return operatorUsers
+  }catch(e){
+    throw(e)
+  }
+}
+
+
+  async createUserRequest(telegramId, status, messageReq, category, address) {
     try {
       const User = this.sequelize.models.User;
       const UserRequest = this.sequelize.models.UserRequest;
@@ -52,6 +74,7 @@ class DatabaseService {
         text: `${userName}:\n${messageReq}`,
         UserRequestId: req.id
       });
+      return req
     } catch (error) {
       console.log(error);
     }
@@ -121,23 +144,26 @@ class DatabaseService {
       throw error;
     }
   }
+
+ 
+
   async replyToUser(messageId, newText, newOperatorId) {
     try {
       const existingMessage = await Message.findByPk(messageId);
-  
+
       if (!existingMessage) {
         console.error('Сообщение не найдено.');
         return;
       }
-      
-      const operator = `\nОператор:\n`+newText
-      existingMessage.text = (existingMessage.text || '') + (operator || ''); 
+
+      const operator = `\nОператор:\n` + newText
+      existingMessage.text = (existingMessage.text || '') + (operator || '');
       existingMessage.operatorId = newOperatorId || existingMessage.operatorId;
-  
+
       await existingMessage.save();
-  
+
       console.log('Сообщение успешно обновлено:', existingMessage);
-      
+
       return existingMessage;
     } catch (error) {
       console.error('Ошибка при обновлении сообщения:', error);
@@ -146,26 +172,26 @@ class DatabaseService {
   }
   async replyToOperator(messageId, newText, data) {
     try {
-        const existingMessage = await Message.findByPk(messageId);
+      const existingMessage = await Message.findByPk(messageId);
 
-        if (!existingMessage) {
-            throw new Error('Сообщение не найдено.');
-        }
+      if (!existingMessage) {
+        throw new Error('Сообщение не найдено.');
+      }
 
-        const user = data[0]?.UserRequest?.User?.username;
-        const userText = `\n${user}:\n${newText}`;
-        
-        existingMessage.text = (existingMessage.text || '') + userText;
-        await existingMessage.save();
+      const user = data[0]?.UserRequest?.User?.username;
+      const userText = `\n${user}:\n${newText}`;
+
+      existingMessage.text = (existingMessage.text || '') + userText;
+      await existingMessage.save();
 
       //  console.log('Сообщение успешно обновлено:', existingMessage);
-        return existingMessage;
+      return existingMessage;
     } catch (error) {
-        throw error;
+      throw error;
     }
-}
+  }
 
-  
+
 }
 
 module.exports = DatabaseService;

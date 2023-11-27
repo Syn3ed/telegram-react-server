@@ -1,5 +1,6 @@
 require('dotenv').config();
 const appUrl = process.env.WEB_APP_URL;
+const { User } = require('../BaseData/bdModel');
 const { menuMain, menuSecond, menuKeyboard, menuKeyboardRemove, comandBot, menuSite } = require(`./options.js`)
 const DatabaseService = require(`../BaseData/bdService`);
 const sequelize = require(`../BaseData/bdConnect.js`)
@@ -48,7 +49,7 @@ class commandAndAnswer {
         await this.bot.sendMessage(chatId, `Ваши заявки`, {
             reply_markup: {
                 inline_keyboard: [
-                    [{text: 'Ваши Заявки', web_app: {url: appUrl + `/RequestUserList/${msg.chat.id}`}}]
+                    [{ text: 'Ваши Заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }]
                 ]
             }
         });
@@ -56,10 +57,10 @@ class commandAndAnswer {
     async handleMenu(msg) {
         const chatId = msg.chat.id;
         await this.bot.sendMessage(chatId, `Меню бота`, {
-            reply_markup:{
-                keyboard:[
-                    [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` }}, { text: 'Контакты', callback_data: '/webadres' }],
-                    [{text: `Ваши Заявки`, web_app: { url: appUrl } }]
+            reply_markup: {
+                keyboard: [
+                    [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
+                    [{ text: `Ваши Заявки`, web_app: { url: appUrl } }]
                 ]
             }
         });
@@ -119,6 +120,32 @@ class commandAndAnswer {
     }
 
 
+    async sendMessagesToUsersWithRoleId(message,id) {
+        try {
+            const usersWithRoleId2 = await User.findAll({ where: { RoleId: 2 } });
+
+            // Отправить сообщение каждому пользователю с RoleId = 2
+            usersWithRoleId2.forEach(user => {
+                const userId = user.telegramId;
+                this.bot.sendMessage(userId, message,{
+                    reply_markup: {
+                      inline_keyboard: [
+                        [{ text: 'Новая заявка', web_app: { url: appUrl + `/requestsOperator/${id}` } }]
+                      ]
+                    }
+                  })
+                    .then(sentMessage => {
+                        console.log(`Сообщение успешно отправлено пользователю с id ${userId}`);
+                    })
+                    .catch(error => {
+                        console.error(`Ошибка при отправке сообщения пользователю с id ${userId}:`, error);
+                    });
+            });
+        } catch (error) {
+            console.error('Ошибка при отправке сообщений пользователям с RoleId = 2:', error);
+        }
+    }
+
     async handleCreateRequest(msg) {
         try {
             const chatId = msg.chat.id;
@@ -137,8 +164,13 @@ class commandAndAnswer {
             const description = descriptionResponse.text;
             const category = categoryResponse.text;
             const address = addressResponse.text
-            await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', description, category,address);
+            // await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', description, category, address);
+            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', description, category, address);
+            const createdRequestId = createdRequest.dataValues.id
+            // console.log(createdRequest, 'sssssssssssssssssssssssssssssssssssssssssssssssss', createdRequest.dataValues.id)
             await this.bot.sendMessage(chatId, 'Заявка успешно создана!');
+            const message = 'Создана новая заявка'
+            await this.sendMessagesToUsersWithRoleId(message,createdRequestId)
         } catch (error) {
             console.error('Ошибка при создании заявки:', error.message);
             await this.bot.sendMessage(msg.chat.id, 'Произошла ошибка при создании заявки.');

@@ -55,6 +55,22 @@ app.post(`/replyToOperator`, async (req, res) => {
     return res.status(500).json({})
   }
 })
+app.post(`/replyToOperatorPhoto`, async (req, res) => {
+  const { queryId, userRequestId, username } = req.body;
+  try {
+    await bot.answerWebAppQuery(queryId, {
+      type: 'article',
+      id: queryId,
+      title: 'ResOp',
+      input_message_content: {
+        message_text: `/resToOperatorPhoto ${userRequestId}`
+      }
+    })
+    return res.status(200).json({});
+  } catch (e) {
+    return res.status(500).json({})
+  }
+})
 
 app.get('/users', async (req, res) => {
   try {
@@ -274,7 +290,7 @@ const startBot = async () => {
         bot.once('text', (response) => resolve(response));
       });
 
-      await dbManager.replyToUser(userRequestId, reply.text,msg.chat.id);
+      await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
 
       const userTelegramId = await dbManager.findUserToReq(userRequestId);
       if (userTelegramId) {
@@ -288,20 +304,20 @@ const startBot = async () => {
             include: [
               {
                 model: User,
-                attributes: ['username', 'address','telegramId']
+                attributes: ['username', 'address', 'telegramId']
               }
             ]
           }
         ]
       });
-      
+
       bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
         reply_markup: {
-            inline_keyboard: [
-                [{text: 'Ваша Заявка', web_app: {url: appUrl + `/requests/${userRequestId}`}}]
-            ]
+          inline_keyboard: [
+            [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/requests/${userRequestId}` } }]
+          ]
         }
-    });
+      });
       bot.sendMessage(msg.chat.id, 'Ответ успешно добавлен.');
     } catch (error) {
       console.error('Ошибка при ответе на заявку:', error);
@@ -329,25 +345,25 @@ const startBot = async () => {
             include: [
               {
                 model: User,
-                attributes: ['username', 'address','telegramId']
+                attributes: ['username', 'address', 'telegramId']
               }
             ]
           }
         ]
       });
-      await console.log(messages[0].operatorId)
-      await dbManager.replyToOperator(userRequestId, reply.text,messages);
-  
+      // await console.log(messages[0].operatorId)
+      await dbManager.replyToOperator(userRequestId, reply.text, messages);
+
       await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
         reply_markup: {
-            inline_keyboard: [
-                [{text: 'Пришел ответ от пользователя', web_app: {url: appUrl + `/requestsOperator/${userRequestId}`}}]
-            ]
+          inline_keyboard: [
+            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/requestsOperator/${userRequestId}` } }]
+          ]
         }
-    });
+      });
 
     } catch (error) {
-      
+
 
     }
   });
@@ -362,11 +378,38 @@ const startBot = async () => {
       const datares = msg
       datares.text = msg?.web_app_data?.data
     }
-    console.log(msg)  
+    console.log(msg)
     if (msg.text == '/lol') {
       bot.sendMessage(msg.chat.id, 'lol')
     }
     await commandHandler.handleMessage(msg);
+  });
+  // bot.on('photo', (msg) => {
+  //   try {
+  //     // const media = msg.media_group_id
+  //     const chatId = msg.chat.id;
+  //     const photo = msg.photo[0]; 
+  //     const fileId = photo.file_id;
+  //     const media = msg.photo.map(photo => ({ type: 'photo', media: photo.file_id }));
+  //     bot.sendMediaGroup(chatId, media);
+  //     // bot.sendPhoto(chatId, fileId);
+  //     console.log(fileId)
+  //     // bot.sendMediaGroup(chatId,media)
+  //   } catch (e) {
+
+  //   }
+  // });
+  bot.on('photo', (msg) => {
+    try {
+      const chatId = msg.chat.id;
+      const photo = msg.photo[0];
+      const fileId = photo.file_id;
+     
+      bot.sendPhoto(chatId, fileId);
+      // console.log('asdasdasdasda',media)
+    } catch (e) {
+      console.error('Ошибка при отправке медиагруппы:', e);
+    }
   });
 
 
