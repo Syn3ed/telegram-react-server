@@ -299,10 +299,10 @@ const startBot = async () => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
 
       const userTelegramId = await dbManager.findUserToReq(userRequestId);
-      
-      if (userTelegramId) {
-        bot.sendMessage(userTelegramId, `Новый ответ на вашу заявку: ${reply}`);
-      }
+
+      // if (userTelegramId) {
+      //   bot.sendMessage(userTelegramId, `Новый ответ на вашу заявку: ${reply}`);
+      // }
       const messages = await Message.findAll({
         where: { id: userRequestId },
         include: [
