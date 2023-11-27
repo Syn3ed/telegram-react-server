@@ -271,6 +271,7 @@ const createRoles = async () => {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
+  //
   bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
@@ -291,8 +292,14 @@ const startBot = async () => {
       });
 
       await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
+      const status = 'Заявка в обработке!';
+      await dbManager.changeStatusRes(requestId, status);
+
+      const message = `Заявка под номером ${requestId} в обработке`
+      await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
 
       const userTelegramId = await dbManager.findUserToReq(userRequestId);
+      
       if (userTelegramId) {
         bot.sendMessage(userTelegramId, `Новый ответ на вашу заявку: ${reply}`);
       }
@@ -311,6 +318,7 @@ const startBot = async () => {
         ]
       });
 
+
       bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
         reply_markup: {
           inline_keyboard: [
@@ -324,6 +332,8 @@ const startBot = async () => {
       bot.sendMessage(msg.chat.id, 'Произошла ошибка при ответе на заявку.');
     }
   });
+
+
   bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
 
@@ -404,7 +414,7 @@ const startBot = async () => {
       const chatId = msg.chat.id;
       const photo = msg.photo[0];
       const fileId = photo.file_id;
-     
+
       bot.sendPhoto(chatId, fileId);
       // console.log('asdasdasdasda',media)
     } catch (e) {

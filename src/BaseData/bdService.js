@@ -1,5 +1,5 @@
 const sequelize = require('./bdConnect');
-const { Message, UserRequest } = require('./bdModel');
+const { Message, UserRequest,User } = require('./bdModel');
 
 class DatabaseService {
   constructor(sequelize) {
@@ -38,19 +38,19 @@ class DatabaseService {
       console.log(operatorRole)
       return operatorRole
     } catch (e) {
-      throw(e)
+      throw (e)
     }
   }
 
-async findToUserForRole(operatorRole){
-  try{
-    const User = this.sequelize.models.User;
-    const operatorUsers = await User.findAll({ where: { RoleId: operatorRole.id } });
-    return operatorUsers
-  }catch(e){
-    throw(e)
+  async findToUserForRole(operatorRole) {
+    try {
+      const User = this.sequelize.models.User;
+      const operatorUsers = await User.findAll({ where: { RoleId: operatorRole.id } });
+      return operatorUsers
+    } catch (e) {
+      throw (e)
+    }
   }
-}
 
 
   async createUserRequest(telegramId, status, messageReq, category, address) {
@@ -145,7 +145,31 @@ async findToUserForRole(operatorRole){
     }
   }
 
- 
+  async changeRoleUser(userId,newRoleId) {
+    try {
+      const user = await User.findByPk(userId);
+
+      if (user) {
+        user.roleId = newRoleId;
+        await user.save();
+      }
+    } catch (e) {
+
+    }
+  }
+
+  async changeStatusRes(userRequestId, newStatus) {
+    try {
+      const userRequest = await UserRequest.findByPk(userRequestId);
+      if (userRequest) {
+        userRequest.status = newStatus;
+        await userRequest.save();
+        console.log(`Статус заявки с ID ${userRequestId} успешно изменен.`);
+      }
+    } catch (e) {
+      console.log(`Ошибка: ${e}`);
+    }
+  }
 
   async replyToUser(messageId, newText, newOperatorId) {
     try {
