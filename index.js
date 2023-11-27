@@ -85,7 +85,7 @@ app.get('/req', async (req, res) => {
   try {
     const stat = 'ожидает ответа оператора'
     const usersReq = await UserRequest.findAll({
-      where: { status: stat },
+      // where: { status: stat },
       include: User
     });
     const formattedUserRequests = usersReq.map(userRequest => ({
@@ -291,12 +291,14 @@ const startBot = async () => {
         bot.once('text', (response) => resolve(response));
       });
 
-      await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
-      const status = 'Заявка в обработке!';
-      await dbManager.changeStatusRes(requestId, status);
-
-      const message = `Заявка под номером ${requestId} в обработке`
-      await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+      const userRequestStatus = await UserRequest.findByPk(userRequestId);
+      if (userRequestStatus.status === 'ожидает ответа оператора') {
+        await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
+        const status = 'Заявка в обработке!';
+        await dbManager.changeStatusRes(requestId, status);
+        const message = `Заявка под номером ${requestId} в обработке`
+        await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+      }
 
       const userTelegramId = await dbManager.findUserToReq(userRequestId);
 
