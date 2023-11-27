@@ -130,7 +130,7 @@ class commandAndAnswer {
                 this.bot.sendMessage(userId, message,{
                     reply_markup: {
                       inline_keyboard: [
-                        [{ text: 'Новая заявка', web_app: { url: appUrl + `/requestsOperator/${id}` } }]
+                        [{ text: `${message}`, web_app: { url: appUrl + `/requestsOperator/${id}` } }]
                       ]
                     }
                   })
@@ -169,7 +169,7 @@ class commandAndAnswer {
             const createdRequestId = createdRequest.dataValues.id
             // console.log(createdRequest, 'sssssssssssssssssssssssssssssssssssssssssssssssss', createdRequest.dataValues.id)
             await this.bot.sendMessage(chatId, 'Заявка успешно создана!');
-            const message = 'Создана новая заявка'
+            const message = `Создана новая заявка под номером ${createdRequestId}`
             await this.sendMessagesToUsersWithRoleId(message,createdRequestId)
         } catch (error) {
             console.error('Ошибка при создании заявки:', error.message);
