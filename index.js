@@ -44,7 +44,7 @@ app.post(`/replyToUser`, async (req, res) => {
 app.post('/handleShowPhoto', async (req, res) => {
   try {
     const { userRequestId, username, queryId, idMedia } = req.body;
-    await bot.sendPhoto(queryId, idMedia);
+    await bot.sendPhoto(userRequestId, idMedia);
     res.status(200).json({ success: true });
   } catch (error) {
     console.error('Ошибка при обработке запроса:', error);
