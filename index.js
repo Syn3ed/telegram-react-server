@@ -376,7 +376,7 @@ const startBot = async () => {
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
     try {
-      await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
+      await bot.sendMessage(msg.chat.id, 'Отправте фото:');
       const reply = await new Promise((resolve) => {
         bot.once('photo', (response) => resolve(response));
       });
@@ -471,18 +471,18 @@ const startBot = async () => {
 
   //   }
   // });
-  bot.on('photo', (msg) => {
-    try {
-      const chatId = msg.chat.id;
-      const photo = msg.photo[0];
-      const fileId = photo.file_id;
+  // bot.on('photo', (msg) => {
+  //   try {
+  //     const chatId = msg.chat.id;
+  //     const photo = msg.photo[0];
+  //     const fileId = photo.file_id;
 
-      bot.sendPhoto(chatId, fileId);
-      // console.log('asdasdasdasda',media)
-    } catch (e) {
-      console.error('Ошибка при отправке медиагруппы:', e);
-    }
-  });
+  //     bot.sendPhoto(chatId, fileId);
+  //     // console.log('asdasdasdasda',media)
+  //   } catch (e) {
+  //     console.error('Ошибка при отправке медиагруппы:', e);
+  //   }
+  // });
 
 
 };
