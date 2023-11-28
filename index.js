@@ -276,10 +276,6 @@ app.get('/mes/:userRequestId', async (req, res) => {
               attributes: ['username', 'address']
 
             },
-            {
-              model: Media,
-              where:{UserRequestId:userRequestId}
-            }
           ]
         }
       ]
@@ -291,8 +287,6 @@ app.get('/mes/:userRequestId', async (req, res) => {
       status: message.UserRequest.status,
       description: message.UserRequest.messageReq,
       subject: message.UserRequest.category,
-      idPhoto: message.UserRequest.Media.id,
-      idMedia: message.UserRequest.Media.idMedia,
       username: message.UserRequest.User ? message.UserRequest.User.username : null,
       address: message.UserRequest.address ? message.UserRequest.address : null,
     }));
