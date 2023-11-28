@@ -524,9 +524,9 @@ const startBot = async () => {
       datares.text = msg?.web_app_data?.data
     }
     console.log(msg)
-    if (msg.text == '/lol') {
-      bot.sendMessage(msg.chat.id, 'lol')
-    }
+    const data = JSON.parse(msg?.web_app_data?.data)
+    console.log(data)
+    await bot.sendMessage(chatId, `${data}`)
     await commandHandler.handleMessage(msg);
   });
   // bot.on('photo', (msg) => {
