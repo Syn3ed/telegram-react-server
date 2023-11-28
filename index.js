@@ -40,6 +40,19 @@ app.post(`/replyToUser`, async (req, res) => {
     return res.status(500).json({})
   }
 })
+
+app.post('/handleShowPhoto', async (req, res) => {
+  try {
+    const { userRequestId, username, queryId, idMedia } = req.body;
+    await bot.sendPhoto(queryId, idMedia);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Ошибка при обработке запроса:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+
 app.post(`/replyToOperator`, async (req, res) => {
   const { queryId, userRequestId, username } = req.body;
   try {
@@ -121,7 +134,7 @@ app.get('/photo/:id', async (req, res) => {
 
 
 app.get('/reqPhoto/:id', async (req, res) => {
-  try{
+  try {
     const requestId = req.params.id;
     const media = await Media.findAll({
       where: { UserRequestId: requestId },
@@ -133,7 +146,7 @@ app.get('/reqPhoto/:id', async (req, res) => {
       UserRequestId: med.UserRequestId,
     }));
     res.json(formattedPhoto);
-  }catch(error){
+  } catch (error) {
     console.error('Ошибка при получении фото:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
