@@ -525,8 +525,9 @@ const startBot = async () => {
     }
     console.log(msg)
     if (msg?.web_app_data?.data) {
-      const data = JSON.parse(msg?.web_app_data?.data)
-      console.log(data)
+      const data = JSON.parse(msg?.web_app_data?.data);
+      console.log(data);
+      const chatId =msg.chat.id;
       await bot.sendMessage(chatId, `${data}`)
     }
     await commandHandler.handleMessage(msg);
