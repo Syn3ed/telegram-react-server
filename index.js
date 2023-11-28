@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 
 
 
-app.post('/test',async (req,res) =>{
+app.post('/test', async (req, res) => {
   console.log(req.body);
   console.log(`OK`);
   res.status(200).send('OK');
@@ -524,9 +524,11 @@ const startBot = async () => {
       datares.text = msg?.web_app_data?.data
     }
     console.log(msg)
-    const data = JSON.parse(msg?.web_app_data?.data)
-    console.log(data)
-    await bot.sendMessage(chatId, `${data}`)
+    if (msg?.web_app_data?.data) {
+      const data = JSON.parse(msg?.web_app_data?.data)
+      console.log(data)
+      await bot.sendMessage(chatId, `${data}`)
+    }
     await commandHandler.handleMessage(msg);
   });
   // bot.on('photo', (msg) => {
