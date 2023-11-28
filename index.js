@@ -44,9 +44,9 @@ app.post(`/replyToUser`, async (req, res) => {
         message_text: `/resToUser ${userRequestId}`
       }
     })
-    return res.status(200).json({});
+    res.status(200).send('OK');
   } catch (e) {
-    return res.status(500).json({})
+    res.status(500).send('NO')
   }
 })
 
