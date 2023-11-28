@@ -94,6 +94,17 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
   }
 })
 
+
+app.get('/photo',async(req,res)=>{
+  try{
+    const media = await Media.findAll();
+    res.json(media);
+  }catch(error){
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+})
+
 app.get('/users', async (req, res) => {
   try {
     const users = await User.findAll();
