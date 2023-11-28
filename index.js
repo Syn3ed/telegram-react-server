@@ -103,6 +103,19 @@ app.get('/photo',async(req,res)=>{
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+});
+
+app.get('/photo/:id',async(req,res)=>{
+  try{
+    const userRequest = req.params.id;
+    const media = await Media.findAll({
+      where: { UserRequestId: userRequest}
+    });
+    res.json(media);
+  }catch(error){
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 })
 
 app.get('/users', async (req, res) => {
@@ -269,15 +282,15 @@ app.get('/mes/:userRequestId', async (req, res) => {
 
 
 
-app.post('/users', async (req, res) => {
-  try {
-    const newUser = await User.create(req.body);
-    res.json(newUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+// app.post('/users', async (req, res) => {
+//   try {
+//     const newUser = await User.create(req.body);
+//     res.json(newUser);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
 
 
 const connectToDatabase = async () => {
