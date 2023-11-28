@@ -29,6 +29,7 @@ app.use(bodyParser.json());
 
 app.post('/test',async (req,res) =>{
   console.log(req.body);
+  console.log(`OK`);
   res.status(200).send('OK');
 })
 
