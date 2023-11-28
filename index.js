@@ -42,9 +42,16 @@ app.post(`/replyToUser`, async (req, res) => {
 })
 
 app.post('/handleShowPhoto', async (req, res) => {
+  const { queryId, userRequestId, username, idMedia } = req.body;
   try {
-    const { userRequestId, username, queryId, idMedia } = req.body;
-    await bot.sendPhoto(userRequestId, idMedia);
+    await bot.answerWebAppQuery(queryId, {
+      type: 'article',
+      id: queryId,
+      title: 'ResOp',
+      input_message_content: {
+        message_text: `/handleShowPhoto ${idMedia}`
+      }
+    })
     res.status(200).json({ success: true });
   } catch (error) {
     console.error('Ошибка при обработке запроса:', error);
@@ -438,6 +445,19 @@ const startBot = async () => {
       console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
     }
   });
+
+
+
+  bot.onText(/\/handleShowPhoto (\d+)/, async (msg, match) => {
+    const idMedia = match[1];
+    try {
+      const chatId = msg.chat.id;
+      bot.sendPhoto(chatId, idMedia);
+    } catch (error) {
+      console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
+    }
+  });
+
 
 
   bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
