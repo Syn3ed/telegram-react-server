@@ -20,9 +20,17 @@ const { where } = require('sequelize');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+
+
+app.post('/test',async (req,res) =>{
+  console.log(req.body);
+  res.status(200).send('OK');
+})
 
 app.post(`/replyToUser`, async (req, res) => {
   const { queryId, userRequestId, username } = req.body;
