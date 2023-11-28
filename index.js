@@ -95,28 +95,50 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
 })
 
 
-app.get('/photo',async(req,res)=>{
-  try{
+app.get('/photo', async (req, res) => {
+  try {
     const media = await Media.findAll();
     res.json(media);
-  }catch(error){
+  } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-app.get('/photo/:id',async(req,res)=>{
-  try{
+app.get('/photo/:id', async (req, res) => {
+  try {
     const userRequest = req.params.id;
     const media = await Media.findAll({
-      where: { UserRequestId: userRequest}
+      where: { UserRequestId: userRequest }
     });
     res.json(media);
-  }catch(error){
+  } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 })
+
+
+app.get('/reqPhoto/:id', async (req, res) => {
+  try{
+    const requestId = req.params.id;
+    const media = await Media.findAll({
+      where: { UserRequestId: requestId },
+    });
+
+    const formattedPhoto = media.map(med => ({
+      id: med.id,
+      status: med.idMedia,
+      messageReq: med.UserRequestId,
+    }));
+    res.json(formattedPhoto);
+  }catch(error){
+    console.error('Ошибка при получении фото:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+})
+
+
 
 app.get('/users', async (req, res) => {
   try {
@@ -393,21 +415,21 @@ const startBot = async () => {
       const reply = await new Promise((resolve) => {
         bot.once('photo', (response) => resolve(response));
       });
-  
+
       if (!reply || !reply.photo || !reply.photo[0]) {
         throw new Error('Не удалось получить фотографию.');
       }
-  
+
       const photo = reply.photo[0];
       const fileId = photo.file_id;
-  
+
       await createMediaRecord(userRequestId, fileId);
       await bot.sendMessage(msg.chat.id, 'Фото успешно добавлено.');
     } catch (error) {
       console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
     }
   });
-  
+
 
   bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
