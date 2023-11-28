@@ -15,7 +15,7 @@ const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { User, UserRequest, Message, Role } = require('./src/BaseData/bdModel');
+const { User, UserRequest, Message, Role, Media } = require('./src/BaseData/bdModel');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -55,6 +55,28 @@ app.post(`/replyToOperator`, async (req, res) => {
     return res.status(500).json({})
   }
 })
+const createMediaRecord = async (userRequestId, idMedia) => {
+  try {
+    const userRequest = await UserRequest.findByPk(userRequestId);
+
+    if (!userRequest) {
+      console.error('Заявка не найдена.');
+      return;
+    }
+
+    // Создаем запись в таблице Media
+    const mediaRecord = await Media.create({
+      idMedia,
+      UserRequestId: userRequestId,
+    });
+
+    console.log('Запись в таблице Media успешно создана:', mediaRecord);
+  } catch (error) {
+    console.error('Ошибка при создании записи в таблице Media:', error);
+    throw error;
+  }
+};
+
 app.post(`/replyToOperatorPhoto`, async (req, res) => {
   const { queryId, userRequestId, username } = req.body;
   try {
@@ -206,6 +228,9 @@ app.get('/mes/:userRequestId', async (req, res) => {
               model: User,
               attributes: ['username', 'address']
 
+            },
+            {
+              model: Media
             }
           ]
         }
@@ -220,6 +245,8 @@ app.get('/mes/:userRequestId', async (req, res) => {
       subject: message.UserRequest.category,
       username: message.UserRequest.User ? message.UserRequest.User.username : null,
       address: message.UserRequest.address ? message.UserRequest.address : null,
+      idPhoto: message.UserRequest.Media.id,
+      idMedia: message.UserRequest.Media.idMedia,
     }));
 
     res.json(formattedMessages);
@@ -335,6 +362,28 @@ const startBot = async () => {
     }
   });
 
+  bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
+    const userRequestId = match[1];
+    try {
+      await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
+      const reply = await new Promise((resolve) => {
+        bot.once('photo', (response) => resolve(response));
+      });
+  
+      if (!reply || !reply.photo || !reply.photo[0]) {
+        throw new Error('Не удалось получить фотографию.');
+      }
+  
+      const photo = reply.photo[0];
+      const fileId = photo.file_id;
+  
+      await createMediaRecord(userRequestId, fileId);
+      await bot.sendMessage(msg.chat.id, 'Фото успешно добавлено.');
+    } catch (error) {
+      console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
+    }
+  });
+  
 
   bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
