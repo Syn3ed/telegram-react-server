@@ -16,6 +16,7 @@ const callbackHandler = new callbackAnswer(bot);
 const express = require('express');
 const bodyParser = require('body-parser');
 const { User, UserRequest, Message, Role, Media } = require('./src/BaseData/bdModel');
+const { where } = require('sequelize');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -128,8 +129,8 @@ app.get('/reqPhoto/:id', async (req, res) => {
 
     const formattedPhoto = media.map(med => ({
       id: med.id,
-      status: med.idMedia,
-      messageReq: med.UserRequestId,
+      idMedia: med.idMedia,
+      UserRequestId: med.UserRequestId,
     }));
     res.json(formattedPhoto);
   }catch(error){
@@ -276,7 +277,8 @@ app.get('/mes/:userRequestId', async (req, res) => {
 
             },
             {
-              model: Media
+              model: Media,
+              where:{UserRequestId:userRequestId}
             }
           ]
         }
@@ -289,10 +291,10 @@ app.get('/mes/:userRequestId', async (req, res) => {
       status: message.UserRequest.status,
       description: message.UserRequest.messageReq,
       subject: message.UserRequest.category,
-      username: message.UserRequest.User ? message.UserRequest.User.username : null,
-      address: message.UserRequest.address ? message.UserRequest.address : null,
       idPhoto: message.UserRequest.Media.id,
       idMedia: message.UserRequest.Media.idMedia,
+      username: message.UserRequest.User ? message.UserRequest.User.username : null,
+      address: message.UserRequest.address ? message.UserRequest.address : null,
     }));
 
     res.json(formattedMessages);
