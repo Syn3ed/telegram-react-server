@@ -532,7 +532,7 @@ const startBot = async () => {
         await bot.sendMessage(chatId, `${data.userj}`)
       }
       catch (e) {
-
+        console.log(e)
       }
     }
     await commandHandler.handleMessage(msg);
