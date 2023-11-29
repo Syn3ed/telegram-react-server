@@ -527,9 +527,12 @@ const startBot = async () => {
     if (msg?.web_app_data?.data) {
       try {
         const data = JSON.parse(msg?.web_app_data?.data);
-        console.log(data);
-        const chatId = msg.chat.id;
-        await bot.sendMessage(chatId, `${data.userj}`)
+        if (data.address) {
+          await bot.sendMessage(chatId, `${data.address}`)
+        } else {
+
+        }
+        // await bot.sendMessage(chatId, `${data.userj}`)
       }
       catch (e) {
         console.log(e)
