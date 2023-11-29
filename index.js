@@ -345,7 +345,7 @@ const connectToDatabase = async () => {
     await sequelize.authenticate();
     await sequelize.sync();
     console.log('Подключение к БД успешно');
-    const userrole =  dbManager.changeRoleUser(393448227,3)
+    const userrole =  dbManager.changeRoleUser(1,3)
     app.listen(PORT, () => {
       console.log(`Сервер запущен на порту ${PORT}`);
     });
