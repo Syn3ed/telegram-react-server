@@ -32,7 +32,7 @@ module.exports = {
         reply_markup: {
             keyboard: [
                 [{ text: 'Мои заявки', callback_data: '/webg' }, { text: 'Контакты', callback_data: '/webadres' }],
-                [{text: `Ваши Заявки`, web_app: { url: appUrl } }]
+                [{text: `Ваши Заявки`, web_app: { url: appUrl } },{text:'test',web_app: { url: appUrl }}]
             ]
         }
     },
@@ -44,8 +44,5 @@ module.exports = {
     comandBot: [
         { command: '/start', description: 'Начальное приветствие' },
         { command: `/menu`, description: `Запуск меню` },
-        { command: '/123', description: 'test123' },
-        { command: '/create_request', description: 'test123' },
-        { command: '/respond_to_request', description: 'test123' },
     ]
 }

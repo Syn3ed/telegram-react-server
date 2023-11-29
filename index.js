@@ -422,7 +422,7 @@ const startBot = async () => {
       bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/requests/${userRequestId}` } }]
+            [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
           ]
         }
       });
@@ -502,7 +502,7 @@ const startBot = async () => {
       await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/requestsOperator/${userRequestId}` } }]
+            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
           ]
         }
       });

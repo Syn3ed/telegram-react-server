@@ -16,7 +16,7 @@ class commandAndAnswer {
         this.addCommand('Закрыть меню', this.handleCloseMenu);
         this.addCommand('/create_request', this.handleCreateRequest);
         this.addCommand('/msg', this.handleMsg);
-        this.addCommand('Мои заявки', this.handleSiteUser);
+        // this.addCommand('Мои заявки', this.handleSiteUser);
         this.addCommand('/\/resToOperators (\d+)/', this.ReplyToUser);
         this.bot.setMyCommands(comandBot)
     }
@@ -60,7 +60,7 @@ class commandAndAnswer {
             reply_markup: {
                 keyboard: [
                     [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
-                    [{ text: `Ваши Заявки`, web_app: { url: appUrl } }]
+                    [{ text: `Ваши Заявки`, web_app: { url: appUrl } },{text:'Cоздание заявки',web_app: { url: appUrl + '/FormReq'}}]
                 ]
             }
         });
@@ -130,7 +130,7 @@ class commandAndAnswer {
                 this.bot.sendMessage(userId, message,{
                     reply_markup: {
                       inline_keyboard: [
-                        [{ text: `${message}`, web_app: { url: appUrl + `/requestsOperator/${id}` } }]
+                        [{ text: `${message}`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
                       ]
                     }
                   })
