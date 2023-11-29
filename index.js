@@ -369,6 +369,7 @@ const createRoles = async () => {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
+  await dbManager.changeRoleUser('393448227',3)
   //
   bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;

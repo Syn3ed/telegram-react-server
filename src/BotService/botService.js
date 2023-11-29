@@ -122,7 +122,7 @@ class commandAndAnswer {
 
     async sendMessagesToUsersWithRoleId(message,id) {
         try {
-            const usersWithRoleId2 = await User.findAll({ where: { RoleId: 2 } });
+            const usersWithRoleId2 = await User.findAll({ where: { RoleId: 3 } });
 
             // Отправить сообщение каждому пользователю с RoleId = 2
             usersWithRoleId2.forEach(user => {
