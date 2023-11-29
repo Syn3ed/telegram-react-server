@@ -128,7 +128,6 @@ class commandAndAnswer {
         try {
             const usersWithRoleId2 = await User.findAll({ where: { RoleId: 3 } });
 
-            // Отправить сообщение каждому пользователю с RoleId = 2
             usersWithRoleId2.forEach(user => {
                 const userId = user.telegramId;
                 this.bot.sendMessage(userId, message, {
