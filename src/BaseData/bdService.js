@@ -150,7 +150,7 @@ class DatabaseService {
       const user = await User.findByPk(userId);
 
       if (user) {
-        user.roleId = newRoleId;
+        user.RoleId = newRoleId;
         await user.save();
       }
     } catch (e) {
