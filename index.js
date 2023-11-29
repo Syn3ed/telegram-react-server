@@ -345,7 +345,7 @@ const connectToDatabase = async () => {
     await sequelize.authenticate();
     await sequelize.sync();
     console.log('Подключение к БД успешно');
-
+    const userrole =  dbManager.changeRoleUser(393448227,3)
     app.listen(PORT, () => {
       console.log(`Сервер запущен на порту ${PORT}`);
     });
@@ -369,7 +369,6 @@ const createRoles = async () => {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  await dbManager.changeRoleUser('393448227',3)
   //
   bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
     const chatId = msg.chat.id;
