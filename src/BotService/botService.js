@@ -26,9 +26,13 @@ class commandAndAnswer {
     }
 
     async handleStart(msg) {
-        const chatId = msg.chat.id;
-        await this.bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
-        await dbManager.createUserWithRole(`${chatId}`, `${msg.from.first_name}`, `User`)
+        try{
+            const chatId = msg.chat.id;
+            await this.bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
+            await dbManager.createUserWithRole(`${chatId}`, `${msg.from.first_name}`, `User`)
+        }catch(e){
+            console.log(e)
+        }
     }
 
     async handleMsg(msg) {
@@ -60,7 +64,7 @@ class commandAndAnswer {
             reply_markup: {
                 keyboard: [
                     [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
-                    [{ text: `Ваши Заявки`, web_app: { url: appUrl } },{text:'Cоздание заявки',web_app: { url: appUrl + '/FormReq'}}]
+                    [{ text: `Ваши Заявки`, web_app: { url: appUrl } }, { text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }]
                 ]
             }
         });
@@ -120,20 +124,20 @@ class commandAndAnswer {
     }
 
 
-    async sendMessagesToUsersWithRoleId(message,id) {
+    async sendMessagesToUsersWithRoleId(message, id) {
         try {
             const usersWithRoleId2 = await User.findAll({ where: { RoleId: 3 } });
 
             // Отправить сообщение каждому пользователю с RoleId = 2
             usersWithRoleId2.forEach(user => {
                 const userId = user.telegramId;
-                this.bot.sendMessage(userId, message,{
+                this.bot.sendMessage(userId, message, {
                     reply_markup: {
-                      inline_keyboard: [
-                        [{ text: `${message}`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
-                      ]
+                        inline_keyboard: [
+                            [{ text: `${message}`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
+                        ]
                     }
-                  })
+                })
                     .then(sentMessage => {
                         console.log(`Сообщение успешно отправлено пользователю с id ${userId}`);
                     })
@@ -170,7 +174,7 @@ class commandAndAnswer {
             // console.log(createdRequest, 'sssssssssssssssssssssssssssssssssssssssssssssssss', createdRequest.dataValues.id)
             await this.bot.sendMessage(chatId, 'Заявка успешно создана!');
             const message = `Создана новая заявка под номером ${createdRequestId}`
-            await this.sendMessagesToUsersWithRoleId(message,createdRequestId)
+            await this.sendMessagesToUsersWithRoleId(message, createdRequestId)
         } catch (error) {
             console.error('Ошибка при создании заявки:', error.message);
             await this.bot.sendMessage(msg.chat.id, 'Произошла ошибка при создании заявки.');
