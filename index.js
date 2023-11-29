@@ -524,8 +524,10 @@ const startBot = async () => {
       datares.text = msg?.web_app_data?.data
     }
     console.log(msg)
+    const chatId = msg.chat.id
     if (msg?.web_app_data?.data) {
       try {
+        
         const data = JSON.parse(msg?.web_app_data?.data);
         if (data.address) {
           await bot.sendMessage(chatId, `${data.address}`)
