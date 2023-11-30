@@ -458,12 +458,20 @@ const startBot = async () => {
 
 
   bot.onText(/\/handleShowPhoto (\d+)/, async (msg, match) => {
-    const idMedia = match[1];
+    const idMed = match[1];
+    // try {
+    //   const chatId = msg.chat.id;
+    //   bot.sendPhoto(chatId, idMedia);
+    // } catch (error) {
+    //   console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
+    // }
     try {
-      const chatId = msg.chat.id;
-      bot.sendPhoto(chatId, idMedia);
-    } catch (error) {
-      console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
+      const med = await Media.findByPk(idMed);
+      if (med) {
+       bot.sendPhoto(msg.chat.id, med.idMedia);
+      }
+    } catch (e) {
+
     }
   });
 
