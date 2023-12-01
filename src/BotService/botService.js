@@ -26,11 +26,11 @@ class commandAndAnswer {
     }
 
     async handleStart(msg) {
-        try{
+        try {
             const chatId = msg.chat.id;
             await this.bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
             await dbManager.createUserWithRole(`${chatId}`, `${msg.from.first_name}`, `User`)
-        }catch(e){
+        } catch (e) {
             console.log(e)
         }
     }
@@ -60,14 +60,26 @@ class commandAndAnswer {
     }
     async handleMenu(msg) {
         const chatId = msg.chat.id;
-        await this.bot.sendMessage(chatId, `Меню бота`, {
-            reply_markup: {
-                keyboard: [
-                    [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
-                    [{ text: `Ваши Заявки`, web_app: { url: appUrl } }, { text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }]
-                ]
-            }
-        });
+        const user = await User.findOne({ where: { telegramId: `${chatId}` } });
+        if (user.RoleId === '2') {
+            await this.bot.sendMessage(chatId, `Меню бота`, {
+                reply_markup: {
+                    keyboard: [
+                        [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
+                        [{ text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }]
+                    ]
+                }
+            });
+        } else if (user.RoleId === '3') {
+            await this.bot.sendMessage(chatId, `Меню бота`, {
+                reply_markup: {
+                    keyboard: [
+                        [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
+                        [{ text: `Ваши Заявки`, web_app: { url: appUrl } }, { text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }]
+                    ]
+                }
+            });
+        }
     }
 
 
