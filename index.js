@@ -230,8 +230,10 @@ app.get('/reqUser/:id', async (req, res) => {
       include: {
         model: UserRequest,
         order: [['id', 'ASC']],
+        separate: true, 
       },
     });
+    
     
 
     if (!user) {
