@@ -184,6 +184,7 @@ app.get('/req', async (req, res) => {
     const stat = 'ожидает ответа оператора'
     const usersReq = await UserRequest.findAll({
       // where: { status: stat },
+      order: [['id', 'ASC']],
       include: User
     });
     const formattedUserRequests = usersReq.map(userRequest => ({
@@ -270,7 +271,8 @@ app.get('/mes', async (req, res) => {
             }
           ]
         }
-      ]
+      ],
+      order: [['id', 'ASC']]
     });
 
     const formattedMessages = messages.map(message => ({
