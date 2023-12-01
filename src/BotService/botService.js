@@ -61,7 +61,7 @@ class commandAndAnswer {
     async handleMenu(msg) {
         const chatId = msg.chat.id;
         const user = await User.findOne({ where: { telegramId: `${chatId}` } });
-        if (user.RoleId === '2') {
+        if (user.RoleId == '2') {
             await this.bot.sendMessage(chatId, `Меню бота`, {
                 reply_markup: {
                     keyboard: [
@@ -70,7 +70,7 @@ class commandAndAnswer {
                     ]
                 }
             });
-        } else if (user.RoleId === '3') {
+        } else if (user.RoleId == '3') {
             await this.bot.sendMessage(chatId, `Меню бота`, {
                 reply_markup: {
                     keyboard: [
