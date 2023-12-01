@@ -228,7 +228,7 @@ app.get('/reqUser/:id', async (req, res) => {
     const user = await User.findOne({
       where: { telegramId: userRequestId },
       include: UserRequest,
-      order: [['id', 'ASC']],
+      order: [['id', 'ASC']]
     });
 
     if (!user) {
