@@ -337,6 +337,7 @@ app.get('/mes/:userRequestId', async (req, res) => {
       subject: message.UserRequest.category,
       username: message.UserRequest.User ? message.UserRequest.User.username : null,
       address: message.UserRequest.address ? message.UserRequest.address : null,
+      userId: message.UserRequest.UserId
     }));
 
     res.json(formattedMessages);
