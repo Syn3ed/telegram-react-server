@@ -50,6 +50,9 @@ app.post(`/replyToUser`, async (req, res) => {
   }
 })
 
+
+
+
 app.post('/handleShowPhoto', async (req, res) => {
   const { queryId, userRequestId, username, idMedia } = req.body;
   try {
@@ -262,7 +265,14 @@ app.get('/reqUser/:id', async (req, res) => {
   }
 });
 
+app.get('/asd',async (req,res)=>{
+  try{
+    const asd = await UserRequest.findAll()
+    res.json(asd);
+  }catch(e){
 
+  }
+})
 
 app.get('/mes', async (req, res) => {
   try {
