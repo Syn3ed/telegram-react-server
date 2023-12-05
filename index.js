@@ -91,17 +91,57 @@ app.post('/handleShowPhoto', async (req, res) => {
 
 
 app.post(`/replyToOperator`, async (req, res) => {
-  const { queryId, userRequestId, username,userId } = req.body;
+  const { queryId, userRequestId, username, userId } = req.body;
   try {
-    await bot.answerWebAppQuery(queryId, {
-      type: 'article',
-      id: queryId,
-      title: 'ResOp',
-      input_message_content: {
-        message_text: `/resToOperator ${userRequestId}`
+    // await bot.answerWebAppQuery(queryId, {
+    //   type: 'article',
+    //   id: queryId,
+    //   title: 'ResOp',
+    //   input_message_content: {
+    //     message_text: `/resToOperator ${userRequestId}`
+    //   }
+    // })
+    try {
+      const user = await User.findByPk(userId);
+      const userRequest = await dbManager.findReq(userRequestId);
+      if (!userRequest) {
+        bot.sendMessage(user.telegramId, 'Заявка не найдена.');
+        return;
       }
-    })
-    console.log(queryId,' ',queryId,queryId,queryId)
+      await bot.sendMessage(user.telegramId, 'Введите сообщение:');
+      const reply = await new Promise((resolve) => {
+        bot.once('text', (response) => resolve(response));
+      });
+      const messages = await Message.findAll({
+        where: { id: userRequestId },
+        include: [
+          {
+            model: UserRequest,
+            include: [
+              {
+                model: User,
+                attributes: ['username', 'address', 'telegramId']
+              }
+            ]
+          }
+        ]
+      });
+      await dbManager.replyToOperator(userRequestId, reply.text, messages);
+
+      await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+          ]
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      console.log(error);
+      console.log(error);
+    }
+
+    console.log(queryId, ' ', queryId, queryId, queryId);
     return res.status(200).json({});
   } catch (e) {
     return res.status(500).json({})
@@ -252,11 +292,11 @@ app.get('/reqUser/:id', async (req, res) => {
       include: {
         model: UserRequest,
         order: [['id', 'ASC']],
-        separate: true, 
+        separate: true,
       },
     });
-    
-    
+
+
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -284,11 +324,11 @@ app.get('/reqUser/:id', async (req, res) => {
   }
 });
 
-app.get('/asd',async (req,res)=>{
-  try{
+app.get('/asd', async (req, res) => {
+  try {
     const asd = await UserRequest.findAll()
     res.json(asd);
-  }catch(e){
+  } catch (e) {
 
   }
 })
@@ -507,7 +547,7 @@ const startBot = async () => {
     try {
       const med = await Media.findByPk(idMed);
       if (med) {
-       bot.sendPhoto(msg.chat.id, med.idMedia);
+        bot.sendPhoto(msg.chat.id, med.idMedia);
       }
     } catch (e) {
 
