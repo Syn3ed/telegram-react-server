@@ -72,8 +72,26 @@ app.post('/handleShowPhoto', async (req, res) => {
 });
 
 
+// app.post(`/replyToOperator`, async (req, res) => {
+//   const { queryId, userRequestId, username } = req.body;
+//   try {
+//     await bot.answerWebAppQuery(queryId, {
+//       type: 'article',
+//       id: queryId,
+//       title: 'ResOp',
+//       input_message_content: {
+//         message_text: `/resToOperator ${userRequestId}`
+//       }
+//     })
+//     return res.status(200).json({});
+//   } catch (e) {
+//     return res.status(500).json({})
+//   }
+// })
+
+
 app.post(`/replyToOperator`, async (req, res) => {
-  const { queryId, userRequestId, username } = req.body;
+  const { queryId, userRequestId, username,userId } = req.body;
   try {
     await bot.answerWebAppQuery(queryId, {
       type: 'article',
@@ -83,6 +101,7 @@ app.post(`/replyToOperator`, async (req, res) => {
         message_text: `/resToOperator ${userRequestId}`
       }
     })
+    console.log(queryId,' ',queryId,queryId,queryId)
     return res.status(200).json({});
   } catch (e) {
     return res.status(500).json({})
