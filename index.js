@@ -26,7 +26,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
-
+app.get('/messages',async(req,res)=>{
+  try{ 
+    const users = await Message.findAll();
+  }catch(e){
+    
+  }
+})
 app.post('/test', async (req, res) => {
   console.log(req.body);
   console.log(`OK`);
