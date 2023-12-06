@@ -58,21 +58,21 @@ app.post('/test', async (req, res) => {
 // })
 
 app.post(`/replyToUser`, async (req, res) => {
-  const { queryId, userRequestId, username,userId } = req.body;
+  const { queryId, userRequestId, username,userId,operatorId} = req.body;
   const requestId = userRequestId;
   try {
     const userRequest = await dbManager.findReq(userRequestId);
     const user = await User.findByPk(userId);
     if (!userRequest) {
-      bot.sendMessage(user.telegramId, 'Заявка не найдена.');
+      bot.sendMessage(operatorId, 'Заявка не найдена.');
       return;
     }
 
-    await bot.sendMessage(user.telegramId, 'Введите сообщение:');
+    await bot.sendMessage(operatorId, 'Введите сообщение:');
     const reply = await new Promise((resolve) => {
       bot.once('text', (response) => resolve(response));
     });
-    await dbManager.replyToUser(userRequestId, reply.text, user.telegramId);
+    await dbManager.replyToUser(userRequestId, reply.text, operatorId);
     const userRequestStatus = await UserRequest.findByPk(requestId);
     if (userRequestStatus.status === 'ожидает ответа оператора') {
       const status = 'Заявка в обработке!';
@@ -106,7 +106,7 @@ app.post(`/replyToUser`, async (req, res) => {
         ]
       }
     });
-    bot.sendMessage(user.telegramId, 'Ответ успешно добавлен.');
+    bot.sendMessage(operatorId, 'Ответ успешно добавлен.');
   } catch (error) {
     console.error('Ошибка при ответе на заявку:', error);
     console.log(error);
