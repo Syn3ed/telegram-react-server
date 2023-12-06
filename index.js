@@ -29,8 +29,9 @@ app.use(bodyParser.json());
 app.get('/messages',async(req,res)=>{
   try{ 
     const users = await Message.findAll();
+    res.json(users);
   }catch(e){
-    
+    console.log(e)
   }
 })
 app.post('/test', async (req, res) => {
