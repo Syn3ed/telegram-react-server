@@ -156,7 +156,7 @@ app.post('/handleShowPhoto', async (req, res) => {
 
 
 app.post(`/replyToOperator`, async (req, res) => {
-  const { queryId, userRequestId, username, userId } = req.body;
+  const { queryId, userRequestId, username, userId,operatorId } = req.body;
   try {
     // await bot.answerWebAppQuery(queryId, {
     //   type: 'article',
@@ -167,13 +167,14 @@ app.post(`/replyToOperator`, async (req, res) => {
     //   }
     // })
     try {
+      const userWebId = operatorId;
       const user = await User.findByPk(userId);
       const userRequest = await dbManager.findReq(userRequestId);
       if (!userRequest) {
-        bot.sendMessage(user.telegramId, 'Заявка не найдена.');
+        bot.sendMessage(userWebId, 'Заявка не найдена.');
         return;
       }
-      await bot.sendMessage(user.telegramId, 'Введите сообщение:');
+      await bot.sendMessage(userWebId, 'Введите сообщение:');
       const reply = await new Promise((resolve) => {
         bot.once('text', (response) => resolve(response));
       });
