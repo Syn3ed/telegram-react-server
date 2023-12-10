@@ -93,7 +93,7 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
 
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator');
+    // await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator');
 
     const userTelegramId = await dbManager.findUserToReq(userRequestId);
 
