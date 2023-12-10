@@ -15,7 +15,7 @@ const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { User, UserRequest, Message, Role, Media } = require('./src/BaseData/bdModel');
+const { User, UserRequest, Message, Role, Media, MessageChat } = require('./src/BaseData/bdModel');
 const { where } = require('sequelize');
 
 const app = express();
@@ -26,14 +26,26 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
-app.get('/messages',async(req,res)=>{
-  try{ 
-    const users = await Message.findAll();
+
+app.get('/messagesChat', async (req, res) => {
+  try {
+    const users = await MessageChat.findAll();
     res.json(users);
-  }catch(e){
+  } catch (e) {
     console.log(e)
   }
 })
+
+
+app.get('/messages', async (req, res) => {
+  try {
+    const users = await Message.findAll();
+    res.json(users);
+  } catch (e) {
+    console.log(e)
+  }
+});
+
 app.post('/test', async (req, res) => {
   console.log(req.body);
   console.log(`OK`);
@@ -58,7 +70,7 @@ app.post('/test', async (req, res) => {
 // })
 
 app.post(`/replyToUser`, async (req, res) => {
-  const { queryId, userRequestId, username,userId,operatorId} = req.body;
+  const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const requestId = userRequestId;
   try {
     const userRequest = await dbManager.findReq(userRequestId);
@@ -81,8 +93,10 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
 
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator');
+
     const userTelegramId = await dbManager.findUserToReq(userRequestId);
-    
+
     const messages = await Message.findAll({
       where: { id: userRequestId },
       include: [
@@ -156,7 +170,7 @@ app.post('/handleShowPhoto', async (req, res) => {
 
 
 app.post(`/replyToOperator`, async (req, res) => {
-  const { queryId, userRequestId, username, userId,operatorId } = req.body;
+  const { queryId, userRequestId, username, userId, operatorId } = req.body;
   try {
     // await bot.answerWebAppQuery(queryId, {
     //   type: 'article',
@@ -194,6 +208,8 @@ app.post(`/replyToOperator`, async (req, res) => {
       });
       await dbManager.replyToOperator(userRequestId, reply.text, messages);
       bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
+
+      await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User');
 
       await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
         reply_markup: {
