@@ -1,5 +1,5 @@
 const sequelize = require('./bdConnect');
-const { Message, UserRequest,User } = require('./bdModel');
+const { Message, UserRequest, User,MessageChat } = require('./bdModel');
 
 class DatabaseService {
   constructor(sequelize) {
@@ -127,6 +127,24 @@ class DatabaseService {
   }
 
 
+  async createUserRequestMessage(userRequestId, textMessage, idUser, roleUser) {
+    try {
+      const userRequest = await UserRequest.findByPk(userRequestId);
+      if(userRequest){
+        const message = await MessageChat.create({
+          textMessage,
+          idUser,
+          roleUser,
+          userRequestId,
+        });
+
+        console.log(`Создано сообщение для заявки с id ${userRequestId}: ${message.textMessage}`);
+      }
+    } catch (error) {
+      console.error('Ошибка при создании сообщения для заявки:', error);
+    }
+  }
+
 
   async createMessage(userRequestId, text) {
     try {
@@ -145,7 +163,7 @@ class DatabaseService {
     }
   }
 
-  async changeRoleUser(userId,newRoleId) {
+  async changeRoleUser(userId, newRoleId) {
     try {
       const user = await User.findByPk(userId);
 
