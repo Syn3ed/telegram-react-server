@@ -209,7 +209,7 @@ app.post(`/replyToOperator`, async (req, res) => {
       await dbManager.replyToOperator(userRequestId, reply.text, messages);
       bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
 
-      await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User');
+      // await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User');
 
       await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
         reply_markup: {
