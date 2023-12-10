@@ -127,18 +127,18 @@ class DatabaseService {
   }
 
 
-  async createUserRequestMessage(userRequestId, textMessage, idUser, roleUser) {
+  async createUserRequestMessage(UserRequestId, textMessage, idUser, roleUser) {
     try {
-      const userRequest = await UserRequest.findByPk(userRequestId);
+      const userRequest = await UserRequest.findByPk(UserRequestId);
       if(userRequest){
         const message = await MessageChat.create({
           textMessage,
           idUser,
           roleUser,
-          userRequestId,
+          UserRequestId,
         });
 
-        console.log(`Создано сообщение для заявки с id ${userRequestId}: ${message.textMessage}`);
+        console.log(`Создано сообщение для заявки с id ${UserRequestId}: ${message.textMessage}`);
       }
     } catch (error) {
       console.error('Ошибка при создании сообщения для заявки:', error);
