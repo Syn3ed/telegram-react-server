@@ -326,7 +326,7 @@ app.get('/users', async (req, res) => {
 });
 
 
-app.getO('/chat',async (req,res) =>{
+app.get('/chat',async (req,res) =>{
   try{
     const chat = await MessageChat.findAll();
     const formattedChat = chat.map(chatMes => ({
