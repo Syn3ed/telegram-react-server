@@ -171,15 +171,6 @@ app.post('/handleShowPhoto', async (req, res) => {
 
 app.post(`/replyToOperator`, async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
-  try {
-    // await bot.answerWebAppQuery(queryId, {
-    //   type: 'article',
-    //   id: queryId,
-    //   title: 'ResOp',
-    //   input_message_content: {
-    //     message_text: `/resToOperator ${userRequestId}`
-    //   }
-    // })
     try {
       const userWebId = operatorId;
       const user = await User.findByPk(userId);
@@ -189,8 +180,14 @@ app.post(`/replyToOperator`, async (req, res) => {
         return;
       }
       await bot.sendMessage(userWebId, 'Введите сообщение:');
+
       const reply = await new Promise((resolve) => {
-        bot.once('text', (response) => resolve(response));
+        bot.once('text', (msg) => {
+          const userId = msg.from.id;
+          if (userId === userWebId) {
+            resolve(msg);
+          }
+        });
       });
       const messages = await Message.findAll({
         where: { id: userRequestId },
@@ -218,17 +215,13 @@ app.post(`/replyToOperator`, async (req, res) => {
           ]
         }
       });
+      return res.status(200).json({});
     } catch (error) {
       console.log(error);
       console.log(error);
       console.log(error);
     }
 
-    console.log(queryId, ' ', queryId, queryId, queryId);
-    return res.status(200).json({});
-  } catch (e) {
-    return res.status(500).json({})
-  }
 })
 const createMediaRecord = async (userRequestId, idMedia) => {
   try {
