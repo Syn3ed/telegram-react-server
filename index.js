@@ -80,10 +80,10 @@ app.post(`/replyToUser`, async (req, res) => {
       bot.sendMessage(operatorId, 'Заявка не найдена.');
       return;
     }
+    waitingUsers[userWebId] = true;
 
     await bot.sendMessage(operatorId, 'Введите сообщение:');
     const reply = await new Promise((resolve) => {
-      // Обработчик для текстового сообщения
       const textHandler = (msg) => {
         const userId = msg.from.id;
         if (userId === userWebId && waitingUsers[userWebId]) {
@@ -92,7 +92,7 @@ app.post(`/replyToUser`, async (req, res) => {
           resolve(msg);
         }
       };
-      
+
       bot.on('text', textHandler);
     });
     await dbManager.replyToUser(userRequestId, reply.text, operatorId);
