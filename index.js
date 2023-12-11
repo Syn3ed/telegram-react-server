@@ -167,62 +167,83 @@ app.post('/handleShowPhoto', async (req, res) => {
 //     return res.status(500).json({})
 //   }
 // })
+const waitingUsers = {};
 
 
 app.post(`/replyToOperator`, async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
-    try {
-      const userWebId = operatorId;
-      const user = await User.findByPk(userId);
-      const userRequest = await dbManager.findReq(userRequestId);
-      if (!userRequest) {
-        bot.sendMessage(userWebId, 'Заявка не найдена.');
-        return;
-      }
-      await bot.sendMessage(userWebId, 'Введите сообщение:');
+  const userWebId = operatorId;
 
-      const reply = await new Promise((resolve) => {
-        bot.once('text', (msg) => {
-          const userId = msg.from.id;
-          if (userId === userWebId) {
-            resolve(msg);
-          }
-        });
-      });
-      const messages = await Message.findAll({
-        where: { id: userRequestId },
-        include: [
-          {
-            model: UserRequest,
-            include: [
-              {
-                model: User,
-                attributes: ['username', 'address', 'telegramId']
-              }
-            ]
-          }
-        ]
-      });
-      await dbManager.replyToOperator(userRequestId, reply.text, messages);
-      bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
+  try {
+    const user = await User.findByPk(userId);
+    const userRequest = await dbManager.findReq(userRequestId);
 
-      await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User');
-
-      await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-          ]
-        }
-      });
-      return res.status(200).json({});
-    } catch (error) {
-      console.log(error);
-      console.log(error);
-      console.log(error);
+    if (!userRequest) {
+      bot.sendMessage(userWebId, 'Заявка не найдена.');
+      return res.status(400).json({ error: 'Заявка не найдена.' });
     }
 
-})
+    // Устанавливаем состояние "ожидание ответа" для пользователя
+    waitingUsers[userWebId] = true;
+
+    // Отправляем сообщение с запросом ответа
+    await bot.sendMessage(userWebId, 'Введите сообщение:');
+
+    // Ожидаем ответ от пользователя
+    const reply = await new Promise((resolve) => {
+      // Обработчик для текстового сообщения
+      const textHandler = (msg) => {
+        const userId = msg.from.id;
+        if (userId === userWebId && waitingUsers[userWebId]) {
+          // Очищаем состояние "ожидание ответа" для пользователя
+          waitingUsers[userWebId] = false;
+          // Удаляем обработчик, чтобы не ловить лишние сообщения
+          bot.off('text', textHandler);
+          resolve(msg);
+        }
+      };
+
+      // Включаем обработчик текстовых сообщений
+      bot.on('text', textHandler);
+    });
+
+    // Дальнейший код для обработки ответа и отправки сообщений
+    const messages = await Message.findAll({
+      where: { id: userRequestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
+
+    await dbManager.replyToOperator(userRequestId, reply.text, messages);
+
+    bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
+
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User');
+
+    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+        ]
+      }
+    });
+
+    return res.status(200).json({});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+  }
+});
+
 const createMediaRecord = async (userRequestId, idMedia) => {
   try {
     const userRequest = await UserRequest.findByPk(userRequestId);
