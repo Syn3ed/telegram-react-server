@@ -324,6 +324,24 @@ app.get('/users', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+app.getO('/chat',async (req,res) =>{
+  try{
+    const chat = await MessageChat.findAll();
+    const formattedChat = chat.map(chatMes => ({
+      id: chatMes.id,
+      textMessage:chatMes.textMessage,
+      idUser:chatMes.idUser,
+      roleUser:chatMes.roleUser,
+      UserRequestId:chatMes.UserRequestId,
+    }));
+    res.json(formattedChat);
+  }catch(e){
+    console.log(e);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+})
 app.get('/req', async (req, res) => {
   try {
     const stat = 'ожидает ответа оператора'
