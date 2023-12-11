@@ -73,6 +73,7 @@ app.post(`/replyToUser`, async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const requestId = userRequestId;
   const userWebId = operatorId;
+
   try {
     const userRequest = await dbManager.findReq(userRequestId);
     const user = await User.findByPk(userId);
@@ -80,63 +81,78 @@ app.post(`/replyToUser`, async (req, res) => {
       bot.sendMessage(operatorId, 'Заявка не найдена.');
       return;
     }
-    waitingUsers[userWebId] = true;
 
-    await bot.sendMessage(operatorId, 'Введите сообщение:');
-    const reply = await new Promise((resolve) => {
-      const textHandler = (msg) => {
-        const userId = msg.from.id;
-        if (userId === userWebId && waitingUsers[userWebId]) {
-          waitingUsers[userWebId] = false;
-          bot.off('text', textHandler);
-          resolve(msg);
-        }
-      };
+    // Устанавливаем флаг "ожидание ответа" только если он еще не установлен
+    if (!waitingUsers[userWebId]) {
+      waitingUsers[userWebId] = true;
 
-      bot.on('text', textHandler);
-    });
-    await dbManager.replyToUser(userRequestId, reply.text, operatorId);
-    const userRequestStatus = await UserRequest.findByPk(requestId);
-    if (userRequestStatus.status === 'ожидает ответа оператора') {
-      const status = 'Заявка в обработке!';
-      await dbManager.changeStatusRes(requestId, status);
-      const message = `Заявка под номером ${requestId} в обработке`
-      await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
-    }
+      // Отправляем сообщение с запросом ответа
+      await bot.sendMessage(operatorId, 'Введите сообщение:');
 
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator');
+      // Ожидаем ответ от оператора
+      const reply = await new Promise((resolve) => {
+        const textHandler = (msg) => {
+          const userId = msg.from.id;
+          if (userId === userWebId && waitingUsers[userWebId]) {
+            // Сбрасываем флаг "ожидание ответа"
+            waitingUsers[userWebId] = false;
+            // Удаляем обработчик, чтобы не ловить лишние сообщения
+            bot.off('text', textHandler);
+            resolve(msg);
+          }
+        };
 
-    const userTelegramId = await dbManager.findUserToReq(userRequestId);
+        // Включаем обработчик текстовых сообщений
+        bot.on('text', textHandler);
+      });
 
-    const messages = await Message.findAll({
-      where: { id: userRequestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
-            }
+      // Далее ваш код для обработки ответа и отправки сообщений
+      await dbManager.replyToUser(userRequestId, reply.text, operatorId);
+
+      const userRequestStatus = await UserRequest.findByPk(requestId);
+      if (userRequestStatus.status === 'ожидает ответа оператора') {
+        const status = 'Заявка в обработке!';
+        await dbManager.changeStatusRes(requestId, status);
+        const message = `Заявка под номером ${requestId} в обработке`;
+        await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+      }
+
+      await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator');
+
+      const userTelegramId = await dbManager.findUserToReq(userRequestId);
+
+      const messages = await Message.findAll({
+        where: { id: userRequestId },
+        include: [
+          {
+            model: UserRequest,
+            include: [
+              {
+                model: User,
+                attributes: ['username', 'address', 'telegramId']
+              }
+            ]
+          }
+        ]
+      });
+
+      bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
           ]
         }
-      ]
-    });
+      });
 
-
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-        ]
-      }
-    });
-    bot.sendMessage(operatorId, 'Ответ успешно добавлен.');
+      bot.sendMessage(operatorId, 'Ответ успешно добавлен.');
+    }
   } catch (error) {
     console.error('Ошибка при ответе на заявку:', error);
     console.log(error);
+    bot.sendMessage(operatorId, 'Произошла ошибка при обработке вашего ответа.');
   }
 });
+
 
 
 
