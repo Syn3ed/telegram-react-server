@@ -346,7 +346,7 @@ app.get('/chat', async (req, res) => {
 
 app.get('chat/:id', async (req, res) => {
   try {
-    const userRequestId = req.params.id;
+    const userRequestId = parseInt(req.params.id, 10);
     const chat = await MessageChat.findAll({ where: { UserRequestId: userRequestId } });
     const formattedChat = chat.map(chatMes => ({
       id: chatMes.id,
