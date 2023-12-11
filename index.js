@@ -72,6 +72,7 @@ app.post('/test', async (req, res) => {
 app.post(`/replyToUser`, async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const requestId = userRequestId;
+  const userWebId = operatorId;
   try {
     const userRequest = await dbManager.findReq(userRequestId);
     const user = await User.findByPk(userId);
@@ -82,7 +83,17 @@ app.post(`/replyToUser`, async (req, res) => {
 
     await bot.sendMessage(operatorId, 'Введите сообщение:');
     const reply = await new Promise((resolve) => {
-      bot.once('text', (response) => resolve(response));
+      // Обработчик для текстового сообщения
+      const textHandler = (msg) => {
+        const userId = msg.from.id;
+        if (userId === userWebId && waitingUsers[userWebId]) {
+          waitingUsers[userWebId] = false;
+          bot.off('text', textHandler);
+          resolve(msg);
+        }
+      };
+      
+      bot.on('text', textHandler);
     });
     await dbManager.replyToUser(userRequestId, reply.text, operatorId);
     const userRequestStatus = await UserRequest.findByPk(requestId);
@@ -125,7 +136,7 @@ app.post(`/replyToUser`, async (req, res) => {
     console.error('Ошибка при ответе на заявку:', error);
     console.log(error);
   }
-})
+});
 
 
 
@@ -150,23 +161,6 @@ app.post('/handleShowPhoto', async (req, res) => {
   }
 });
 
-
-// app.post(`/replyToOperator`, async (req, res) => {
-//   const { queryId, userRequestId, username } = req.body;
-//   try {
-//     await bot.answerWebAppQuery(queryId, {
-//       type: 'article',
-//       id: queryId,
-//       title: 'ResOp',
-//       input_message_content: {
-//         message_text: `/resToOperator ${userRequestId}`
-//       }
-//     })
-//     return res.status(200).json({});
-//   } catch (e) {
-//     return res.status(500).json({})
-//   }
-// })
 const waitingUsers = {};
 
 
@@ -541,17 +535,6 @@ app.get('/mes/:userRequestId', async (req, res) => {
   }
 });
 
-
-
-// app.post('/users', async (req, res) => {
-//   try {
-//     const newUser = await User.create(req.body);
-//     res.json(newUser);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
 
 
 const connectToDatabase = async () => {
