@@ -213,28 +213,8 @@ app.post(`/replyToUser`, async (req, res) => {
 
 
 
-
-
-// app.post('/handleShowPhoto', async (req, res) => {
-//   const { queryId, userRequestId, username, idMedia } = req.body;
-//   try {
-//     await bot.answerWebAppQuery(queryId, {
-//       type: 'article',
-//       id: queryId,
-//       title: 'ResOp',
-//       input_message_content: {
-//         message_text: `/handleShowPhoto ${idMedia}`
-//       }
-//     })
-//     res.status(200).json({ success: true });
-//   } catch (error) {
-//     console.error('Ошибка при обработке запроса:', error);
-//     res.status(500).json({ success: false, error: 'Internal Server Error' });
-//   }
-// });
-
 app.post('/handleShowPhoto', async (req, res) => {
-  const { queryId, userRequestId, username, idMedia,operatorId } = req.body;
+  const { queryId, userRequestId, username, idMedia, operatorId } = req.body;
   try {
     const med = await Media.findByPk(idMedia);
     if (med) {
@@ -586,31 +566,46 @@ const startBot = async () => {
 
     try {
       const userRequest = await dbManager.findReq(userRequestId);
-
       if (!userRequest) {
-        bot.sendMessage(msg.chat.id, 'Заявка не найдена.');
+        bot.sendMessage(userId, 'Заявка не найдена.');
         return;
-      }
+      };
 
-      await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
+
+      
+      waitingUsers[userId] = true;
+
+      await bot.sendMessage(userId, 'Введите сообщение:');
+
       const reply = await new Promise((resolve) => {
-        bot.once('text', (response) => resolve(response));
+        const textHandler = (msg) => {
+          if (userId === msg.from.id && waitingUsers[userId]) {
+            waitingUsers[userId] = false;
+            bot.off('text', textHandler);
+            resolve(msg);
+          }
+        };
+
+
+        bot.on('text', textHandler);
       });
+
+      // await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
+      // const replys = await new Promise((resolve) => {
+      //   bot.once('text', (response) => resolve(response));
+      // });
+
       await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
       const userRequestStatus = await UserRequest.findByPk(requestId);
       if (userRequestStatus.status === 'ожидает ответа оператора') {
-        // await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
         const status = 'Заявка в обработке!';
         await dbManager.changeStatusRes(requestId, status);
         const message = `Заявка под номером ${requestId} в обработке`
         await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
-      }
+      };
 
       const userTelegramId = await dbManager.findUserToReq(userRequestId);
 
-      // if (userTelegramId) {
-      //   bot.sendMessage(userTelegramId, `Новый ответ на вашу заявку: ${reply}`);
-      // }
       const messages = await Message.findAll({
         where: { id: userRequestId },
         include: [
@@ -667,7 +662,7 @@ const startBot = async () => {
 
   bot.onText(/\/handleShowPhoto (\d+)/, async (msg, match) => {
     const idMed = match[1];
-    
+
     try {
       const med = await Media.findByPk(idMed);
       if (med) {
