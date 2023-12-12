@@ -575,19 +575,16 @@ const startBot = async () => {
       
       waitingUsers[userId] = true;
 
-      await bot.sendMessage(userId, 'Введите сообщение:');
-
       const reply = await new Promise((resolve) => {
-        const textHandler = (msg) => {
-          if (userId === msg.from.id && waitingUsers[userId]) {
+        const textHandler = (response) => {
+          if (userId === response.from.id && waitingUsers[userId]) {
             waitingUsers[userId] = false;
             bot.off('text', textHandler);
-            resolve(msg);
+            resolve(response);
           }
         };
-
-
-        bot.on('text', textHandler);
+  
+        bot.once('text', textHandler);
       });
 
       // await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
