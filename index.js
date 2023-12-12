@@ -552,74 +552,6 @@ const createRoles = async () => {
   }
 };
 
-const handleUserReply = async (msg, requestId) => {
-  const userId = msg.from.id;
-
-  try {
-    const userRequest = await dbManager.findReq(requestId);
-
-    if (!userRequest) {
-      bot.sendMessage(userId, 'Заявка не найдена.');
-      return;
-    }
-
-    waitingUsers[userId] = true;
-
-    await bot.sendMessage(userId, 'Введите сообщение:');
-
-    const reply = await new Promise((resolve) => {
-      const textHandler = (response) => {
-        if (userId === response.from.id && waitingUsers[userId]) {
-          waitingUsers[userId] = false;
-          bot.off('text', textHandler);
-          resolve(response);
-        }
-      };
-
-      bot.once('text', textHandler);
-    });
-
-    await dbManager.replyToUser(requestId, reply.text, userId);
-
-    const userRequestStatus = await UserRequest.findByPk(requestId);
-    if (userRequestStatus.status === 'ожидает ответа оператора') {
-      const status = 'Заявка в обработке!';
-      await dbManager.changeStatusRes(requestId, status);
-      const message = `Заявка под номером ${requestId} в обработке`;
-      await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
-    }
-
-    const userTelegramId = await dbManager.findUserToReq(requestId);
-
-    const messages = await Message.findAll({
-      where: { id: requestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
-            }
-          ]
-        }
-      ]
-    });
-
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
-        ]
-      }
-    });
-
-    bot.sendMessage(userId, 'Ответ успешно добавлен.');
-  } catch (error) {
-    console.error('Ошибка при ответе на заявку:', error);
-    bot.sendMessage(userId, 'Произошла ошибка при ответе на заявку.');
-  }
-};
 
 const startBot = async () => {
   await connectToDatabase();
@@ -639,7 +571,7 @@ const startBot = async () => {
   //     };
 
 
-
+      
   //     waitingUsers[userId] = true;
 
   //     await bot.sendMessage(userId, 'Введите сообщение:');
@@ -651,7 +583,7 @@ const startBot = async () => {
   //           resolve(response);
   //         }
   //       };
-
+  
   //       bot.once('text', textHandler);
   //     });
 
@@ -696,6 +628,69 @@ const startBot = async () => {
   //   }
   // });
 
+
+  bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
+    const userId = msg.from.id;
+    const requestId = match[1];
+  
+    try {
+      const userRequest = await dbManager.findReq(requestId);
+      if (!userRequest) {
+        bot.sendMessage(userId, 'Заявка не найдена.');
+        return;
+      }
+  
+      // Отправляем сообщение с запросом ответа
+      await bot.sendMessage(userId, 'Введите сообщение:');
+  
+      // Ожидаем ответ от пользователя
+      const response = await bot.once('text');
+      const reply = response.text;
+  
+      // Обрабатываем ответ пользователя
+      await dbManager.replyToUser(requestId, reply, userId);
+  
+      const userRequestStatus = await UserRequest.findByPk(requestId);
+      if (userRequestStatus.status === 'ожидает ответа оператора') {
+        const status = 'Заявка в обработке!';
+        await dbManager.changeStatusRes(requestId, status);
+        const message = `Заявка под номером ${requestId} в обработке`;
+        await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+      }
+  
+      const userTelegramId = await dbManager.findUserToReq(requestId);
+  
+      const messages = await Message.findAll({
+        where: { id: requestId },
+        include: [
+          {
+            model: UserRequest,
+            include: [
+              {
+                model: User,
+                attributes: ['username', 'address', 'telegramId']
+              }
+            ]
+          }
+        ]
+      });
+  
+      bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
+          ]
+        }
+      });
+  
+      bot.sendMessage(userId, 'Ответ успешно добавлен.');
+    } catch (error) {
+      console.error('Ошибка при ответе на заявку:', error);
+      bot.sendMessage(userId, 'Произошла ошибка при ответе на заявку.');
+    }
+  });
+  
+
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
     try {
@@ -734,10 +729,6 @@ const startBot = async () => {
   });
 
 
-  bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
-    const requestId = match[1];
-    await handleUserReply(msg, requestId);
-  });
 
   bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
@@ -761,7 +752,7 @@ const startBot = async () => {
             resolve(response);
           }
         };
-
+  
         bot.once('text', textHandler);
       });
       const messages = await Message.findAll({
@@ -829,7 +820,7 @@ const startBot = async () => {
     }
     await commandHandler.handleMessage(msg);
   });
-
+  
 };
 
 startBot();
