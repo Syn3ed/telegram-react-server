@@ -571,7 +571,7 @@ const startBot = async () => {
   //     };
 
 
-      
+
   //     waitingUsers[userId] = true;
 
   //     await bot.sendMessage(userId, 'Введите сообщение:');
@@ -583,7 +583,7 @@ const startBot = async () => {
   //           resolve(response);
   //         }
   //       };
-  
+
   //       bot.once('text', textHandler);
   //     });
 
@@ -632,28 +632,28 @@ const startBot = async () => {
   bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
     const userId = msg.from.id;
     const requestId = match[1];
-  
+
     try {
       const userRequest = await dbManager.findReq(requestId);
       if (!userRequest) {
         bot.sendMessage(userId, 'Заявка не найдена.');
         return;
       }
-  
+
       waitingUsers[userId] = true;
-  
+
       // Отправляем сообщение с запросом ответа
       await bot.sendMessage(userId, 'Введите сообщение:');
- 
+
       const textHandler = async (response) => {
         if (userId === response.from.id && waitingUsers[userId]) {
           waitingUsers[userId] = false;
           bot.off('text', textHandler);
           const reply = response.text;
-  
+
           // Обрабатываем ответ пользователя
           await dbManager.replyToUser(requestId, reply, userId);
-  
+
           const userRequestStatus = await UserRequest.findByPk(requestId);
           if (userRequestStatus.status === 'ожидает ответа оператора') {
             const status = 'Заявка в обработке!';
@@ -661,9 +661,9 @@ const startBot = async () => {
             const message = `Заявка под номером ${requestId} в обработке`;
             await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
           }
-  
+
           const userTelegramId = await dbManager.findUserToReq(requestId);
-  
+
           const messages = await Message.findAll({
             where: { id: requestId },
             include: [
@@ -678,7 +678,7 @@ const startBot = async () => {
               }
             ]
           });
-  
+
           bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
             reply_markup: {
               inline_keyboard: [
@@ -686,19 +686,19 @@ const startBot = async () => {
               ]
             }
           });
-  
+
           bot.sendMessage(userId, 'Ответ успешно добавлен.');
         }
       };
-  
+
       bot.on('text', textHandler);
     } catch (error) {
       console.error('Ошибка при ответе на заявку:', error);
       bot.sendMessage(userId, 'Произошла ошибка при ответе на заявку.');
     }
   });
-  
-  
+
+
 
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
@@ -753,47 +753,46 @@ const startBot = async () => {
       waitingUsers[userId] = true;
 
       await bot.sendMessage(userId, 'Введите сообщение:');
-      const reply = await new Promise((resolve) => {
-        const textHandler = (response) => {
-          if (userId === response.from.id && waitingUsers[userId]) {
-            waitingUsers[userId] = false;
-            bot.off('text', textHandler);
-            resolve(response);
-          }
-        };
-  
-        bot.once('text', textHandler);
-      });
-      const messages = await Message.findAll({
-        where: { id: userRequestId },
-        include: [
-          {
-            model: UserRequest,
+
+      const textHandler = async (response) => {
+        if (userId === response.from.id && waitingUsers[userId]) {
+          waitingUsers[userId] = false;
+          bot.off('text', textHandler);
+          const reply = response.text;
+          const messages = await Message.findAll({
+            where: { id: userRequestId },
             include: [
               {
-                model: User,
-                attributes: ['username', 'address', 'telegramId']
+                model: UserRequest,
+                include: [
+                  {
+                    model: User,
+                    attributes: ['username', 'address', 'telegramId']
+                  }
+                ]
               }
             ]
-          }
-        ]
-      });
-      // await console.log(messages[0].operatorId)
-      await dbManager.replyToOperator(userRequestId, reply.text, messages);
+          });
+          await dbManager.replyToOperator(userRequestId, reply, messages[0].operatorId);
 
-      await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-          ]
+          await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+              ]
+            }
+          });
+          bot.sendMessage(userId, 'Ответ успешно добавлен.');
         }
-      });
-      bot.sendMessage(userId, 'Ответ успешно добавлен.');
+      };
+
+      bot.on('text', textHandler); 
+
     } catch (error) {
-
-
+      console.log(error);
     }
   });
+
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
@@ -829,7 +828,7 @@ const startBot = async () => {
     }
     await commandHandler.handleMessage(msg);
   });
-  
+
 };
 
 startBot();
