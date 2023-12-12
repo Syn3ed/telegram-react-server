@@ -215,25 +215,36 @@ app.post(`/replyToUser`, async (req, res) => {
 
 
 
+// app.post('/handleShowPhoto', async (req, res) => {
+//   const { queryId, userRequestId, username, idMedia } = req.body;
+//   try {
+//     await bot.answerWebAppQuery(queryId, {
+//       type: 'article',
+//       id: queryId,
+//       title: 'ResOp',
+//       input_message_content: {
+//         message_text: `/handleShowPhoto ${idMedia}`
+//       }
+//     })
+//     res.status(200).json({ success: true });
+//   } catch (error) {
+//     console.error('Ошибка при обработке запроса:', error);
+//     res.status(500).json({ success: false, error: 'Internal Server Error' });
+//   }
+// });
+
 app.post('/handleShowPhoto', async (req, res) => {
   const { queryId, userRequestId, username, idMedia } = req.body;
   try {
-    await bot.answerWebAppQuery(queryId, {
-      type: 'article',
-      id: queryId,
-      title: 'ResOp',
-      input_message_content: {
-        message_text: `/handleShowPhoto ${idMedia}`
-      }
-    })
+    const med = await Media.findByPk(idMedia);
+    if (med) {
+      bot.sendPhoto(msg.chat.id, med.idMedia);
+    }
     res.status(200).json({ success: true });
   } catch (error) {
-    console.error('Ошибка при обработке запроса:', error);
-    res.status(500).json({ success: false, error: 'Internal Server Error' });
+    console.log(error)
   }
 });
-
-
 
 
 
@@ -656,12 +667,7 @@ const startBot = async () => {
 
   bot.onText(/\/handleShowPhoto (\d+)/, async (msg, match) => {
     const idMed = match[1];
-    // try {
-    //   const chatId = msg.chat.id;
-    //   bot.sendPhoto(chatId, idMedia);
-    // } catch (error) {
-    //   console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
-    // }
+    
     try {
       const med = await Media.findByPk(idMed);
       if (med) {
