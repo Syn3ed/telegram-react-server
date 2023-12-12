@@ -575,6 +575,7 @@ const startBot = async () => {
       
       waitingUsers[userId] = true;
 
+      await bot.sendMessage(userId, 'Введите сообщение:');
       const reply = await new Promise((resolve) => {
         const textHandler = (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
@@ -674,16 +675,28 @@ const startBot = async () => {
 
   bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
+    const userId = msg.from.id;
 
     try {
       const userRequest = await dbManager.findReq(userRequestId);
       if (!userRequest) {
-        bot.sendMessage(msg.chat.id, 'Заявка не найдена.');
+        bot.sendMessage(userId, 'Заявка не найдена.');
         return;
       }
-      await bot.sendMessage(msg.chat.id, 'Введите сообщение:');
+
+      waitingUsers[userId] = true;
+
+      await bot.sendMessage(userId, 'Введите сообщение:');
       const reply = await new Promise((resolve) => {
-        bot.once('text', (response) => resolve(response));
+        const textHandler = (response) => {
+          if (userId === response.from.id && waitingUsers[userId]) {
+            waitingUsers[userId] = false;
+            bot.off('text', textHandler);
+            resolve(response);
+          }
+        };
+  
+        bot.once('text', textHandler);
       });
       const messages = await Message.findAll({
         where: { id: userRequestId },
@@ -750,35 +763,7 @@ const startBot = async () => {
     }
     await commandHandler.handleMessage(msg);
   });
-  // bot.on('photo', (msg) => {
-  //   try {
-  //     // const media = msg.media_group_id
-  //     const chatId = msg.chat.id;
-  //     const photo = msg.photo[0]; 
-  //     const fileId = photo.file_id;
-  //     const media = msg.photo.map(photo => ({ type: 'photo', media: photo.file_id }));
-  //     bot.sendMediaGroup(chatId, media);
-  //     // bot.sendPhoto(chatId, fileId);
-  //     console.log(fileId)
-  //     // bot.sendMediaGroup(chatId,media)
-  //   } catch (e) {
-
-  //   }
-  // });
-  // bot.on('photo', (msg) => {
-  //   try {
-  //     const chatId = msg.chat.id;
-  //     const photo = msg.photo[0];
-  //     const fileId = photo.file_id;
-
-  //     bot.sendPhoto(chatId, fileId);
-  //     // console.log('asdasdasdasda',media)
-  //   } catch (e) {
-  //     console.error('Ошибка при отправке медиагруппы:', e);
-  //   }
-  // });
-
-
+  
 };
 
 startBot();
