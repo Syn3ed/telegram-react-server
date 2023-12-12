@@ -234,11 +234,11 @@ app.post(`/replyToUser`, async (req, res) => {
 // });
 
 app.post('/handleShowPhoto', async (req, res) => {
-  const { queryId, userRequestId, username, idMedia } = req.body;
+  const { queryId, userRequestId, username, idMedia,operatorId } = req.body;
   try {
     const med = await Media.findByPk(idMedia);
     if (med) {
-      bot.sendPhoto(msg.chat.id, med.idMedia);
+      bot.sendPhoto(operatorId, med.idMedia);
     }
     res.status(200).json({ success: true });
   } catch (error) {
