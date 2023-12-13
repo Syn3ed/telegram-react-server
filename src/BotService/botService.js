@@ -66,7 +66,7 @@ class commandAndAnswer {
                 reply_markup: {
                     keyboard: [
                         [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
-                        [{ text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }]
+                        [{ text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } },{ text: `Все заявки`, web_app: { url: appUrl } }]
                     ]
                 }
             });
