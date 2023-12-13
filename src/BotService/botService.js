@@ -215,6 +215,8 @@ class callbackAnswer {
         this.bot.deleteMessage(chatId, messageId)
     }
 
+ 
+
     async handleLeft(msg) {
         const chatId = msg.message.chat.id;
         this.handleDelete(msg)
