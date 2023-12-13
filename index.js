@@ -786,19 +786,49 @@ const startBot = async () => {
         }
       };
 
-      bot.on('text', textHandler); 
+      bot.on('text', textHandler);
 
     } catch (error) {
       console.log(error);
     }
   });
 
+  // bot.onText(/\/asd (\d+)/,async(msg,math) =>{
+  //   try{
+  //     const userId = msg.from.id;
+
+  //   }catch(e){
+  //     console.log(e)
+  //   }
+  // });
+
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
-    console.log(msg)
-    console.log('Подключение к бд установлено');
+    bot.onText(/\/resRole/, async (msg, math) => {
+      try {
+        const userId = msg.from.id;
+        waitingUsers[userId] = true;
+
+        await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
+        const textHandler = async (response) => {
+          if (userId === response.from.id && waitingUsers[userId]) {
+            waitingUsers[userId] = false;
+            bot.off('text', textHandler);
+            const reply = response.text;
+            const chRole = dbManager.changeRoleUser(reply, 3)
+            await bot.sendMessage(reply, 'Роль изменена');
+            bot.sendMessage(userId, 'Ответ успешно добавлен.');
+          }
+        };
+
+        bot.on('text', textHandler);
+      } catch (e) {
+        console.log(e)
+      }
+    });
   });
+
   bot.on('message', async (msg) => {
     if (msg?.web_app_data?.data) {
       const datares = msg

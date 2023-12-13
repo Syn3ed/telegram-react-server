@@ -165,7 +165,7 @@ class DatabaseService {
 
   async changeRoleUser(userId, newRoleId) {
     try {
-      const user = await User.findByPk(userId);
+      const user = await User.findOne({where:{telegramId:userId}})
 
       if (user) {
         user.RoleId = newRoleId;
