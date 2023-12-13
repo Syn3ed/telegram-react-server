@@ -827,6 +827,8 @@ const startBot = async () => {
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
+
+   
   });
 
   bot.on('message', async (msg) => {
@@ -858,6 +860,28 @@ const startBot = async () => {
     }
     await commandHandler.handleMessage(msg);
   });
+  if (msg.text === 'Изменить роль пользователю на админа') {
+    try {
+      const userId = msg.from.id;
+      waitingUsers[userId] = true;
+
+      await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
+      const textHandler = async (response) => {
+        if (userId === response.from.id && waitingUsers[userId]) {
+          waitingUsers[userId] = false;
+          bot.off('text', textHandler);
+          const reply = response.text;
+          const chRole = dbManager.changeRoleUser(reply, 3)
+          await bot.sendMessage(reply, 'Роль изменена');
+          bot.sendMessage(userId, 'Ответ успешно добавлен.');
+        }
+      };
+
+      bot.on('text', textHandler);
+    } catch (e) {
+      console.log(e)
+    }
+  }
 
 };
 
