@@ -802,54 +802,31 @@ const startBot = async () => {
   //   }
   // });
 
+  bot.onText('Изменить роль пользователю на админа', async (msg, math) => {
+    try {
+      const userId = msg.from.id;
+      waitingUsers[userId] = true;
+
+      await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
+      const textHandler = async (response) => {
+        if (userId === response.from.id && waitingUsers[userId]) {
+          waitingUsers[userId] = false;
+          bot.off('text', textHandler);
+          const reply = response.text;
+          const chRole = dbManager.changeRoleUser(reply, 3)
+          await bot.sendMessage(reply, 'Роль изменена');
+          bot.sendMessage(userId, 'Ответ успешно добавлен.');
+        }
+      };
+
+      bot.on('text', textHandler);
+    } catch (e) {
+      console.log(e)
+    }
+  });
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
-    bot.onText('/resRole', async (msg, math) => {
-      try {
-        const userId = msg.from.id;
-        waitingUsers[userId] = true;
-
-        await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
-        const textHandler = async (response) => {
-          if (userId === response.from.id && waitingUsers[userId]) {
-            waitingUsers[userId] = false;
-            bot.off('text', textHandler);
-            const reply = response.text;
-            const chRole = dbManager.changeRoleUser(reply, 3)
-            await bot.sendMessage(reply, 'Роль изменена');
-            bot.sendMessage(userId, 'Ответ успешно добавлен.');
-          }
-        };
-
-        bot.on('text', textHandler);
-      } catch (e) {
-        console.log(e)
-      }
-    });
-
-    if(msg.text === '/resRole'){
-      try {
-        const userId = msg.from.id;
-        waitingUsers[userId] = true;
-
-        await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
-        const textHandler = async (response) => {
-          if (userId === response.from.id && waitingUsers[userId]) {
-            waitingUsers[userId] = false;
-            bot.off('text', textHandler);
-            const reply = response.text;
-            const chRole = dbManager.changeRoleUser(reply, 3)
-            await bot.sendMessage(reply, 'Роль изменена');
-            bot.sendMessage(userId, 'Ответ успешно добавлен.');
-          }
-        };
-
-        bot.on('text', textHandler);
-      } catch (e) {
-        console.log(e)
-      }
-    }
   });
 
   bot.on('message', async (msg) => {
