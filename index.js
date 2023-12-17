@@ -850,7 +850,7 @@ const startBot = async () => {
             bot.off('text', textHandler);
             const reply = response.text;
             const chRole = dbManager.changeRoleUser(reply, 3)
-            await bot.sendMessage(reply, 'Роль изменена');
+            await bot.sendMessage(reply, 'Вам присвоена роль "Администратор"');
             bot.sendMessage(userId, 'Роль пользователя успешно изменена.');
           }
         };
