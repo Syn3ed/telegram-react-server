@@ -385,6 +385,26 @@ app.get('/req', async (req, res) => {
 app.get('/adminList', async (req, res) => {
   try {
     const users = await User.findAll({
+      where: { RoleId: 2 },
+      order: [['id', 'ASC']],
+    });
+    const formattedUserRequests = users.map(userRequest => ({
+      id: userRequest.id,
+      telegramId: userRequest.telegramId,
+      username: userRequest.username,
+      RoleId: userRequest.RoleId,
+    }));
+    res.json(formattedUserRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/adminListOperator', async (req, res) => {
+  try {
+    const users = await User.findAll({
+      where: { RoleId: 3 },
       order: [['id', 'ASC']],
     });
     const formattedUserRequests = users.map(userRequest => ({
@@ -846,7 +866,7 @@ const startBot = async () => {
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
 
-   
+
   });
 
   bot.on('message', async (msg) => {
@@ -860,7 +880,7 @@ const startBot = async () => {
       try {
         const userId = msg.from.id;
         waitingUsers[userId] = true;
-  
+
         await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
         const textHandler = async (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
@@ -872,7 +892,7 @@ const startBot = async () => {
             bot.sendMessage(userId, 'Роль пользователя успешно изменена.');
           }
         };
-  
+
         bot.on('text', textHandler);
       } catch (e) {
         console.log(e)
@@ -900,7 +920,7 @@ const startBot = async () => {
     // }
     await commandHandler.handleMessage(msg);
   });
-  
+
 
 };
 
