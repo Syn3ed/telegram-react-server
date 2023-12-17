@@ -76,7 +76,7 @@ class commandAndAnswer {
                     keyboard: [
                         [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
                         [{ text: `Ваши Заявки`, web_app: { url: appUrl } }, { text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }],
-                        [{ text: 'Изменить роль пользователю на админа', callback_data: '/resRole' }]
+                        [{ text: 'Изменить роль пользователю на админа', callback_data: '/resRole' },{ text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
                     ]
                 }
             });
