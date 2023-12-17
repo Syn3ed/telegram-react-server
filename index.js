@@ -420,6 +420,24 @@ app.get('/adminListOperator', async (req, res) => {
   }
 });
 
+app.get('/adminFullList', async (req, res) => {
+  try {
+    const users = await User.findAll({
+      order: [['id', 'ASC']],
+    });
+    const formattedUserRequests = users.map(userRequest => ({
+      id: userRequest.id,
+      telegramId: userRequest.telegramId,
+      username: userRequest.username,
+      RoleId: userRequest.RoleId,
+    }));
+    res.json(formattedUserRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.get('/req/:id', async (req, res) => {
   try {
     const userRequestId = req.params.id;
