@@ -916,26 +916,26 @@ const startBot = async () => {
         console.log(e)
       }
     }
-    // if (msg?.web_app_data?.data) {
-    //   try {
+    if (msg?.web_app_data?.data) {
+      try {
 
-    //     const data = JSON.parse(msg?.web_app_data?.data);
-    //     if (data.address) {
-    //       await bot.sendMessage(chatId, `${data.address}`)
-    //       const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
-    //       const createdRequestId = createdRequest.dataValues.id
-    //       await bot.sendMessage(chatId, 'Заявка успешно создана!');
-    //       const message = `Создана новая заявка под номером ${createdRequestId}`
-    //       await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
-    //     } else {
+        const data = JSON.parse(msg?.web_app_data?.data);
+        if (data.address) {
+          await bot.sendMessage(chatId, `${data.address}`)
+          const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+          const createdRequestId = createdRequest.dataValues.id
+          await bot.sendMessage(chatId, 'Заявка успешно создана!');
+          const message = `Создана новая заявка под номером ${createdRequestId}`
+          await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
+        } else {
 
-    //     }
+        }
 
-    //   }
-    //   catch (e) {
-    //     console.log(e)
-    //   }
-    // }
+      }
+      catch (e) {
+        console.log(e)
+      }
+    }
     await commandHandler.handleMessage(msg);
   });
 
