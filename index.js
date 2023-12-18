@@ -759,7 +759,7 @@ const startBot = async () => {
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
     try {
-      await bot.sendMessage(msg.chat.id, 'Отправте фото:');
+      await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
       const reply = await new Promise((resolve) => {
         bot.once('photo', (response) => resolve(response));
       });
