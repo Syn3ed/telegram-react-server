@@ -121,7 +121,7 @@ app.post(`/replyToOperator`, async (req, res) => {
 
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
 
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User');
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User',username);
 
     await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
       reply_markup: {
@@ -208,7 +208,7 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
 
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator');
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator','Operator');
 
     const userTelegramId = await dbManager.findUserToReq(userRequestId);
 
@@ -718,7 +718,7 @@ const startBot = async () => {
           bot.off('text', textHandler);
           const reply = response.text;
 
-          await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator');
+          await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator','Operator');
 
           const userRequestStatus = await UserRequest.findByPk(requestId);
           if (userRequestStatus.status === 'ожидает ответа оператора') {
@@ -865,6 +865,7 @@ const startBot = async () => {
   bot.onText(/\/resToOperator (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
     const userId = msg.from.id;
+    const username = msg.from.first_name
 
     try {
       const userRequest = await dbManager.findReq(userRequestId);
@@ -896,7 +897,7 @@ const startBot = async () => {
               }
             ]
           });
-          await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User');
+          await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User',username);
 
           await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
             reply_markup: {
