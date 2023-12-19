@@ -652,13 +652,13 @@ const createRoles = async () => {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  MessageChat.sync({ force: true })
-    .then(() => {
-      console.log('Таблица успешно пересоздана.');
-    })
-    .catch((error) => {
-      console.error('Ошибка при пересоздании таблицы:', error);
-    });
+  // MessageChat.sync({ force: true })
+  //   .then(() => {
+  //     console.log('Таблица успешно пересоздана.');
+  //   })
+  //   .catch((error) => {
+  //     console.error('Ошибка при пересоздании таблицы:', error);
+  //   });
 
 
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
@@ -707,7 +707,6 @@ const startBot = async () => {
 
       waitingUsers[userId] = true;
 
-      // Отправляем сообщение с запросом ответа
       await bot.sendMessage(userId, 'Введите сообщение:');
 
       const textHandler = async (response) => {
@@ -716,7 +715,6 @@ const startBot = async () => {
           bot.off('text', textHandler);
           const reply = response.text;
 
-          // Обрабатываем ответ пользователя
           await dbManager.createUserRequestMessage(requestId, reply.text, userId, 'Operator');
 
           const userRequestStatus = await UserRequest.findByPk(requestId);
@@ -726,6 +724,9 @@ const startBot = async () => {
             const message = `Заявка под номером ${requestId} в обработке`;
             await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
           }
+          const existingMessage = await Message.findByPk(requestId);
+          existingMessage.operatorId = userId;
+          await existingMessage.save();
 
           const userTelegramId = await dbManager.findUserToReq(requestId);
 
