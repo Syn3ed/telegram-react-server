@@ -551,7 +551,6 @@ app.get('/mes', async (req, res) => {
     });
 
     const formattedMessages = messages.map(message => ({
-      text: message.text,
       userRequestId: message.UserRequest.id,
       status: message.UserRequest.status,
       messageReq: message.UserRequest.messageReq,
@@ -589,7 +588,6 @@ app.get('/mes/:userRequestId', async (req, res) => {
     });
 
     const formattedMessages = messages.map(message => ({
-      dialog: message.text,
       userRequestId: message.UserRequest.id,
       status: message.UserRequest.status,
       description: message.UserRequest.messageReq,
