@@ -768,21 +768,55 @@ const startBot = async () => {
 
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
+    const userId = msg.from.id;
     try {
       await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
-      const reply = await new Promise((resolve) => {
-        bot.once('photo', (response) => resolve(response));
-      });
+      // const reply = await new Promise((resolve) => {
+      //   bot.once('photo', (response) => resolve(response));
+      // });
 
-      if (!reply || !reply.photo || !reply.photo[0]) {
-        throw new Error('Не удалось получить фотографию.');
-      }
+      waitingUsers[userId] = true;
+      const textHandler = async (response) => {
+        if (userId === response.from.id && waitingUsers[userId]) {
+          waitingUsers[userId] = false;
+          bot.off('photo', textHandler);
+          const reply = response;
 
-      const photo = reply.photo[0];
-      const fileId = photo.file_id;
+          if (!reply || !reply.photo || !reply.photo[0]) {
+            throw new Error('Не удалось получить фотографию.');
+          }
 
-      await createMediaRecord(userRequestId, fileId);
-      await bot.sendMessage(msg.chat.id, 'Фото успешно добавлено.');
+          const photo = reply.photo[0];
+          const fileId = photo.file_id;
+          await createMediaRecord(userRequestId, fileId);
+
+
+          const mediaRecord = await Media.create({
+            fileId,
+            UserRequestId: userRequestId,
+          });
+          console.log('Запись в таблице Media успешно создана:', mediaRecord);
+          await bot.sendMessage(msg.chat.id, 'Фото успешно добавлено.');
+        }
+      };
+      bot.on('photo', textHandler);
+
+      // if (!reply || !reply.photo || !reply.photo[0]) {
+      //   throw new Error('Не удалось получить фотографию.');
+      // }
+
+      // const photo = reply.photo[0];
+      // const fileId = photo.file_id;
+
+      // await createMediaRecord(userRequestId, fileId);
+
+      // const mediaRecord = await Media.create({
+      //   fileId,
+      //   UserRequestId: userRequestId,
+      // });
+
+      // console.log('Запись в таблице Media успешно создана:', mediaRecord);
+      // await bot.sendMessage(msg.chat.id, 'Фото успешно добавлено.');
     } catch (error) {
       console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
     }
