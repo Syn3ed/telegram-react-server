@@ -816,7 +816,7 @@ const startBot = async () => {
       // });
 
       // console.log('Запись в таблице Media успешно создана:', mediaRecord);
-      // await bot.sendMessage(msg.chat.id, 'Фото успешно добавлено.');
+      await bot.sendMessage(msg.chat.id, 'Файл успешно добавлено.');
     } catch (error) {
       console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
     }
