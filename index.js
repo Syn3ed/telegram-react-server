@@ -715,7 +715,7 @@ const startBot = async () => {
           bot.off('text', textHandler);
           const reply = response.text;
 
-          await dbManager.createUserRequestMessage(requestId, reply.text, userId, 'Operator');
+          await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator');
 
           const userRequestStatus = await UserRequest.findByPk(requestId);
           if (userRequestStatus.status === 'ожидает ответа оператора') {
@@ -839,7 +839,7 @@ const startBot = async () => {
               }
             ]
           });
-          await dbManager.createUserRequestMessage(userRequestId, reply.text, userId, 'User');
+          await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User');
 
           await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
             reply_markup: {
