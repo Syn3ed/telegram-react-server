@@ -769,7 +769,7 @@ const startBot = async () => {
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
     const userId = msg.from.id;
-    const userName = msg.msg.from.first_name
+    const userName = msg.from.first_name
     try {
       await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
       // const reply = await new Promise((resolve) => {
