@@ -773,9 +773,6 @@ const startBot = async () => {
     const userName = msg.from.first_name
     try {
       await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
-      // const reply = await new Promise((resolve) => {
-      //   bot.once('photo', (response) => resolve(response));
-      // });
 
       waitingUsers[userId] = true;
       const textHandler = async (response) => {
@@ -792,43 +789,55 @@ const startBot = async () => {
           const fileId = photo.file_id;
           const mediaRecord = await createMediaRecord(userRequestId, fileId);
 
-          // const mediaRecord = await Media.create({
-          //   fileId,
-          //   UserRequestId: userRequestId,
-          // });
-
           const mediaChat = await MessageChat.create({
             IdMedia: mediaRecord.id,
-            roleUser:'User',
-            username:userName,
-            UserRequestId:userRequestId,
+            roleUser: 'User',
+            username: userName,
+            UserRequestId: userRequestId,
           })
-          // const mediaRecord = await Media.create({
-          //   fileId,
-          //   UserRequestId: userRequestId,
-          // });
 
           await bot.sendMessage(msg.chat.id, 'Файл успешно добавлено.');
         }
       };
       bot.on('photo', textHandler);
+    } catch (error) {
+      console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
+    }
+  });
 
-      // if (!reply || !reply.photo || !reply.photo[0]) {
-      //   throw new Error('Не удалось получить фотографию.');
-      // }
+  bot.onText(/\/resToUserPhoto (\d+)/, async (msg, match) => {
+    const userRequestId = match[1];
+    const userId = msg.from.id;
+    const userName = msg.from.first_name
+    try {
+      await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
 
-      // const photo = reply.photo[0];
-      // const fileId = photo.file_id;
+      waitingUsers[userId] = true;
+      const textHandler = async (response) => {
+        if (userId === response.from.id && waitingUsers[userId]) {
+          waitingUsers[userId] = false;
+          bot.off('photo', textHandler);
+          const reply = response;
 
-      // await createMediaRecord(userRequestId, fileId);
+          if (!reply || !reply.photo || !reply.photo[0]) {
+            throw new Error('Не удалось получить фотографию.');
+          }
 
-      // const mediaRecord = await Media.create({
-      //   fileId,
-      //   UserRequestId: userRequestId,
-      // });
+          const photo = reply.photo[0];
+          const fileId = photo.file_id;
+          const mediaRecord = await createMediaRecord(userRequestId, fileId);
 
-      // console.log('Запись в таблице Media успешно создана:', mediaRecord);
-      // await bot.sendMessage(msg.chat.id, 'Файл успешно добавлено.');
+          await MessageChat.create({
+            IdMedia: mediaRecord.id,
+            roleUser: 'Operator',
+            username: 'Оператор',
+            UserRequestId: userRequestId,
+          })
+
+          await bot.sendMessage(msg.chat.id, 'Файл успешно добавлено.');
+        }
+      };
+      bot.on('photo', textHandler);
     } catch (error) {
       console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
     }
