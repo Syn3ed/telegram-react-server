@@ -395,6 +395,8 @@ app.get('/chat/:id', async (req, res) => {
       idUser: chatMes.idUser,
       roleUser: chatMes.roleUser,
       UserRequestId: chatMes.UserRequestId,
+      IdMedia:chatMes.IdMedia,
+      username:chatMes.username,
     }));
     res.json(formattedChat);
   } catch (e) {
