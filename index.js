@@ -791,10 +791,10 @@ const startBot = async () => {
           await createMediaRecord(userRequestId, fileId);
 
 
-          const mediaRecord = await Media.create({
-            fileId,
-            UserRequestId: userRequestId,
-          });
+          // const mediaRecord = await Media.create({
+          //   fileId,
+          //   UserRequestId: userRequestId,
+          // });
           console.log('Запись в таблице Media успешно создана:', mediaRecord);
           await bot.sendMessage(msg.chat.id, 'Фото успешно добавлено.');
         }
