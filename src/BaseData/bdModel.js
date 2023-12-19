@@ -38,7 +38,7 @@ const UserRequest = sequelize.define('UserRequest', {
         allowNull: true,
     },
 }, {
-    timestamps: false,
+    timestamps: true,
 });
 
 const Message = sequelize.define('Message', {
