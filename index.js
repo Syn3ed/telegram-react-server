@@ -52,22 +52,6 @@ app.post('/test', async (req, res) => {
   res.status(200).send('OK');
 })
 
-// app.post(`/replyToUser`, async (req, res) => {
-//   const { queryId, userRequestId, username } = req.body;
-//   try {
-//     await bot.answerWebAppQuery(queryId, {
-//       type: 'article',
-//       id: queryId,
-//       title: 'ResUs',
-//       input_message_content: {
-//         message_text: `/resToUser ${userRequestId}`
-//       }
-//     })
-//     res.status(200).send('OK');
-//   } catch (e) {
-//     res.status(500).send('NO')
-//   }
-// })
 
 const waitingUsers = {};
 app.post(`/replyToOperator`, async (req, res) => {
@@ -653,84 +637,15 @@ const createRoles = async () => {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  MessageChat.sync({ force: true })
-  .then(() => {
-    console.log('Таблица успешно пересоздана.');
-  })
-  .catch((error) => {
-    console.error('Ошибка при пересоздании таблицы:', error);
-  });
-  //
-  // bot.onText(/\/resToUser (\d+)/, async (msg, match) => {
-  //   const chatId = msg.chat.id;
-  //   const userId = msg.from.id;
-  //   const requestId = match[1];
-  //   const userRequestId = match[1];
-
-  //   try {
-  //     const userRequest = await dbManager.findReq(userRequestId);
-  //     if (!userRequest) {
-  //       bot.sendMessage(userId, 'Заявка не найдена.');
-  //       return;
-  //     };
-
-
-
-  //     waitingUsers[userId] = true;
-
-  //     await bot.sendMessage(userId, 'Введите сообщение:');
-  //     const reply = await new Promise((resolve) => {
-  //       const textHandler = (response) => {
-  //         if (userId === response.from.id && waitingUsers[userId]) {
-  //           waitingUsers[userId] = false;
-  //           bot.off('text', textHandler);
-  //           resolve(response);
-  //         }
-  //       };
-
-  //       bot.once('text', textHandler);
-  //     });
-
-  //     await dbManager.replyToUser(userRequestId, reply.text, msg.chat.id);
-  //     const userRequestStatus = await UserRequest.findByPk(requestId);
-  //     if (userRequestStatus.status === 'ожидает ответа оператора') {
-  //       const status = 'Заявка в обработке!';
-  //       await dbManager.changeStatusRes(requestId, status);
-  //       const message = `Заявка под номером ${requestId} в обработке`
-  //       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
-  //     };
-
-  //     const userTelegramId = await dbManager.findUserToReq(userRequestId);
-
-  //     const messages = await Message.findAll({
-  //       where: { id: userRequestId },
-  //       include: [
-  //         {
-  //           model: UserRequest,
-  //           include: [
-  //             {
-  //               model: User,
-  //               attributes: ['username', 'address', 'telegramId']
-  //             }
-  //           ]
-  //         }
-  //       ]
-  //     });
-
-
-  //     bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
-  //       reply_markup: {
-  //         inline_keyboard: [
-  //           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-  //         ]
-  //       }
-  //     });
-  //     bot.sendMessage(msg.chat.id, 'Ответ успешно добавлен.');
-  //   } catch (error) {
-  //     console.error('Ошибка при ответе на заявку:', error);
-  //     bot.sendMessage(msg.chat.id, 'Произошла ошибка при ответе на заявку.');
-  //   }
+  // MessageChat.sync({ force: true })
+  // .then(() => {
+  //   console.log('Таблица успешно пересоздана.');
+  // })
+  // .catch((error) => {
+  //   console.error('Ошибка при пересоздании таблицы:', error);
   // });
+
+
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
     const userId = msg.from.id;
     const requestId = match[1];
@@ -787,7 +702,7 @@ const startBot = async () => {
           const reply = response.text;
 
           // Обрабатываем ответ пользователя
-          await dbManager.replyToUser(requestId, reply, userId);
+          await dbManager.createUserRequestMessage(requestId, reply.text, userId, 'Operator');
 
           const userRequestStatus = await UserRequest.findByPk(requestId);
           if (userRequestStatus.status === 'ожидает ответа оператора') {
@@ -908,7 +823,7 @@ const startBot = async () => {
               }
             ]
           });
-          await dbManager.replyToOperator(userRequestId, reply, messages[0].operatorId);
+          await dbManager.createUserRequestMessage(userRequestId, reply.text, userId, 'User');
 
           await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
             reply_markup: {
