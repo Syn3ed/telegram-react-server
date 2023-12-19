@@ -78,23 +78,23 @@ const Media = sequelize.define('Media', {
 const MessageChat = sequelize.define('MessageChat', {
     textMessage: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     idUser: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     roleUser: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     username: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     IdMedia:{
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     }
 }, {
     timestamps: true

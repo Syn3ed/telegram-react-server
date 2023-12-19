@@ -46,10 +46,27 @@ app.get('/messages', async (req, res) => {
   }
 });
 
-app.post('/test', async (req, res) => {
-  console.log(req.body);
-  console.log(`OK`);
-  res.status(200).send('OK');
+app.get('/test/:id', async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const messages = await Message.findAll({
+      where: { id: requestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
+    res.json(messages);
+  } catch (e) {
+    console.log(e)
+  }
 })
 
 
@@ -294,11 +311,11 @@ app.get('/photo', async (req, res) => {
   }
 });
 
-app.get('/mestest',async (req,res) =>{
-  try{
+app.get('/mestest', async (req, res) => {
+  try {
     const chat = await MessageChat.findAll();
     res.json(chat);
-  }catch(e){
+  } catch (e) {
     console.log(e)
   }
 })
@@ -636,12 +653,12 @@ const startBot = async () => {
   await connectToDatabase();
   await createRoles();
   MessageChat.sync({ force: true })
-  .then(() => {
-    console.log('Таблица успешно пересоздана.');
-  })
-  .catch((error) => {
-    console.error('Ошибка при пересоздании таблицы:', error);
-  });
+    .then(() => {
+      console.log('Таблица успешно пересоздана.');
+    })
+    .catch((error) => {
+      console.error('Ошибка при пересоздании таблицы:', error);
+    });
 
 
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
