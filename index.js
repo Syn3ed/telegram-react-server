@@ -635,13 +635,13 @@ const createRoles = async () => {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  // MessageChat.sync({ force: true })
-  // .then(() => {
-  //   console.log('Таблица успешно пересоздана.');
-  // })
-  // .catch((error) => {
-  //   console.error('Ошибка при пересоздании таблицы:', error);
-  // });
+  MessageChat.sync({ force: true })
+  .then(() => {
+    console.log('Таблица успешно пересоздана.');
+  })
+  .catch((error) => {
+    console.error('Ошибка при пересоздании таблицы:', error);
+  });
 
 
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
