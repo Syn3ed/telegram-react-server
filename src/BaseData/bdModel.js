@@ -38,7 +38,7 @@ const UserRequest = sequelize.define('UserRequest', {
         allowNull: true,
     },
 }, {
-    timestamps: true,
+    timestamps: false,
 });
 
 const Message = sequelize.define('Message', {
@@ -89,7 +89,7 @@ const MessageChat = sequelize.define('MessageChat',{
         allowNull: false,
     },
 },{
-    timestamps: false
+    timestamps: true
 });
 
 User.belongsTo(Role);
