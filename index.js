@@ -277,6 +277,7 @@ const createMediaRecord = async (userRequestId, idMedia) => {
     });
 
     console.log('Запись в таблице Media успешно создана:', mediaRecord);
+    return mediaRecord
   } catch (error) {
     console.error('Ошибка при создании записи в таблице Media:', error);
     throw error;
@@ -789,12 +790,12 @@ const startBot = async () => {
 
           const photo = reply.photo[0];
           const fileId = photo.file_id;
-          // await createMediaRecord(userRequestId, fileId);
+          const mediaRecord = await createMediaRecord(userRequestId, fileId);
 
-          const mediaRecord = await Media.create({
-            fileId,
-            UserRequestId: userRequestId,
-          });
+          // const mediaRecord = await Media.create({
+          //   fileId,
+          //   UserRequestId: userRequestId,
+          // });
 
           const mediaChat = await MessageChat.create({
             IdMedia: mediaRecord.id,
