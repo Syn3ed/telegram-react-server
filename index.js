@@ -769,6 +769,7 @@ const startBot = async () => {
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
     const userId = msg.from.id;
+    const userName = msg.msg.from.first_name
     try {
       await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
       // const reply = await new Promise((resolve) => {
@@ -788,14 +789,24 @@ const startBot = async () => {
 
           const photo = reply.photo[0];
           const fileId = photo.file_id;
-          await createMediaRecord(userRequestId, fileId);
+          // await createMediaRecord(userRequestId, fileId);
 
+          const mediaRecord = await Media.create({
+            fileId,
+            UserRequestId: userRequestId,
+          });
 
+          const mediaChat = await MessageChat.create({
+            IdMedia: mediaRecord.id,
+            roleUser:'User',
+            username:userName,
+            UserRequestId:userRequestId,
+          })
           // const mediaRecord = await Media.create({
           //   fileId,
           //   UserRequestId: userRequestId,
           // });
-          
+
           await bot.sendMessage(msg.chat.id, 'Файл успешно добавлено.');
         }
       };
