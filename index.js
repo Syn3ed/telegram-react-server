@@ -310,6 +310,15 @@ app.get('/photo', async (req, res) => {
   }
 });
 
+app.get('/mestest',async (req,res) =>{
+  try{
+    const chat = await MessageChat.findAll();
+    res.json(chat);
+  }catch(e){
+    console.log(e)
+  }
+})
+
 app.get('/photo/:id', async (req, res) => {
   try {
     const userRequest = req.params.id;

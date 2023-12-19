@@ -89,7 +89,7 @@ const MessageChat = sequelize.define('MessageChat',{
         allowNull: false,
     },
 },{
-    timestamps: false
+    timestamps: true
 });
 
 User.belongsTo(Role);
