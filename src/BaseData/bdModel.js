@@ -46,7 +46,7 @@ const Message = sequelize.define('Message', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
-    operatorId:{
+    operatorId: {
         type: DataTypes.TEXT,
         allowNull: true,
     }
@@ -75,20 +75,28 @@ const Media = sequelize.define('Media', {
 });
 
 
-const MessageChat = sequelize.define('MessageChat',{
-    textMessage:{
+const MessageChat = sequelize.define('MessageChat', {
+    textMessage: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    idUser:{
+    idUser: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    roleUser:{
+    roleUser: {
         type: DataTypes.STRING,
         allowNull: false,
     },
-},{
+    username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    IdMedia:{
+        type: DataTypes.STRING,
+        allowNull: false,
+    }
+}, {
     timestamps: true
 });
 
@@ -107,4 +115,4 @@ Media.belongsTo(UserRequest);
 UserRequest.hasMany(MessageChat);
 MessageChat.belongsTo(UserRequest);
 
-module.exports ={ User,UserRequest,Message,Role,Media,MessageChat};
+module.exports = { User, UserRequest, Message, Role, Media, MessageChat };
