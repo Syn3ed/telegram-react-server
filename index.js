@@ -121,7 +121,7 @@ app.post(`/replyToOperator`, async (req, res) => {
 
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
     const timeData = new Date();
-    const hours = timeMess.getHours();
+    const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
@@ -213,7 +213,7 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
     const timeData = new Date();
-    const hours = timeMess.getHours();
+    const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
@@ -747,7 +747,7 @@ const startBot = async () => {
           const reply = response.text;
 
           const timeData = new Date();
-          const hours = timeMess.getHours();
+          const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
           const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
@@ -936,7 +936,7 @@ const startBot = async () => {
           });
 
           const timeData = new Date();
-          const hours = timeMess.getHours();
+          const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
           const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
