@@ -312,6 +312,23 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
   }
 })
 
+app.post(`/replyToOperatorPhoto`, async (req, res) => {
+  const { queryId, userRequestId, username } = req.body;
+  try {
+    await bot.answerWebAppQuery(queryId, {
+      type: 'article',
+      id: queryId,
+      title: 'ResOp',
+      input_message_content: {
+        message_text: `/resToUserPhoto ${userRequestId}`
+      }
+    })
+    return res.status(200).json({});
+  } catch (e) {
+    return res.status(500).json({})
+  }
+})
+
 
 app.get('/photo', async (req, res) => {
   try {
@@ -862,6 +879,8 @@ const startBot = async () => {
       console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
     }
   });
+
+  
 
 
 
