@@ -430,6 +430,7 @@ app.get('/chat/:id', async (req, res) => {
       UserRequestId: chatMes.UserRequestId,
       IdMedia: chatMes.IdMedia,
       username: chatMes.username,
+      Time: chatMes.TimeMessages,
     }));
     res.json(formattedChat);
   } catch (e) {
