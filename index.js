@@ -312,7 +312,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
   }
 })
 
-app.post(`/replyToOperatorPhoto`, async (req, res) => {
+app.post(`/resToUserPhoto`, async (req, res) => {
   const { queryId, userRequestId, username } = req.body;
   try {
     await bot.answerWebAppQuery(queryId, {
