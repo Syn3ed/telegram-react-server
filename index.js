@@ -121,10 +121,12 @@ app.post(`/replyToOperator`, async (req, res) => {
 
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
     const timeData = new Date();
+    timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    
     const timeMess = `${formattedHours}:${formattedMinutes}`
     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
 
@@ -213,10 +215,12 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
     const timeData = new Date();
+    timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    
     const timeMess = `${formattedHours}:${formattedMinutes}`;
 
     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
@@ -748,10 +752,11 @@ const startBot = async () => {
           const reply = response.text;
 
           const timeData = new Date();
+          timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
           const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
-          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;          
           const timeMess = `${formattedHours}:${formattedMinutes}`;
 
           await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator', 'Оператор', timeMess);
@@ -937,10 +942,11 @@ const startBot = async () => {
           });
 
           const timeData = new Date();
+          timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
           const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
-          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;          
           const timeMess = `${formattedHours}:${formattedMinutes}`;
 
           await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username,timeMess);
