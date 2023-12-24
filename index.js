@@ -404,6 +404,7 @@ app.get('/chat', async (req, res) => {
       idUser: chatMes.idUser,
       roleUser: chatMes.roleUser,
       UserRequestId: chatMes.UserRequestId,
+      Time: chatMes.TimeMessages,
     }));
     res.json(formattedChat);
   } catch (e) {
@@ -1048,7 +1049,6 @@ const startBot = async () => {
       try {
         const data = JSON.parse(msg?.web_app_data?.data);
         if (data.address) {
-          await bot.sendMessage(chatId, `${data.address}`)
           const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
           const createdRequestId = createdRequest.dataValues.id
           await bot.sendMessage(chatId, 'Заявка успешно создана!');
