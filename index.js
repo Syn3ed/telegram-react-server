@@ -120,8 +120,13 @@ app.post(`/replyToOperator`, async (req, res) => {
     await dbManager.replyToOperator(userRequestId, reply.text, messages);
 
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
-
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User',username);
+    const timeData = new Date();
+    const hours = timeMess.getHours();
+    const minutes = timeData.getMinutes();
+    const formattedHours = hours < 10 ? '0' + hours : hours;
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    const timeMess = `${formattedHours}:${formattedMinutes}`
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
 
     await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
       reply_markup: {
@@ -207,8 +212,14 @@ app.post(`/replyToUser`, async (req, res) => {
       const message = `Заявка под номером ${requestId} в обработке`
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
+    const timeData = new Date();
+    const hours = timeMess.getHours();
+    const minutes = timeData.getMinutes();
+    const formattedHours = hours < 10 ? '0' + hours : hours;
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    const timeMess = `${formattedHours}:${formattedMinutes}`;
 
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator','Operator');
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
 
     const userTelegramId = await dbManager.findUserToReq(userRequestId);
 
@@ -395,8 +406,8 @@ app.get('/chat/:id', async (req, res) => {
       idUser: chatMes.idUser,
       roleUser: chatMes.roleUser,
       UserRequestId: chatMes.UserRequestId,
-      IdMedia:chatMes.IdMedia,
-      username:chatMes.username,
+      IdMedia: chatMes.IdMedia,
+      username: chatMes.username,
     }));
     res.json(formattedChat);
   } catch (e) {
@@ -718,7 +729,14 @@ const startBot = async () => {
           bot.off('text', textHandler);
           const reply = response.text;
 
-          await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator','Operator');
+          const timeData = new Date();
+          const hours = timeMess.getHours();
+          const minutes = timeData.getMinutes();
+          const formattedHours = hours < 10 ? '0' + hours : hours;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+          const timeMess = `${formattedHours}:${formattedMinutes}`;
+
+          await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator', 'Оператор', timeMess);
 
           const userRequestStatus = await UserRequest.findByPk(requestId);
           if (userRequestStatus.status === 'ожидает ответа оператора') {
@@ -897,7 +915,15 @@ const startBot = async () => {
               }
             ]
           });
-          await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User',username);
+
+          const timeData = new Date();
+          const hours = timeMess.getHours();
+          const minutes = timeData.getMinutes();
+          const formattedHours = hours < 10 ? '0' + hours : hours;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+          const timeMess = `${formattedHours}:${formattedMinutes}`;
+
+          await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username,timeMess);
 
           await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
             reply_markup: {
@@ -926,28 +952,34 @@ const startBot = async () => {
   //   }
   // });
 
-  bot.onText('Изменить роль пользователю на админа', async (msg, math) => {
+  bot.onText('Изменить роль пользователю на админа', async (msg, match) => {
     try {
       const userId = msg.from.id;
       waitingUsers[userId] = true;
-
+  
       await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
       const textHandler = async (response) => {
         if (userId === response.from.id && waitingUsers[userId]) {
           waitingUsers[userId] = false;
           bot.off('text', textHandler);
           const reply = response.text;
-          const chRole = dbManager.changeRoleUser(reply, 3)
-          await bot.sendMessage(reply, 'Роль изменена');
-          bot.sendMessage(userId, 'Ответ успешно добавлен.');
+  
+          if (!isNaN(reply)) {
+            const chRole = dbManager.changeRoleUser(reply, 3)
+            await bot.sendMessage(reply, 'Роль изменена');
+            bot.sendMessage(userId, 'Изменение прошло успешно.');
+          } else {
+            bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
+          }
         }
       };
-
+  
       bot.on('text', textHandler);
     } catch (e) {
       console.log(e)
     }
   });
+  
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
@@ -966,27 +998,35 @@ const startBot = async () => {
       try {
         const userId = msg.from.id;
         waitingUsers[userId] = true;
-
+    
         await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
         const textHandler = async (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
             waitingUsers[userId] = false;
             bot.off('text', textHandler);
             const reply = response.text;
-            const chRole = dbManager.changeRoleUser(reply, 3)
-            await bot.sendMessage(reply, 'Вам присвоена роль "Администратор"');
-            bot.sendMessage(userId, 'Роль пользователя успешно изменена.');
+    
+            // Проверка, является ли введенное значение числом
+            if (!isNaN(reply)) {
+              const chRole = dbManager.changeRoleUser(reply, 3)
+              await bot.sendMessage(reply, 'Вам присвоена роль "Администратор"');
+              bot.sendMessage(userId, 'Роль пользователя успешно изменена.');
+            } else {
+              // Если введенное значение не является числом, сообщаем об ошибке
+              bot.sendMessage(userId, 'Ошибка: Введите, пожалуйста, корректный ID-телеграма пользователя.');
+            }
           }
         };
-
+    
         bot.on('text', textHandler);
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
     }
+    
+    try{
     if (msg?.web_app_data?.data) {
       try {
-
         const data = JSON.parse(msg?.web_app_data?.data);
         if (data.address) {
           await bot.sendMessage(chatId, `${data.address}`)
@@ -995,14 +1035,13 @@ const startBot = async () => {
           await bot.sendMessage(chatId, 'Заявка успешно создана!');
           const message = `Создана новая заявка под номером ${createdRequestId}`
           await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
-        } else {
-
-        }
-
+        } 
       }
       catch (e) {
         console.log(e)
       }
+    }}catch(e){
+      console.log(e)
     }
     await commandHandler.handleMessage(msg);
   });

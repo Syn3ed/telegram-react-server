@@ -127,7 +127,7 @@ class DatabaseService {
   }
 
 
-  async createUserRequestMessage(UserRequestId, textMessage, idUser, roleUser,username) {
+  async createUserRequestMessage(UserRequestId, textMessage, idUser, roleUser,username,TimeMessages) {
     try {
       const userRequest = await UserRequest.findByPk(UserRequestId);
       if(userRequest){
@@ -137,6 +137,7 @@ class DatabaseService {
           roleUser,
           UserRequestId,
           username,
+          TimeMessages
         });
 
         console.log(`Создано сообщение для заявки с id ${UserRequestId}: ${message.textMessage}`);

@@ -95,6 +95,10 @@ const MessageChat = sequelize.define('MessageChat', {
     IdMedia:{
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    TimeMessages:{
+        type: DataTypes.STRING,
+        allowNull: true,
     }
 }, {
     timestamps: true
