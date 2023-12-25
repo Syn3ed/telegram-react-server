@@ -207,6 +207,10 @@ app.post(`/replyToUser`, async (req, res) => {
       bot.on('text', textHandler);
     });
     await dbManager.replyToUser(userRequestId, reply.text, operatorId);
+    await OperatorReq.create({
+      IdRequest: userRequestId,
+      idUser: userWebId
+    });
     const userRequestStatus = await UserRequest.findByPk(requestId);
     if (userRequestStatus.status === 'ожидает ответа оператора') {
       const status = 'Заявка в обработке!';
