@@ -15,7 +15,7 @@ const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const { User, UserRequest, Message, Role, Media, MessageChat } = require('./src/BaseData/bdModel');
+const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = require('./src/BaseData/bdModel');
 const { where } = require('sequelize');
 
 const app = express();
@@ -461,6 +461,40 @@ app.get('/req', async (req, res) => {
   }
 });
 
+app.get('/reqOperator/:id', async (req, res) => {
+  try {
+    const userRequestId = parseInt(req.params.id, 10);
+    // const stat = 'ожидает ответа оператора'
+    const usersReq = await UserRequest.findAll({
+      where: {
+        // status: stat,
+        IdUser: userRequestId
+      },
+      include: [
+        { model: User },
+        { model: OperatorReq }
+      ],
+      order: [['id', 'ASC']],
+    });
+
+    const formattedUserRequests = usersReq.map(userRequest => ({
+      id: userRequest.id,
+      status: userRequest.status,
+      messageReq: userRequest.messageReq,
+      username: userRequest.User ? userRequest.User.username : null,
+      category: userRequest.category,
+      IdUser: userRequest.IdUser,
+      IdUserRequest: userRequest.IdUserRequest
+    }));
+
+    res.json(formattedUserRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 app.get('/adminList', async (req, res) => {
   try {
     const users = await User.findAll({
@@ -753,7 +787,7 @@ const startBot = async () => {
           const reply = response.text;
 
           const timeData = new Date();
-          timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
+          timeData.setHours(timeData.getHours() + 4); 
           const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
@@ -761,6 +795,10 @@ const startBot = async () => {
           const timeMess = `${formattedHours}:${formattedMinutes}`;
 
           await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator', 'Оператор', timeMess);
+          await OperatorReq.create({
+            IdRequest: requestId,
+            idUser: userId
+          });
 
           const userRequestStatus = await UserRequest.findByPk(requestId);
           if (userRequestStatus.status === 'ожидает ответа оператора') {

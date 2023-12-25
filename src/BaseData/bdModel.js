@@ -104,6 +104,22 @@ const MessageChat = sequelize.define('MessageChat', {
     timestamps: true
 });
 
+const OperatorReq = sequelize.define('OperatorReq', {
+    IdUserRequest: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    IdUser: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+}, {
+    timestamps: true
+});
+
+
+
+
 User.belongsTo(Role);
 Role.hasMany(User);
 
@@ -119,4 +135,10 @@ Media.belongsTo(UserRequest);
 UserRequest.hasMany(MessageChat);
 MessageChat.belongsTo(UserRequest);
 
-module.exports = { User, UserRequest, Message, Role, Media, MessageChat };
+UserRequest.hasMany(Media);
+Media.belongsTo(UserRequest);
+
+UserRequest.hasMany(OperatorReq);
+OperatorReq.belongsTo(UserRequest);
+
+module.exports = { User, UserRequest, Message, Role, Media, MessageChat,OperatorReq};

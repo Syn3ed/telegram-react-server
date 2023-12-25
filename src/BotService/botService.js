@@ -74,8 +74,8 @@ class commandAndAnswer {
             await this.bot.sendMessage(chatId, `Меню бота`, {
                 reply_markup: {
                     keyboard: [
-                        [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Контакты', callback_data: '/webadres' }],
-                        [{ text: `Ваши Заявки`, web_app: { url: appUrl } }, { text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }],
+                        [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${msg.chat.id}` } }, { text: 'Заявки в обработке',  web_app: { url: appUrl+`/reqOperator/:${chatId}` }}],
+                        [{ text: `Заявки в ожидании`, web_app: { url: appUrl } }, { text: 'Cоздание заявки', web_app: { url: appUrl + '/FormReq' } }],
                         [{ text: 'Изменить роль пользователю на админа', callback_data: '/resRole' },{ text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
                     ]
                 }
