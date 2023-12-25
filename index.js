@@ -121,13 +121,16 @@ app.post(`/replyToOperator`, async (req, res) => {
 
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
     const timeData = new Date();
+    const year = timeData.getFullYear();
+    const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+    const day = timeData.getDate();
     timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-    
-    const timeMess = `${formattedHours}:${formattedMinutes}`
+
+    const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
 
     await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
@@ -224,7 +227,7 @@ app.post(`/replyToUser`, async (req, res) => {
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-    
+
     const timeMess = `${formattedHours}:${formattedMinutes}`;
 
     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
@@ -791,12 +794,16 @@ const startBot = async () => {
           const reply = response.text;
 
           const timeData = new Date();
-          timeData.setHours(timeData.getHours() + 4); 
+          const year = timeData.getFullYear();
+          const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+          const day = timeData.getDate();
+          timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
           const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
-          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;          
-          const timeMess = `${formattedHours}:${formattedMinutes}`;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+          const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
 
           await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator', 'Оператор', timeMess);
           await OperatorReq.create({
@@ -874,12 +881,24 @@ const startBot = async () => {
           const photo = reply.photo[0];
           const fileId = photo.file_id;
           const mediaRecord = await createMediaRecord(userRequestId, fileId);
+          const timeData = new Date();
+          const year = timeData.getFullYear();
+          const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+          const day = timeData.getDate();
+          timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
+          const hours = timeData.getHours();
+          const minutes = timeData.getMinutes();
+          const formattedHours = hours < 10 ? '0' + hours : hours;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+      
+          const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
 
           const mediaChat = await MessageChat.create({
             IdMedia: mediaRecord.id,
             roleUser: 'User',
             username: userName,
             UserRequestId: userRequestId,
+            TimeMessages:timeMess,
           })
 
           await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -913,14 +932,27 @@ const startBot = async () => {
           const fileId = photo.file_id;
           const mediaRecord = await createMediaRecord(userRequestId, fileId);
 
+          const timeData = new Date();
+          const year = timeData.getFullYear();
+          const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+          const day = timeData.getDate();
+          timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
+          const hours = timeData.getHours();
+          const minutes = timeData.getMinutes();
+          const formattedHours = hours < 10 ? '0' + hours : hours;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+      
+          const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+
           await MessageChat.create({
             IdMedia: mediaRecord.id,
             roleUser: 'Operator',
             username: 'Оператор',
             UserRequestId: userRequestId,
+            TimeMessages:timeMess,
           })
 
-          await bot.sendMessage(msg.chat.id,  `Файл успешно добавлен к заявке №${userRequestId}`);
+          await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
         }
       };
       bot.on('photo', textHandler);
@@ -929,7 +961,7 @@ const startBot = async () => {
     }
   });
 
-  
+
 
 
 
@@ -985,14 +1017,18 @@ const startBot = async () => {
           });
 
           const timeData = new Date();
+          const year = timeData.getFullYear();
+          const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+          const day = timeData.getDate();
           timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
           const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
-          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;          
-          const timeMess = `${formattedHours}:${formattedMinutes}`;
+          const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+      
+          const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
 
-          await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username,timeMess);
+          await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
 
           await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
             reply_markup: {
@@ -1025,14 +1061,14 @@ const startBot = async () => {
     try {
       const userId = msg.from.id;
       waitingUsers[userId] = true;
-  
+
       await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
       const textHandler = async (response) => {
         if (userId === response.from.id && waitingUsers[userId]) {
           waitingUsers[userId] = false;
           bot.off('text', textHandler);
           const reply = response.text;
-  
+
           if (!isNaN(reply)) {
             const chRole = dbManager.changeRoleUser(reply, 3)
             await bot.sendMessage(reply, 'Роль изменена');
@@ -1042,13 +1078,13 @@ const startBot = async () => {
           }
         }
       };
-  
+
       bot.on('text', textHandler);
     } catch (e) {
       console.log(e)
     }
   });
-  
+
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
@@ -1067,14 +1103,14 @@ const startBot = async () => {
       try {
         const userId = msg.from.id;
         waitingUsers[userId] = true;
-    
+
         await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
         const textHandler = async (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
             waitingUsers[userId] = false;
             bot.off('text', textHandler);
             const reply = response.text;
-    
+
             // Проверка, является ли введенное значение числом
             if (!isNaN(reply)) {
               const chRole = dbManager.changeRoleUser(reply, 3)
@@ -1086,29 +1122,30 @@ const startBot = async () => {
             }
           }
         };
-    
+
         bot.on('text', textHandler);
       } catch (e) {
         console.log(e);
       }
     }
-    
-    try{
-    if (msg?.web_app_data?.data) {
-      try {
-        const data = JSON.parse(msg?.web_app_data?.data);
-        if (data.address) {
-          const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
-          const createdRequestId = createdRequest.dataValues.id
-          await bot.sendMessage(chatId, 'Заявка успешно создана!');
-          const message = `Создана новая заявка под номером ${createdRequestId}`
-          await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
-        } 
+
+    try {
+      if (msg?.web_app_data?.data) {
+        try {
+          const data = JSON.parse(msg?.web_app_data?.data);
+          if (data.address) {
+            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            const createdRequestId = createdRequest.dataValues.id
+            await bot.sendMessage(chatId, 'Заявка успешно создана!');
+            const message = `Создана новая заявка под номером ${createdRequestId}`
+            await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
+          }
+        }
+        catch (e) {
+          console.log(e)
+        }
       }
-      catch (e) {
-        console.log(e)
-      }
-    }}catch(e){
+    } catch (e) {
       console.log(e)
     }
     await commandHandler.handleMessage(msg);
