@@ -882,7 +882,7 @@ const startBot = async () => {
             UserRequestId: userRequestId,
           })
 
-          await bot.sendMessage(msg.chat.id, 'Файл успешно добавлено.');
+          await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
         }
       };
       bot.on('photo', textHandler);
@@ -920,7 +920,7 @@ const startBot = async () => {
             UserRequestId: userRequestId,
           })
 
-          await bot.sendMessage(msg.chat.id, 'Файл успешно добавлено.');
+          await bot.sendMessage(msg.chat.id,  `Файл успешно добавлен к заявке №${userRequestId}`);
         }
       };
       bot.on('photo', textHandler);
