@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "node index.js",
     "build": "npm install nodemon node-telegram-bot-api express sequelize dotenv cors body-parser"
-    
+
   },
   "keywords": [],
   "author": "",
