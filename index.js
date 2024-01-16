@@ -25,7 +25,41 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
+
+app.post('/upload', upload.array('files', 5), async (req, res) => {
+  try {
+      const files = req.files;
+
+
+      const chatId = '393448227';
+
+      const apiUrl = `https://api.telegram.org/bot${token}/sendDocument`;
+
+      for (const file of files) {
+          const formData = new FormData();
+          formData.append('chat_id', chatId);
+          formData.append('document', file.buffer, { filename: file.originalname });
+
+          await axios.post(apiUrl, formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+              },
+          });
+      }
+
+      res.send('Файлы успешно отправлены в бота Telegram!');
+  } catch (error) {
+      console.error('Ошибка при отправке файлов в бота Telegram:', error);
+      res.status(500).send('Произошла ошибка при отправке файлов в бота Telegram');
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Сервер запущен на порту ${port}`);
+});
 
 app.get('/messagesChat', async (req, res) => {
   try {
@@ -738,7 +772,16 @@ const startBot = async () => {
   //     console.error('Ошибка при пересоздании таблицы:', error);
   //   });
 
-
+  bot.on(/\/site123/, async(msg)=>{
+    const chatId = msg.from.id;
+    await bot.sendMessage(chatId, 'asdasdasd', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Пришел', web_app: { url: appUrl + `/InlineFormReq` } }]
+        ]
+      }
+    });
+  })
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
     const userId = msg.from.id;
     const requestId = match[1];
@@ -929,7 +972,7 @@ const startBot = async () => {
           }
 
           const photo = reply.photo[0];
-          const fileId = photo.file_id;
+          const fileId = reply.photo[0].file_id;
           const mediaRecord = await createMediaRecord(userRequestId, fileId);
 
           const timeData = new Date();
