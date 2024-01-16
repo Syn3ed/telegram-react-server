@@ -58,7 +58,7 @@ app.post('/upload', upload.array('files', 5), async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${port}`);
 });
 
