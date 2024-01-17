@@ -10,8 +10,6 @@ const { commandAndAnswer, callbackAnswer } = require('./src/BotService/botServic
 require('./src/BaseData/bdModel');
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
-const https = require('https');
-const fs = require('fs');
 
 const commandHandler = new commandAndAnswer(bot);
 const callbackHandler = new callbackAnswer(bot);
@@ -25,15 +23,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const port = process.env.PORT || 3000;
 
-const privateKey = fs.readFileSync('key.pem', 'utf8');
-const certificate = fs.readFileSync('cert.pem', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
 
-const httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
 
 
 
@@ -755,9 +745,9 @@ const connectToDatabase = async () => {
     await sequelize.sync();
     console.log('Подключение к БД успешно');
     const userrole = dbManager.changeRoleUser(1, 3)
-    // app.listen(PORT, () => {
-    //   console.log(`Сервер запущен на порту ${PORT}`);
-    // });
+    app.listen(PORT, () => {
+      console.log(`Сервер запущен на порту ${PORT}`);
+    });
 
   } catch (e) {
     console.log('Подключение к БД сломалось', e);
