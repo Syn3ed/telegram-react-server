@@ -1203,4 +1203,6 @@ const startBot = async () => {
 };
 
 startBot();
-
+console.log(`Сервер запущен на порту ${PORT}`);
+console.log(`Сервер запущен на порту ${PORT}`);
+console.log(`Сервер запущен на порту ${PORT}`);
