@@ -745,7 +745,7 @@ const connectToDatabase = async () => {
     await sequelize.sync();
     console.log('Подключение к БД успешно');
     const userrole = dbManager.changeRoleUser(1, 3)
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, '192.168.0.2', () => {
       const address = server.address();
       console.log(`Сервер запущен на адресе ${address.address} и порту ${address.port}`);
     });
