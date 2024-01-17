@@ -20,7 +20,7 @@ const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = re
 const { where } = require('sequelize');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 const port = process.env.PORT || 3000;
 
 
