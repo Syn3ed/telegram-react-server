@@ -9,7 +9,8 @@ require('dotenv').config();
 //     password: 'YwvXuLjxMvufBB5w1h0jPsjLA4ztJqR0', 
 //     database: 'syne3d', 
 //   });
-const sequelize = new Sequelize('postgres://syne3d_user:YwvXuLjxMvufBB5w1h0jPsjLA4ztJqR0@dpg-clg7277jc5ks73ecg5n0-a.frankfurt-postgres.render.com/syne3d', { dialectOptions: {}, ssl: false });
+const sequelize = new Sequelize('postgres://syne3d_user:YwvXuLjxMvufBB5w1h0jPsjLA4ztJqR0@dpg-clg7277jc5ks73ecg5n0-a.frankfurt-postgres.render.com/syne3d?ssl=true');
+
 
 //
   module.exports = sequelize
