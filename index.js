@@ -745,10 +745,6 @@ const connectToDatabase = async () => {
     await sequelize.sync();
     console.log('Подключение к БД успешно');
     const userrole = dbManager.changeRoleUser(1, 3)
-    app.listen(8000, () => {
-      console.log(`Сервер запущен на порту ${PORT}`);
-    });
-
   } catch (e) {
     console.log('Подключение к БД сломалось', e);
   }
@@ -766,6 +762,9 @@ const createRoles = async () => {
 
 
 const startBot = async () => {
+  const PORT = 8000;
+
+  app.listen(PORT, () => console.log('server started on PORT ' + PORT))
   await connectToDatabase();
   await createRoles();
   // MessageChat.sync({ force: true })
