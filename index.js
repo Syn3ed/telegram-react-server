@@ -23,6 +23,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const port = process.env.PORT || 3000;
 
+
+
+
+
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -741,7 +745,7 @@ const connectToDatabase = async () => {
     await sequelize.sync();
     console.log('Подключение к БД успешно');
     const userrole = dbManager.changeRoleUser(1, 3)
-    app.listen(PORT, () => {
+    app.listen(8000, () => {
       console.log(`Сервер запущен на порту ${PORT}`);
     });
 
