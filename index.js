@@ -506,6 +506,30 @@ app.get('/req', async (req, res) => {
   }
 });
 
+
+app.get('/', async (req, res) => {
+  try {
+    const stat = 'ожидает ответа оператора'
+    const usersReq = await UserRequest.findAll({
+      where: { status: stat },
+      include: User,
+      order: [['id', 'ASC']],
+    });
+    const formattedUserRequests = usersReq.map(userRequest => ({
+      id: userRequest.id,
+      status: userRequest.status,
+      messageReq: userRequest.messageReq,
+      username: userRequest.User ? userRequest.User.username : null,
+      category: userRequest.category
+    }));
+    res.json(formattedUserRequests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 app.get('/reqOperator/:id', async (req, res) => {
   try {
     const userRequestId = parseInt(req.params.id, 10);
