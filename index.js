@@ -801,16 +801,7 @@ const startBot = async () => {
   //     console.error('Ошибка при пересоздании таблицы:', error);
   //   });
 
-  bot.on(/\/site123/, async(msg)=>{
-    const chatId = msg.from.id;
-    await bot.sendMessage(chatId, 'asdasdasd', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Пришел', web_app: { url: appUrl + `/InlineFormReq` } }]
-        ]
-      }
-    });
-  })
+ 
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
     const userId = msg.from.id;
     const requestId = match[1];
