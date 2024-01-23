@@ -1243,12 +1243,12 @@ const startBot = async () => {
                 })
       
                 await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                await bot.sendMessage(chatId, 'Заявка успешно создана!');
+                const message = `Создана новая заявка под номером ${createdRequestId}`
+                await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
               }
             };
             bot.on('photo', textHandler);
-            await bot.sendMessage(chatId, 'Заявка успешно создана!');
-            const message = `Создана новая заявка под номером ${createdRequestId}`
-            await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
           }
         }
         catch (e) {
