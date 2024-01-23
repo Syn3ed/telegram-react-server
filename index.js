@@ -1197,6 +1197,7 @@ const startBot = async () => {
 
     try {
       if (msg?.web_app_data?.data) {
+        const userName = msg.from.first_name;
         try {
           const data = msg?.web_app_data?.data//JSON.parse(msg?.web_app_data?.data);
           if (data.address) {
@@ -1230,7 +1231,6 @@ const startBot = async () => {
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
             
                 const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
-                const userName = msg.from.first_name;
                 await MessageChat.create({
                   IdMedia: mediaRecord.id,
                   roleUser: 'User',
