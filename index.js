@@ -37,29 +37,29 @@ const upload = multer({ storage: storage });
 
 app.post('/upload', upload.array('files', 5), async (req, res) => {
   try {
-      const files = req.files;
+    const files = req.files;
 
 
-      const chatId = '393448227';
+    const chatId = '393448227';
 
-      const apiUrl = `https://api.telegram.org/bot${token}/sendDocument`;
+    const apiUrl = `https://api.telegram.org/bot${token}/sendDocument`;
 
-      for (const file of files) {
-          const formData = new FormData();
-          formData.append('chat_id', chatId);
-          formData.append('document', file.buffer, { filename: file.originalname });
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('chat_id', chatId);
+      formData.append('document', file.buffer, { filename: file.originalname });
 
-          await axios.post(apiUrl, formData, {
-              headers: {
-                  'Content-Type': 'multipart/form-data',
-              },
-          });
-      }
+      await axios.post(apiUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
 
-      res.send('Файлы успешно отправлены в бота Telegram!');
+    res.send('Файлы успешно отправлены в бота Telegram!');
   } catch (error) {
-      console.error('Ошибка при отправке файлов в бота Telegram:', error);
-      res.status(500).send('Произошла ошибка при отправке файлов в бота Telegram');
+    console.error('Ошибка при отправке файлов в бота Telegram:', error);
+    res.status(500).send('Произошла ошибка при отправке файлов в бота Telegram');
   }
 });
 
@@ -790,7 +790,7 @@ const createRoles = async () => {
 
 
 const startBot = async () => {
-  
+
   await connectToDatabase();
   await createRoles();
   // MessageChat.sync({ force: true })
@@ -801,7 +801,7 @@ const startBot = async () => {
   //     console.error('Ошибка при пересоздании таблицы:', error);
   //   });
 
- 
+
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
     const userId = msg.from.id;
     const requestId = match[1];
@@ -946,14 +946,14 @@ const startBot = async () => {
           const mediaRecord = await createMediaRecord(userRequestId, fileId);
           const timeData = new Date();
           const year = timeData.getFullYear();
-          const month = timeData.getMonth() + 1; 
+          const month = timeData.getMonth() + 1;
           const day = timeData.getDate();
-          timeData.setHours(timeData.getHours() + 4); 
+          timeData.setHours(timeData.getHours() + 4);
           const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
           const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-      
+
           const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
 
           const mediaChat = await MessageChat.create({
@@ -961,7 +961,7 @@ const startBot = async () => {
             roleUser: 'User',
             username: userName,
             UserRequestId: userRequestId,
-            TimeMessages:timeMess,
+            TimeMessages: timeMess,
           })
 
           await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -1004,7 +1004,7 @@ const startBot = async () => {
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
           const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-      
+
           const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
 
           await MessageChat.create({
@@ -1012,7 +1012,7 @@ const startBot = async () => {
             roleUser: 'Operator',
             username: 'Оператор',
             UserRequestId: userRequestId,
-            TimeMessages:timeMess,
+            TimeMessages: timeMess,
           })
 
           await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -1085,7 +1085,7 @@ const startBot = async () => {
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
           const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-      
+
           const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
 
           await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
@@ -1153,15 +1153,7 @@ const startBot = async () => {
   });
 
   bot.on('message', async (msg) => {
-    bot.onText(/\/handleShowPhoto (\d+)/, async (msg, match) => {
-      const idMed = match[1];
-      try {
-        const med = await Media.findByPk(idMed);
-        await bot.sendPhoto(msg.chat.id, med.idMedia);
-      } catch (e) {
-        console(e)
-      }
-    });
+
     console.log(msg)
     const chatId = msg.chat.id
     if (msg.text === 'Изменить роль пользователю на админа') {
@@ -1196,6 +1188,20 @@ const startBot = async () => {
 
     try {
       if (msg?.web_app_data?.data) {
+        const regex = /\/handleShowPhoto (\d+)/;
+
+        if (msg?.web_app_data?.data && regex.test(msg.web_app_data.data)) {
+          const match = msg.web_app_data.data.match(regex);
+          const idMed = match[1];
+          try {
+            const med = await Media.findByPk(idMed);
+            await bot.sendPhoto(msg.chat.id, med.idMedia);
+          } catch (e) {
+            console(e)
+          }
+          console.log(idMed);
+        }
+
         const userName = msg.from.first_name;
         try {
           const data = msg?.web_app_data?.data//JSON.parse(msg?.web_app_data?.data);
@@ -1211,33 +1217,33 @@ const startBot = async () => {
                 waitingUsers[userId] = false;
                 bot.off('photo', textHandler);
                 const reply = response;
-      
+
                 if (!reply || !reply.photo || !reply.photo[0]) {
                   throw new Error('Не удалось получить фотографию.');
                 }
-      
+
                 const photo = reply.photo[0];
                 const fileId = photo.file_id;
                 const mediaRecord = await createMediaRecord(userRequestId, fileId);
                 const timeData = new Date();
                 const year = timeData.getFullYear();
-                const month = timeData.getMonth() + 1; 
+                const month = timeData.getMonth() + 1;
                 const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 4); 
+                timeData.setHours(timeData.getHours() + 4);
                 const hours = timeData.getHours();
                 const minutes = timeData.getMinutes();
                 const formattedHours = hours < 10 ? '0' + hours : hours;
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-            
+
                 const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
                 await MessageChat.create({
                   IdMedia: mediaRecord.id,
                   roleUser: 'User',
                   username: userName,
                   UserRequestId: userRequestId,
-                  TimeMessages:timeMess,
+                  TimeMessages: timeMess,
                 })
-      
+
                 await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
                 await bot.sendMessage(chatId, 'Заявка успешно создана!');
                 const message = `Создана новая заявка под номером ${createdRequestId}`
