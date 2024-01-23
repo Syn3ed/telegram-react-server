@@ -1153,7 +1153,15 @@ const startBot = async () => {
   });
 
   bot.on('message', async (msg) => {
-    
+    bot.onText(/\/handleShowPhoto (\d+)/, async (msg, match) => {
+      const idMed = match[1];
+      try {
+        const med = await Media.findByPk(idMed);
+        await bot.sendPhoto(msg.chat.id, med.idMedia);
+      } catch (e) {
+        console(e)
+      }
+    });
     console.log(msg)
     const chatId = msg.chat.id
     if (msg.text === 'Изменить роль пользователю на админа') {
