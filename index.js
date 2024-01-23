@@ -955,9 +955,9 @@ const startBot = async () => {
           const mediaRecord = await createMediaRecord(userRequestId, fileId);
           const timeData = new Date();
           const year = timeData.getFullYear();
-          const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+          const month = timeData.getMonth() + 1; 
           const day = timeData.getDate();
-          timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
+          timeData.setHours(timeData.getHours() + 4); 
           const hours = timeData.getHours();
           const minutes = timeData.getMinutes();
           const formattedHours = hours < 10 ? '0' + hours : hours;
@@ -1165,10 +1165,7 @@ const startBot = async () => {
   });
 
   bot.on('message', async (msg) => {
-    if (msg?.web_app_data?.data) {
-      const datares = msg
-      datares.text = msg?.web_app_data?.data
-    }
+    
     console.log(msg)
     const chatId = msg.chat.id
     if (msg.text === 'Изменить роль пользователю на админа') {
@@ -1206,8 +1203,49 @@ const startBot = async () => {
         try {
           const data = JSON.parse(msg?.web_app_data?.data);
           if (data.address) {
+            const userId = msg.from.id;
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
-            const createdRequestId = createdRequest.dataValues.id
+            await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
+            const createdRequestId = createdRequest.dataValues.id;
+            const userRequestId = createdRequestId;
+            waitingUsers[userId] = true;
+            const textHandler = async (response) => {
+              if (userId === response.from.id && waitingUsers[userId]) {
+                waitingUsers[userId] = false;
+                bot.off('photo', textHandler);
+                const reply = response;
+      
+                if (!reply || !reply.photo || !reply.photo[0]) {
+                  throw new Error('Не удалось получить фотографию.');
+                }
+      
+                const photo = reply.photo[0];
+                const fileId = photo.file_id;
+                const mediaRecord = await createMediaRecord(userRequestId, fileId);
+                const timeData = new Date();
+                const year = timeData.getFullYear();
+                const month = timeData.getMonth() + 1; 
+                const day = timeData.getDate();
+                timeData.setHours(timeData.getHours() + 4); 
+                const hours = timeData.getHours();
+                const minutes = timeData.getMinutes();
+                const formattedHours = hours < 10 ? '0' + hours : hours;
+                const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+            
+                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+      
+                await MessageChat.create({
+                  IdMedia: mediaRecord.id,
+                  roleUser: 'User',
+                  username: userName,
+                  UserRequestId: userRequestId,
+                  TimeMessages:timeMess,
+                })
+      
+                await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+              }
+            };
+            bot.on('photo', textHandler);
             await bot.sendMessage(chatId, 'Заявка успешно создана!');
             const message = `Создана новая заявка под номером ${createdRequestId}`
             await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
