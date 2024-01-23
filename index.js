@@ -1039,14 +1039,11 @@ const startBot = async () => {
 
   bot.onText(/\/handleShowPhoto (\d+)/, async (msg, match) => {
     const idMed = match[1];
-
     try {
       const med = await Media.findByPk(idMed);
-      if (med) {
-        bot.sendPhoto(msg.chat.id, med.idMedia);
-      }
+      await bot.sendPhoto(msg.chat.id, med.idMedia);
     } catch (e) {
-
+      console(e)
     }
   });
 
