@@ -1232,8 +1232,8 @@ const startBot = async () => {
                 const formattedHours = hours < 10 ? '0' + hours : hours;
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
             
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
-      
+                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
+                const userName = msg.from.first_name;
                 await MessageChat.create({
                   IdMedia: mediaRecord.id,
                   roleUser: 'User',
