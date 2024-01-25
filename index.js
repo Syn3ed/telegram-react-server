@@ -23,6 +23,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const port = process.env.PORT || 3000;
 
+// Объект для хранения фотографий каждого пользователя
+const userPhotos = {};
+
+// Объект для отслеживания отправленных медиагрупп
+const sentMediaGroups = {};
 
 
 
@@ -787,7 +792,33 @@ const createRoles = async () => {
     console.error(error);
   }
 };
+async function sendMediaGroup(chatId, userName, userRequestId, timeMess) {
+  if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
+    const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
 
+    // Фильтруем массив фотографий по mediaGroupId
+    const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
+
+
+    // await bot.sendMediaGroup(chatId, groupPhotos.map(photo => ({
+    //     type: 'photo',
+    //     media: photo.media
+    // })));
+    await MessageChat.create({
+      IdMedia: groupPhotos,
+      roleUser: 'User',
+      username: userName,
+      UserRequestId: userRequestId,
+      TimeMessages: timeMess,
+    })
+
+    // Очищаем массив после отправки
+    userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
+
+    // Сбрасываем флаг отправки медиагруппы
+    sentMediaGroups[chatId] = false;
+  }
+}
 
 const startBot = async () => {
 
@@ -1108,16 +1139,9 @@ const startBot = async () => {
     }
   });
 
-  // bot.onText(/\/asd (\d+)/,async(msg,math) =>{
-  //   try{
-  //     const userId = msg.from.id;
 
-  //   }catch(e){
-  //     console.log(e)
-  //   }
-  // });
 
-  bot.onText('Изменить роль пользователю на админа', async (msg, match) => {
+  bot.onText('Изменить роль пользователю на оператора', async (msg, match) => {
     try {
       const userId = msg.from.id;
       waitingUsers[userId] = true;
@@ -1195,7 +1219,11 @@ const startBot = async () => {
           const idMed = match[1];
           try {
             const med = await Media.findByPk(idMed);
-            await bot.sendPhoto(msg.chat.id, med.idMedia);
+            // await bot.sendPhoto(msg.chat.id, med.idMedia);
+            await bot.sendMediaGroup(chatId, med.idMedia.map(photo => ({
+                type: 'photo',
+                media: photo.media
+            })));
           } catch (e) {
             console(e)
           }
@@ -1214,16 +1242,8 @@ const startBot = async () => {
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
               if (userId === response.from.id && waitingUsers[userId]) {
-                waitingUsers[userId] = false;
                 bot.off('photo', textHandler);
                 const reply = response;
-
-                if (!reply || !reply.photo || !reply.photo[0]) {
-                  throw new Error('Не удалось получить фотографию.');
-                }
-
-                const photo = reply.photo[0];
-                const fileId = photo.file_id;
                 const mediaRecord = await createMediaRecord(userRequestId, fileId);
                 const timeData = new Date();
                 const year = timeData.getFullYear();
@@ -1236,13 +1256,47 @@ const startBot = async () => {
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
                 const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
-                await MessageChat.create({
-                  IdMedia: mediaRecord.id,
-                  roleUser: 'User',
-                  username: userName,
-                  UserRequestId: userRequestId,
-                  TimeMessages: timeMess,
-                })
+                if (reply?.photo) {
+                  // Получаем или инициализируем массив фотографий пользователя
+                  userPhotos[chatId] = userPhotos[chatId] || [];
+
+                  // Добавляем информацию о фотографии в массив
+                  userPhotos[chatId].push({
+                    type: 'photo',
+                    media: reply.photo[0].file_id,
+                    mediaGroupId: reply.media_group_id
+                  });
+
+                  console.log('Получена фотография:');
+                  console.log(userPhotos[chatId]);
+
+                  // Проверяем, была ли уже отправлена медиагруппа
+                  if (!sentMediaGroups[chatId]) {
+                    // Устанавливаем таймер на 1 секунд 
+                    setTimeout(() => sendMediaGroup(chatId, userName, userRequestId, timeMess), 1000);
+
+                    // Помечаем, что медиагруппа уже была отправлена
+                    sentMediaGroups[chatId] = true;
+                  }
+                }
+                waitingUsers[userId] = false;
+
+                if (!reply || !reply.photo || !reply.photo[0]) {
+                  throw new Error('Не удалось получить фотографию.');
+                }
+
+                const photo = reply.photo[0];
+                const fileId = photo.file_id;
+
+
+
+                // await MessageChat.create({
+                //   IdMedia: mediaRecord.id,
+                //   roleUser: 'User',
+                //   username: userName,
+                //   UserRequestId: userRequestId,
+                //   TimeMessages: timeMess,
+                // })
 
                 await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
                 await bot.sendMessage(chatId, 'Заявка успешно создана!');
