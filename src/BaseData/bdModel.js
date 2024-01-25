@@ -66,7 +66,7 @@ const Role = sequelize.define('Role', {
 
 const Media = sequelize.define('Media', {
     idMedia: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         unique: true,
     },

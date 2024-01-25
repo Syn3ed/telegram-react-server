@@ -1268,10 +1268,10 @@ const startBot = async () => {
 
                 const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
                 if (reply.photo) {
-                 
+
                   userPhotos[chatId] = userPhotos[chatId] || [];
 
-                  
+
                   userPhotos[chatId].push({
                     type: 'photo',
                     media: reply.photo[0].file_id,
@@ -1281,14 +1281,20 @@ const startBot = async () => {
                   console.log('Получена фотография:');
                   console.log(userPhotos[chatId]);
 
-                  
+
                   if (!sentMediaGroups[chatId]) {
-                  
+
                     setTimeout(() => {
                       sendMediaGroup(chatId, userName, userRequestId, timeMess);
                       waitingUsers[userId] = false;
-                      bot.off('message', textHandler); 
+                      bot.off('message', textHandler);
                       bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                      const photo = reply.photo[0];
+                      const fileId = photo.file_id;
+                      bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                      bot.sendMessage(chatId, 'Заявка успешно создана!');
+                      const message = `Создана новая заявка под номером ${createdRequestId}`
+                      commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
                     }, 1000);
                     sentMediaGroups[chatId] = true;
                   }
@@ -1298,12 +1304,7 @@ const startBot = async () => {
                   throw new Error('Не удалось получить фотографию.');
                 }
 
-                const photo = reply.photo[0];
-                const fileId = photo.file_id;
-                await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-                await bot.sendMessage(chatId, 'Заявка успешно создана!');
-                const message = `Создана новая заявка под номером ${createdRequestId}`
-                await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
+
               }
             };
             bot.on('message', textHandler);
