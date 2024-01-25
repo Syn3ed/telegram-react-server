@@ -804,7 +804,8 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess) {
     //     type: 'photo',
     //     media: photo.media
     // })));
-    const mediaRecord = await createMediaRecord(userRequestId, groupPhotos);
+    const str = JSON.stringify(groupPhotos);
+    const mediaRecord = await createMediaRecord(userRequestId, str);
     await MessageChat.create({
       IdMedia: mediaRecord.id,
       roleUser: 'User',
@@ -1221,7 +1222,10 @@ const startBot = async () => {
           try {
             const med = await Media.findByPk(idMed);
             // await bot.sendPhoto(msg.chat.id, med.idMedia);
-            await bot.sendMediaGroup(chatId, med.idMedia.map(photo => ({
+            console.log('asdPHT')
+            console.log(med)
+            const pht =  JSON.parse(med.idMedia);
+            await bot.sendMediaGroup(chatId, pht.map(photo => ({
                 type: 'photo',
                 media: photo.media
             })));
