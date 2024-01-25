@@ -1268,7 +1268,7 @@ const startBot = async () => {
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
                 const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
-                if (reply?.photo) {
+                if (reply.photo) {
                   // Получаем или инициализируем массив фотографий пользователя
                   userPhotos[chatId] = userPhotos[chatId] || [];
 
