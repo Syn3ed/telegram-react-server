@@ -1254,9 +1254,8 @@ const startBot = async () => {
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
               if (userId === response.from.id && waitingUsers[userId]) {
-                bot.off('message', textHandler);
                 const reply = response;
-                // const mediaRecord = await createMediaRecord(userRequestId, fileId);
+
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
@@ -1269,10 +1268,10 @@ const startBot = async () => {
 
                 const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
                 if (reply.photo) {
-                  // Получаем или инициализируем массив фотографий пользователя
+                 
                   userPhotos[chatId] = userPhotos[chatId] || [];
 
-                  // Добавляем информацию о фотографии в массив
+                  
                   userPhotos[chatId].push({
                     type: 'photo',
                     media: reply.photo[0].file_id,
@@ -1282,16 +1281,15 @@ const startBot = async () => {
                   console.log('Получена фотография:');
                   console.log(userPhotos[chatId]);
 
-                  // Проверяем, была ли уже отправлена медиагруппа
+                  
                   if (!sentMediaGroups[chatId]) {
-                    // Устанавливаем таймер на 5 секунд (5000 миллисекунд)
+                  
                     setTimeout(() => {
                       sendMediaGroup(chatId, userName, userRequestId, timeMess);
-                      waitingUsers[userId] = false; // Помечаем, что таймер сработал
-                      // Отправляем сообщение о добавлении файла
+                      waitingUsers[userId] = false;
+                      bot.off('message', textHandler); 
                       bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-                    }, 5000);
-                    // Помечаем, что медиагруппа уже была отправлена
+                    }, 1000);
                     sentMediaGroups[chatId] = true;
                   }
                 }
@@ -1302,17 +1300,6 @@ const startBot = async () => {
 
                 const photo = reply.photo[0];
                 const fileId = photo.file_id;
-
-
-
-                // await MessageChat.create({
-                //   IdMedia: mediaRecord.id,
-                //   roleUser: 'User',
-                //   username: userName,
-                //   UserRequestId: userRequestId,
-                //   TimeMessages: timeMess,
-                // })
-
                 await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
                 await bot.sendMessage(chatId, 'Заявка успешно создана!');
                 const message = `Создана новая заявка под номером ${createdRequestId}`
