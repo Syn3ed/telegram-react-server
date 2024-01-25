@@ -1224,10 +1224,10 @@ const startBot = async () => {
             // await bot.sendPhoto(msg.chat.id, med.idMedia);
             console.log('asdPHT')
             console.log(med)
-            const pht =  JSON.parse(med.idMedia);
+            const pht = JSON.parse(med.idMedia);
             await bot.sendMediaGroup(chatId, pht.map(photo => ({
-                type: 'photo',
-                media: photo.media
+              type: 'photo',
+              media: photo.media
             })));
           } catch (e) {
             console(e)
@@ -1237,7 +1237,7 @@ const startBot = async () => {
 
         const userName = msg.from.first_name;
         try {
-          const data =JSON.parse(msg?.web_app_data?.data);
+          const data = JSON.parse(msg?.web_app_data?.data);
           console.log('asd1')
           console.log(data)
           console.log('asd2')
@@ -1284,9 +1284,13 @@ const startBot = async () => {
 
                   // Проверяем, была ли уже отправлена медиагруппа
                   if (!sentMediaGroups[chatId]) {
-                    // Устанавливаем таймер на 1 секунд 
-                    setTimeout(() => sendMediaGroup(chatId, userName, userRequestId, timeMess), 5000);
-                    waitingUsers[userId] = false;
+                    // Устанавливаем таймер на 5 секунд (5000 миллисекунд)
+                    setTimeout(() => {
+                      sendMediaGroup(chatId, userName, userRequestId, timeMess);
+                      waitingUsers[userId] = false; // Помечаем, что таймер сработал
+                      // Отправляем сообщение о добавлении файла
+                      bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                    }, 5000);
                     // Помечаем, что медиагруппа уже была отправлена
                     sentMediaGroups[chatId] = true;
                   }
