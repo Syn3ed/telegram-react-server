@@ -1233,6 +1233,7 @@ const startBot = async () => {
         const userName = msg.from.first_name;
         try {
           const data = msg?.web_app_data?.data//JSON.parse(msg?.web_app_data?.data);
+          console.log('asd1')
           if (data.address) {
             const userId = msg.from.id;
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
