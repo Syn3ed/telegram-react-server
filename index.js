@@ -1254,6 +1254,7 @@ const startBot = async () => {
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
               if (userId === response.from.id && waitingUsers[userId]) {
+                bot.off('message', textHandler);
                 const reply = response;
                 // const mediaRecord = await createMediaRecord(userRequestId, fileId);
                 const timeData = new Date();
@@ -1318,6 +1319,7 @@ const startBot = async () => {
                 await commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
               }
             };
+            bot.on('message', textHandler);
           }
         }
         catch (e) {
