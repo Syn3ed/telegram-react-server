@@ -1234,10 +1234,12 @@ const startBot = async () => {
         try {
           const data = msg?.web_app_data?.data//JSON.parse(msg?.web_app_data?.data);
           console.log('asd1')
-          console.log(data.address)
+          console.log(data)
+          console.log('asd2')
+          console.log(msg?.web_app_data?.data)
           if (data.address) {
             const userId = msg.from.id;
-            console.log('asd2')
+            console.log('asd3')
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
             const createdRequestId = createdRequest.dataValues.id;
