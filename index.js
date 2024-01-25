@@ -1232,12 +1232,12 @@ const startBot = async () => {
 
         const userName = msg.from.first_name;
         try {
-          const data = msg?.web_app_data?.data//JSON.parse(msg?.web_app_data?.data);
+          const data =JSON.parse(msg?.web_app_data?.data);
           console.log('asd1')
           console.log(data)
           console.log('asd2')
           console.log(msg?.web_app_data?.data)
-          console.log('data.adress')
+          console.log('data.address')
           console.log(data.address)
           if (data.address) {
             const userId = msg.from.id;
