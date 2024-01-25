@@ -1285,7 +1285,7 @@ const startBot = async () => {
                   // Проверяем, была ли уже отправлена медиагруппа
                   if (!sentMediaGroups[chatId]) {
                     // Устанавливаем таймер на 1 секунд 
-                    setTimeout(() => sendMediaGroup(chatId, userName, userRequestId, timeMess), 5000);
+                    setTimeout(() => sendMediaGroup(chatId, userName, userRequestId, timeMess), 50000);
 
                     // Помечаем, что медиагруппа уже была отправлена
                     sentMediaGroups[chatId] = true;
