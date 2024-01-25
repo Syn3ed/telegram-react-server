@@ -1285,13 +1285,12 @@ const startBot = async () => {
                   // Проверяем, была ли уже отправлена медиагруппа
                   if (!sentMediaGroups[chatId]) {
                     // Устанавливаем таймер на 1 секунд 
-                    setTimeout(() => sendMediaGroup(chatId, userName, userRequestId, timeMess), 50000);
-
+                    setTimeout(() => sendMediaGroup(chatId, userName, userRequestId, timeMess), 5000);
+                    waitingUsers[userId] = false;
                     // Помечаем, что медиагруппа уже была отправлена
                     sentMediaGroups[chatId] = true;
                   }
                 }
-                waitingUsers[userId] = false;
 
                 if (!reply || !reply.photo || !reply.photo[0]) {
                   throw new Error('Не удалось получить фотографию.');
