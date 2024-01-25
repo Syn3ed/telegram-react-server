@@ -804,8 +804,9 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess) {
     //     type: 'photo',
     //     media: photo.media
     // })));
+    const mediaRecord = await createMediaRecord(userRequestId, groupPhotos);
     await MessageChat.create({
-      IdMedia: groupPhotos,
+      IdMedia: mediaRecord.id,
       roleUser: 'User',
       username: userName,
       UserRequestId: userRequestId,
@@ -1251,7 +1252,7 @@ const startBot = async () => {
               if (userId === response.from.id && waitingUsers[userId]) {
                 bot.off('photo', textHandler);
                 const reply = response;
-                const mediaRecord = await createMediaRecord(userRequestId, fileId);
+                // const mediaRecord = await createMediaRecord(userRequestId, fileId);
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
