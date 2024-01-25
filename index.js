@@ -1234,6 +1234,7 @@ const startBot = async () => {
         try {
           const data = msg?.web_app_data?.data//JSON.parse(msg?.web_app_data?.data);
           console.log('asd1')
+          console.log(data.address)
           if (data.address) {
             const userId = msg.from.id;
             console.log('asd2')
