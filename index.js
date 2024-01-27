@@ -320,13 +320,16 @@ app.post('/handleShowPhoto', async (req, res) => {
     // const med = await Media.findByPk(idMedia);
     // await bot.sendPhoto(msg.chat.id, med.idMedia);
     const med = await Media.findByPk(idMedia);
-    console.log('asdPHT')
-    console.log(med)
-    const pht = JSON.parse(med.idMedia);
-    await bot.sendMediaGroup(operatorId, pht.map(photo => ({
-      type: photo.type,
-      media: photo.media
-    })));
+    if (med) {
+      console.log('asdPHT')
+      console.log(med)
+      const pht = JSON.parse(med.idMedia);
+      await bot.sendMediaGroup(operatorId, pht.map(photo => ({
+        type: photo.type,
+        media: photo.media
+      })));
+    }
+
     res.status(200).json({ success: true });
   } catch (error) {
     console.log(error)
