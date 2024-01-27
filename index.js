@@ -456,7 +456,7 @@ app.get('/reqPhoto/:id', async (req, res) => {
 
 app.get('/users', async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await Media.findAll();
     res.json(users);
   } catch (error) {
     console.error(error);
