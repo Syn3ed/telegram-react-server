@@ -319,7 +319,9 @@ app.post('/handleShowPhoto', async (req, res) => {
     // }
     // const med = await Media.findByPk(idMedia);
     // await bot.sendPhoto(msg.chat.id, med.idMedia);
+    console.log(idMedia)
     const med = await Media.findByPk(idMedia);
+    console.log(med)
     if (med) {
       console.log('asdPHT')
       console.log(med)
