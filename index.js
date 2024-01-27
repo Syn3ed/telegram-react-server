@@ -319,6 +319,7 @@ app.post('/handleShowPhoto', async (req, res) => {
     // }
     // const med = await Media.findByPk(idMedia);
     // await bot.sendPhoto(msg.chat.id, med.idMedia);
+    const med = await Media.findByPk(idMedia);
     console.log('asdPHT')
     console.log(med)
     const pht = JSON.parse(med.idMedia);
