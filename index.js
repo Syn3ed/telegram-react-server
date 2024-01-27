@@ -1360,9 +1360,9 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId]) {
 
                   setTimeout(() => {
-                    const op = 'Operator'
+                    const op = 'User'
                     const useName = 'Оператор'
-                    sendMediaGroup(chatId, useName, userRequestId, timeMess,);
+                    sendMediaGroup(chatId, userName, userRequestId, timeMess,);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
