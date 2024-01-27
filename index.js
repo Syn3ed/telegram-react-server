@@ -313,14 +313,24 @@ app.post(`/replyToUser`, async (req, res) => {
 app.post('/handleShowPhoto', async (req, res) => {
   const { queryId, userRequestId, username, idMedia, operatorId } = req.body;
   try {
-    const med = await Media.findByPk(idMedia);
-    if (med) {
-      bot.sendPhoto(operatorId, med.idMedia);
-    }
+    // const med = await Media.findByPk(idMedia);
+    // if (med) {
+    //   bot.sendPhoto(operatorId, med.idMedia);
+    // }
+    // const med = await Media.findByPk(idMedia);
+    // await bot.sendPhoto(msg.chat.id, med.idMedia);
+    console.log('asdPHT')
+    console.log(med)
+    const pht = JSON.parse(med.idMedia);
+    await bot.sendMediaGroup(operatorId, pht.map(photo => ({
+      type: photo.type,
+      media: photo.media
+    })));
     res.status(200).json({ success: true });
   } catch (error) {
     console.log(error)
   }
+
 });
 
 
@@ -826,13 +836,13 @@ const startBot = async () => {
 
   await connectToDatabase();
   await createRoles();
-  Media.sync({ force: true })
-    .then(() => {
-      console.log('Таблица успешно пересоздана.');
-    })
-    .catch((error) => {
-      console.error('Ошибка при пересоздании таблицы:', error);
-    });
+  // Media.sync({ force: true })
+  //   .then(() => {
+  //     console.log('Таблица успешно пересоздана.');
+  //   })
+  //   .catch((error) => {
+  //     console.error('Ошибка при пересоздании таблицы:', error);
+  //   });
 
 
   bot.onText(/\/closeReq (\d+)/, async (msg, match) => {
@@ -1226,7 +1236,7 @@ const startBot = async () => {
             console.log(med)
             const pht = JSON.parse(med.idMedia);
             await bot.sendMediaGroup(chatId, pht.map(photo => ({
-              type: 'photo',
+              type: photo.type,
               media: photo.media
             })));
           } catch (e) {
@@ -1268,36 +1278,42 @@ const startBot = async () => {
 
                 const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
                 if (reply.photo) {
-
                   userPhotos[chatId] = userPhotos[chatId] || [];
-
-
                   userPhotos[chatId].push({
                     type: 'photo',
                     media: reply.photo[0].file_id,
                     mediaGroupId: reply.media_group_id
                   });
-
                   console.log('Получена фотография:');
                   console.log(userPhotos[chatId]);
+                } else if (reply.document) {
+                  userPhotos[chatId].push({
+                    type: 'document',
+                    media: reply.document.file_id,
+                    mediaGroupId: reply.media_group_id
+                  });
+                } else if (reply.video) {
+                  userPhotos[chatId].push({
+                    type: 'video',
+                    media: reply.video.file_id,
+                    mediaGroupId: reply.media_group_id
+                  });
+                }
+                if (!sentMediaGroups[chatId]) {
 
-
-                  if (!sentMediaGroups[chatId]) {
-
-                    setTimeout(() => {
-                      sendMediaGroup(chatId, userName, userRequestId, timeMess);
-                      waitingUsers[userId] = false;
-                      bot.off('message', textHandler);
-                      bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-                      const photo = reply.photo[0];
-                      const fileId = photo.file_id;
-                      bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-                      bot.sendMessage(chatId, 'Заявка успешно создана!');
-                      const message = `Создана новая заявка под номером ${createdRequestId}`
-                      commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
-                    }, 1000);
-                    sentMediaGroups[chatId] = true;
-                  }
+                  setTimeout(() => {
+                    sendMediaGroup(chatId, userName, userRequestId, timeMess);
+                    waitingUsers[userId] = false;
+                    bot.off('message', textHandler);
+                    bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                    const photo = reply.photo[0];
+                    const fileId = photo.file_id;
+                    bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                    bot.sendMessage(chatId, 'Заявка успешно создана!');
+                    const message = `Создана новая заявка под номером ${createdRequestId}`
+                    // commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
+                  }, 1000);
+                  sentMediaGroups[chatId] = true;
                 }
 
                 if (!reply || !reply.photo || !reply.photo[0]) {
