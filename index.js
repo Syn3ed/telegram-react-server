@@ -1294,7 +1294,7 @@ const startBot = async () => {
           console.log(idMed);
         }
         if (msg?.web_app_data?.data && regex2.test(msg.web_app_data.data)) {
-          const match = msg.web_app_data.data.match(regex);
+          const match = msg.web_app_data.data.match(regex2);
           const userRequestId = match[1];
           const userId = msg.from.id;
           const chatId = msg.from.id;
@@ -1384,7 +1384,7 @@ const startBot = async () => {
           }
         }
         if (msg?.web_app_data?.data && regex1.test(msg.web_app_data.data)) {
-          const match = msg.web_app_data.data.match(regex);
+          const match = msg.web_app_data.data.match(regex1);
           const userRequestId = match[1];
           const userId = msg.from.id;
           const chatId = msg.from.id;
@@ -1475,7 +1475,7 @@ const startBot = async () => {
 
         }
         if (msg?.web_app_data?.data && regex3.test(msg.web_app_data.data)) {
-          const match = msg.web_app_data.data.match(regex);
+          const match = msg.web_app_data.data.match(regex3);
           const userRequestId = match[1];
           const userId = msg.from.id;
           const username = msg.from.first_name
@@ -1543,7 +1543,7 @@ const startBot = async () => {
           }
         }
         if (msg?.web_app_data?.data && regex4.test(msg.web_app_data.data)) {
-          const match = msg.web_app_data.data.match(regex);
+          const match = msg.web_app_data.data.match(regex4);
           const userId = msg.from.id;
           const requestId = match[1];
 
@@ -1629,7 +1629,7 @@ const startBot = async () => {
           }
         }
         if (msg?.web_app_data?.data && regex5.test(msg.web_app_data.data)) {
-          const match = msg.web_app_data.data.match(regex);
+          const match = msg.web_app_data.data.match(regex5);
           const userId = msg.from.id;
           const requestId = match[1];
 
