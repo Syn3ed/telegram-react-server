@@ -1402,7 +1402,7 @@ const startBot = async () => {
                   setTimeout(() => {
                     const op = 'User'
                     const useName = 'Оператор'
-                    sendMediaGroup(chatId, userName, userRequestId, timeMess,);
+                    sendMediaGroup(chatId, userName, userRequestId, timeMess,op);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
