@@ -1340,6 +1340,7 @@ const startBot = async () => {
           const chatId = msg.from.id;
           const userName = msg.from.first_name
           try {
+
             await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
 
             waitingUsers[userId] = true;
@@ -1402,7 +1403,7 @@ const startBot = async () => {
                   setTimeout(() => {
                     const op = 'User'
                     const useName = 'Оператор'
-                    sendMediaGroup(chatId, userName, userRequestId, timeMess,op);
+                    sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -1710,7 +1711,7 @@ const startBot = async () => {
           console.log(msg?.web_app_data?.data)
           console.log('data.address')
           console.log(data.address)
-          if (data.address) {
+          if (data.isSwitchOn) {
             const userId = msg.from.id;
             console.log('asd3')
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
@@ -1765,7 +1766,7 @@ const startBot = async () => {
                     bot.sendMessage(chatId, 'Заявка успешно создана!');
                     const message = `Создана новая заявка под номером ${createdRequestId}`
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-                    // commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
+                    commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId); 
                   }, 1000);
                   sentMediaGroups[chatId] = true;
                 }
@@ -1778,6 +1779,15 @@ const startBot = async () => {
               }
             };
             bot.on('message', textHandler);
+          }
+          else {
+            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            const createdRequestId = createdRequest.dataValues.id;
+            const userRequestId = createdRequestId;
+            bot.sendMessage(chatId, 'Заявка успешно создана!');
+            const message = `Создана новая заявка под номером ${createdRequestId}`
+            bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+            commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
           }
         }
         catch (e) {
