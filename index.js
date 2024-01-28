@@ -975,6 +975,7 @@ const startBot = async () => {
   bot.onText(/\/resToOperatorPhoto (\d+)/, async (msg, match) => {
     const userRequestId = match[1];
     const userId = msg.from.id;
+    const chatId = msg.from.id;
     const userName = msg.from.first_name
     try {
       await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
@@ -982,17 +983,18 @@ const startBot = async () => {
       waitingUsers[userId] = true;
       const textHandler = async (response) => {
         if (userId === response.from.id && waitingUsers[userId]) {
-          waitingUsers[userId] = false;
-          bot.off('photo', textHandler);
+          // waitingUsers[userId] = false;
+          // bot.off('photo', textHandler);
           const reply = response;
 
-          if (!reply || !reply.photo || !reply.photo[0]) {
-            throw new Error('Не удалось получить фотографию.');
-          }
+          // if (!reply || !reply.photo || !reply.photo[0]) {
+          //   throw new Error('Не удалось получить фотографию.');
+          // }
 
-          const photo = reply.photo[0];
-          const fileId = photo.file_id;
-          const mediaRecord = await createMediaRecord(userRequestId, fileId);
+          // const photo = reply.photo[0];
+          // const fileId = reply.photo[0].file_id;
+          // const mediaRecord = await createMediaRecord(userRequestId, fileId);
+
           const timeData = new Date();
           const year = timeData.getFullYear();
           const month = timeData.getMonth() + 1;
@@ -1004,19 +1006,57 @@ const startBot = async () => {
           const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
           const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+          if (reply.photo) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
+            userPhotos[chatId].push({
+              type: 'photo',
+              media: reply.photo[0].file_id,
+              mediaGroupId: reply.media_group_id
+            });
+            console.log('Получена фотография:');
+            console.log(userPhotos[chatId]);
+          } else if (reply.document) {
+            userPhotos[chatId].push({
+              type: 'document',
+              media: reply.document.file_id,
+              mediaGroupId: reply.media_group_id
+            });
+          } else if (reply.video) {
+            userPhotos[chatId].push({
+              type: 'video',
+              media: reply.video.file_id,
+              mediaGroupId: reply.media_group_id
+            });
+          }
+          // await MessageChat.create({
+          //   IdMedia: mediaRecord.id,
+          //   roleUser: 'Operator',
+          //   username: 'Оператор',
+          //   UserRequestId: userRequestId,
+          //   TimeMessages: timeMess,
+          // })
+          if (!sentMediaGroups[chatId]) {
 
-          const mediaChat = await MessageChat.create({
-            IdMedia: mediaRecord.id,
-            roleUser: 'User',
-            username: userName,
-            UserRequestId: userRequestId,
-            TimeMessages: timeMess,
-          })
+            setTimeout(() => {
+              const op = 'User'
+              const useName = 'Оператор'
+              sendMediaGroup(chatId, userName, userRequestId, timeMess,);
+              waitingUsers[userId] = false;
+              bot.off('message', textHandler);
+              bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+            }, 1000);
+            sentMediaGroups[chatId] = true;
+          }
 
-          await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+          if (!reply || !reply.photo || !reply.photo[0]) {
+            throw new Error('Не удалось получить фотографию.');
+          }
+
+
+          // await bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
         }
       };
-      bot.on('photo', textHandler);
+      bot.on('message', textHandler);
     } catch (error) {
       console.error('Ошибка при обработке команды /resToOperatorPhoto:', error);
     }
