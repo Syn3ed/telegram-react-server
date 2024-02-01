@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { Op } = require('sequelize');
 const multer = require('multer');
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
