@@ -507,12 +507,19 @@ app.get('/chat/:id', async (req, res) => {
 
 app.get('/req', async (req, res) => {
   try {
-    const stat = 'ожидает ответа оператора'
+    const stat = 'ожидает ответа оператора';
+    const stat1 = 'Заявка в обработке!';
     const usersReq = await UserRequest.findAll({
-      where: { status: stat },
+      where: {
+        [Op.or]: [
+          { status: stat },
+          { status: stat1 }
+        ]
+      },
       include: User,
       order: [['id', 'ASC']],
     });
+    
     const formattedUserRequests = usersReq.map(userRequest => ({
       id: userRequest.id,
       status: userRequest.status,
@@ -1766,7 +1773,7 @@ const startBot = async () => {
                     bot.sendMessage(chatId, 'Заявка успешно создана!');
                     const message = `Создана новая заявка под номером ${createdRequestId}`
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-                    commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId); 
+                    commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId);
                   }, 1000);
                   sentMediaGroups[chatId] = true;
                 }
