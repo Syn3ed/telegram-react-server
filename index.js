@@ -1608,7 +1608,7 @@ const startBot = async () => {
             await bot.sendMessage(userId, 'Введите сообщение:');
 
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
+              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0]?.type === 'bot_command')) {
                 waitingUsers[userId] = false;
                 bot.off('text', textHandler);
                 const reply = response.text;
