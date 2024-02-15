@@ -1541,7 +1541,7 @@ const startBot = async () => {
             await bot.sendMessage(userId, 'Введите сообщение:');
 
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
+              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
                 waitingUsers[userId] = false;
                 bot.off('text', textHandler);
                 const reply = response.text;
@@ -1728,7 +1728,7 @@ const startBot = async () => {
             const userRequestId = createdRequestId;
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
+              if (userId === response.from.id && waitingUsers[userId]&& !(response?.entities[0].type === 'bot_command')) {
                 const reply = response;
 
                 const timeData = new Date();
@@ -1771,8 +1771,9 @@ const startBot = async () => {
                     sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
-                    bot.sendMessage(chatId, 'Заявка успешно создана!');
-                    const message = `Создана новая заявка под номером ${createdRequestId}`
+                    bot.sendMessage(chatId, 'Заявка успешно создана');
+                    // const message = `Создана новая заявка под номером ${createdRequestId}`
+                    const message = `Ссылка на заявку`
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
                     commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId);
                   }, 1000);
@@ -1792,8 +1793,9 @@ const startBot = async () => {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
-            bot.sendMessage(chatId, 'Заявка успешно создана!');
-            const message = `Создана новая заявка под номером ${createdRequestId}`
+            bot.sendMessage(chatId, 'Заявка успешно создана');
+            // const message = `Создана новая заявка под номером ${createdRequestId}`
+            const message = `Ссылка на заявку`
             bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
             commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
           }
