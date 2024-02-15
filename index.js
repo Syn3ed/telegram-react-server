@@ -1608,7 +1608,7 @@ const startBot = async () => {
             await bot.sendMessage(userId, 'Введите сообщение:');
 
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
+              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
                 waitingUsers[userId] = false;
                 bot.off('text', textHandler);
                 const reply = response.text;
@@ -1713,12 +1713,12 @@ const startBot = async () => {
         const userName = msg.from.first_name;
         try {
           const data = JSON.parse(msg?.web_app_data?.data);
-          console.log('asd1')
-          console.log(data)
-          console.log('asd2')
-          console.log(msg?.web_app_data?.data)
-          console.log('data.address')
-          console.log(data.address)
+          // console.log('asd1')
+          // console.log(data)
+          // console.log('asd2')
+          // console.log(msg?.web_app_data?.data)
+          // console.log('data.address')
+          // console.log(data.address)
           if (data.isSwitchOn) {
             const userId = msg.from.id;
             console.log('asd3')
