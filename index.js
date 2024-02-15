@@ -1353,7 +1353,7 @@ const startBot = async () => {
 
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
+              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
                 // waitingUsers[userId] = false;
                 // bot.off('photo', textHandler);
                 const reply = response;
@@ -1443,7 +1443,7 @@ const startBot = async () => {
 
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
+              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
                 // waitingUsers[userId] = false;
                 // bot.off('photo', textHandler);
                 const reply = response;
