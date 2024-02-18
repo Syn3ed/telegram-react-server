@@ -508,15 +508,15 @@ app.get('/chat/:id', async (req, res) => {
 
 app.get('/req', async (req, res) => {
   try {
-    const stat = 'ожидает ответа оператора';
-    const stat1 = 'Заявка в обработке!';
+    // const stat = 'ожидает ответа оператора';
+    // const stat1 = 'Заявка в обработке!';
     const usersReq = await UserRequest.findAll({
-      where: {
-        [Op.or]: [
-          { status: stat },
-          { status: stat1 }
-        ]
-      },
+      // where: {
+      //   [Op.or]: [
+      //     { status: stat },
+      //     { status: stat1 }
+      //   ]
+      // },
       include: User,
       order: [['id', 'ASC']],
     });
@@ -1615,9 +1615,9 @@ const startBot = async () => {
 
                 const timeData = new Date();
                 const year = timeData.getFullYear();
-                const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+                const month = timeData.getMonth() + 1; 
                 const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
+                timeData.setHours(timeData.getHours() + 4); 
                 const hours = timeData.getHours();
                 const minutes = timeData.getMinutes();
                 const formattedHours = hours < 10 ? '0' + hours : hours;
