@@ -847,22 +847,22 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
 }
 
 const startBot = async () => {
-  const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = require('./src/BaseData/bdModel');
-  (async () => {
-    try {
-      await User.sync({ force: true });
-      await UserRequest.sync({ force: true });
-      await Message.sync({ force: true });
-      await Role.sync({ force: true });
-      await Media.sync({ force: true });
-      await MessageChat.sync({ force: true });
-      await OperatorReq.sync({ force: true });
+  // const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = require('./src/BaseData/bdModel');
+  // (async () => {
+  //   try {
+  //     await User.sync({ force: true });
+  //     await UserRequest.sync({ force: true });
+  //     await Message.sync({ force: true });
+  //     await Role.sync({ force: true });
+  //     await Media.sync({ force: true });
+  //     await MessageChat.sync({ force: true });
+  //     await OperatorReq.sync({ force: true });
 
-      console.log('Все таблицы успешно пересозданы.');
-    } catch (error) {
-      console.error('Ошибка при пересоздании таблиц:', error);
-    }
-  })();
+  //     console.log('Все таблицы успешно пересозданы.');
+  //   } catch (error) {
+  //     console.error('Ошибка при пересоздании таблиц:', error);
+  //   }
+  // })();
   await connectToDatabase();
   await createRoles();
   // Media.sync({ force: true })
