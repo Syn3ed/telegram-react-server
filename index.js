@@ -520,7 +520,7 @@ app.get('/req', async (req, res) => {
       include: User,
       order: [['id', 'ASC']],
     });
-    
+
     const formattedUserRequests = usersReq.map(userRequest => ({
       id: userRequest.id,
       status: userRequest.status,
@@ -847,7 +847,22 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
 }
 
 const startBot = async () => {
+  const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = require('./src/BaseData/bdModel');
+  (async () => {
+    try {
+      await User.sync({ force: true });
+      await UserRequest.sync({ force: true });
+      await Message.sync({ force: true });
+      await Role.sync({ force: true });
+      await Media.sync({ force: true });
+      await MessageChat.sync({ force: true });
+      await OperatorReq.sync({ force: true });
 
+      console.log('Все таблицы успешно пересозданы.');
+    } catch (error) {
+      console.error('Ошибка при пересоздании таблиц:', error);
+    }
+  })();
   await connectToDatabase();
   await createRoles();
   // Media.sync({ force: true })
@@ -1615,9 +1630,9 @@ const startBot = async () => {
 
                 const timeData = new Date();
                 const year = timeData.getFullYear();
-                const month = timeData.getMonth() + 1; 
+                const month = timeData.getMonth() + 1;
                 const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 4); 
+                timeData.setHours(timeData.getHours() + 4);
                 const hours = timeData.getHours();
                 const minutes = timeData.getMinutes();
                 const formattedHours = hours < 10 ? '0' + hours : hours;
@@ -1728,7 +1743,7 @@ const startBot = async () => {
             const userRequestId = createdRequestId;
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]&& !(response?.entities[0].type === 'bot_command')) {
+              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
                 const reply = response;
 
                 const timeData = new Date();

@@ -3,16 +3,16 @@ const sequelize = require('./bdConnect');
 
 const User = sequelize.define('User', {
     telegramId: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         unique: true,
     },
     username: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     address: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
 }, {
@@ -21,20 +21,20 @@ const User = sequelize.define('User', {
 
 const UserRequest = sequelize.define('UserRequest', {
     status: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         defaultValue: 'ожидает ответа оператора',
     },
     messageReq: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true
     },
     category: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true
     },
     address: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
 }, {
@@ -77,27 +77,27 @@ const Media = sequelize.define('Media', {
 
 const MessageChat = sequelize.define('MessageChat', {
     textMessage: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     idUser: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     roleUser: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     username: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
-    IdMedia:{
-        type: DataTypes.STRING,
+    IdMedia: {
+        type: DataTypes.TEXT,
         allowNull: true,
     },
-    TimeMessages:{
-        type: DataTypes.STRING,
+    TimeMessages: {
+        type: DataTypes.TEXT,
         allowNull: true,
     }
 }, {
@@ -106,11 +106,11 @@ const MessageChat = sequelize.define('MessageChat', {
 
 const OperatorReq = sequelize.define('OperatorReq', {
     IdUserRequest: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     IdUser: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
     },
 }, {
@@ -141,4 +141,4 @@ Media.belongsTo(UserRequest);
 UserRequest.hasMany(OperatorReq);
 OperatorReq.belongsTo(UserRequest);
 
-module.exports = { User, UserRequest, Message, Role, Media, MessageChat,OperatorReq};
+module.exports = { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq };
