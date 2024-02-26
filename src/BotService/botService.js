@@ -147,7 +147,7 @@ class commandAndAnswer {
                 this.bot.sendMessage(userId, message, {
                     reply_markup: {
                         inline_keyboard: [
-                            [{ text: `${message}`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
+                            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
                         ]
                     }
                 })

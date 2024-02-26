@@ -1787,8 +1787,8 @@ const startBot = async () => {
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(chatId, 'Заявка успешно создана');
-                    // const message = `Создана новая заявка под номером ${createdRequestId}`
-                    const message = `Ссылка на заявку`
+                    const message = `Создана новая заявка под номером ${createdRequestId}`
+                    // const message = `Ссылка на заявку`
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
                     commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId);
                   }, 1000);
@@ -1809,8 +1809,8 @@ const startBot = async () => {
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
             bot.sendMessage(chatId, 'Заявка успешно создана');
-            // const message = `Создана новая заявка под номером ${createdRequestId}`
-            const message = `Ссылка на заявку`
+            const message = `Создана новая заявка под номером ${createdRequestId}`
+            // const message = `Ссылка на заявку`
             bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
             commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
           }
