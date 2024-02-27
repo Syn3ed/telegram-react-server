@@ -184,7 +184,6 @@ class DatabaseService {
       if (userRequest) {
         userRequest.status = newStatus;
         await userRequest.save();
-        console.log(`Статус заявки с ID ${userRequestId} успешно изменен.`);
       }
     } catch (e) {
       console.log(`Ошибка: ${e}`);

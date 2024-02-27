@@ -224,6 +224,21 @@ app.post('/closeReq', async (req, res) => {
   }
 })
 
+app.post(`/resumeReq`, async (req, res) => {
+  try{
+    const {userRequestId} = req.body;
+    const requestId = userRequestId;
+    const status = 'ожидает ответа оператора';
+    await dbManager.changeStatusRes(requestId, status);
+    const message = `Возобновлена заявка под номером ${requestId}`
+    await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+  }catch(e){
+    console.error('Ошибка при ответе на заявку:', e);
+    console.log(e);
+  }
+  
+})
+
 app.post(`/replyToUser`, async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const requestId = userRequestId;
@@ -1338,6 +1353,7 @@ const startBot = async () => {
         const regex3 = /\/resToOperator (\d+)/;
         const regex4 = /\/resToUser (\d+)/;
         const regex5 = /\/closeReq (\d+)/;
+        const regex6 = /\/resumeReq (\d+)/;
         if (msg?.web_app_data?.data && regex.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex);
           const idMed = match[1];
@@ -1724,6 +1740,15 @@ const startBot = async () => {
           } catch (e) {
             console.log(e)
           }
+        }
+        if (msg?.web_app_data?.data && regex6.test(msg.web_app_data.data)) {
+          const match = msg.web_app_data.data.match(regex6);
+          const userId = msg.from.id;
+          const requestId = match[1];
+          const status = 'ожидает ответа оператора';
+          await dbManager.changeStatusRes(requestId, status);
+          const message = `Возобновлена заявка под номером ${requestId}`;
+          await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
         }
         const userName = msg.from.first_name;
         try {
