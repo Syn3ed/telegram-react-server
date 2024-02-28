@@ -252,7 +252,7 @@ app.post(`/resumeReq`, async (req, res) => {
     });
     console.log(messages)
     console.log(messages[0].UserRequest.User.telegramId)
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам возобновили заявку №${requestId}`, {
+    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам возобновили заявку №${requestId}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
