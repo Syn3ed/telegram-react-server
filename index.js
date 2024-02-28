@@ -1539,6 +1539,9 @@ const startBot = async () => {
             const userId = msg.from.id;
             console.log('asd3')
             // const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            const createdRequest = dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            const createdRequestId = createdRequest.dataValues.id;
+            const userRequestId = createdRequestId;
             await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
@@ -1587,9 +1590,6 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
 
                   setTimeout(() => {
-                    const createdRequest = dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
-                    const createdRequestId = createdRequest.dataValues.id;
-                    const userRequestId = createdRequestId;
                     const op = 'User'
                     sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
                     waitingUsers[userId] = false;
