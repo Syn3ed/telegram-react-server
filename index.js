@@ -196,7 +196,7 @@ app.post('/closeReq', async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const userWebId = operatorId;
   try {
-    const status = 'Заявка в обработке!';
+    const status = 'Заявка закрыта!';
     await dbManager.changeStatusRes(userRequestId, status);
     const messages = await Message.findAll({
       where: { id: userRequestId },
@@ -213,11 +213,11 @@ app.post('/closeReq', async (req, res) => {
       ]
     });
     if (userWebId === messages[0].UserRequest.User.telegramId) {
-      bot.sendMessage(userWebId, 'Вы закрыли заявку!');
-      await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${userRequestId}!`);
+      await bot.sendMessage(userWebId, `Вы закрыли заявку №${userRequestId}`);
+      await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${userRequestId}`);
     } else {
-      bot.sendMessage(userId, 'Вы закрыли заявку!');
-      bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${userRequestId}!`)
+      await bot.sendMessage(userId, `Вы закрыли заявку под номером ${userRequestId}`);
+      await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${userRequestId}`)
     }
   } catch (e) {
     console.log(e)
@@ -247,7 +247,7 @@ app.post(`/resumeReq`, async (req, res) => {
       ]
     });
 
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
+    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам возобновили заявку №${userRequestId}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -933,11 +933,11 @@ const startBot = async () => {
         ]
       });
       if (userId === messages[0].UserRequest.User.telegramId) {
-        bot.sendMessage(userId, `Вы закрыли заявку №${requestId} !`);
-        await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId} !`);
+        bot.sendMessage(userId, `Вы закрыли заявку №${requestId}`);
+        await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId}`);
       } else {
         bot.sendMessage(userId, `Вы закрыли заявку №${requestId} !`);
-        bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId} !`)
+        bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`)
       }
     } catch (e) {
       console.log(e)
@@ -1753,11 +1753,11 @@ const startBot = async () => {
               ]
             });
             if (userId === messages[0].UserRequest.User.telegramId) {
-              bot.sendMessage(userId, `Вы закрыли заявку №${requestId} !`);
-              await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId} !`);
+              bot.sendMessage(userId, `Вы закрыли заявку №${requestId}`);
+              await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId}`);
             } else {
               bot.sendMessage(userId, `Вы закрыли заявку №${requestId} !`);
-              bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId} !`)
+              bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`)
             }
           } catch (e) {
             console.log(e)
