@@ -1542,7 +1542,7 @@ const startBot = async () => {
             await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
+              if (userId === response.from.id && waitingUsers[userId]) {
                 const reply = response;
 
                 if (reply?.text === 'Стоп' || reply?.text === 'стоп') {
