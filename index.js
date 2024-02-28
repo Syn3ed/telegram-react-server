@@ -1550,9 +1550,7 @@ const startBot = async () => {
                   waitingUsers[userId] = false;
                   return;
                 }
-                const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
-                const createdRequestId = createdRequest.dataValues.id;
-                const userRequestId = createdRequestId;
+
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
@@ -1589,6 +1587,9 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
 
                   setTimeout(() => {
+                    const createdRequest = dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+                    const createdRequestId = createdRequest.dataValues.id;
+                    const userRequestId = createdRequestId;
                     const op = 'User'
                     sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
                     waitingUsers[userId] = false;
