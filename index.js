@@ -250,7 +250,8 @@ app.post(`/resumeReq`, async (req, res) => {
         }
       ]
     });
-
+    console.log(messages)
+    console.log(messages[0].UserRequest.User.telegramId)
     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам возобновили заявку №${requestId}`, {
       reply_markup: {
         inline_keyboard: [
@@ -259,7 +260,6 @@ app.post(`/resumeReq`, async (req, res) => {
       }
     });
   } catch (e) {
-    console.error('Ошибка при ответе на заявку:', e);
     console.log(e);
   }
 
