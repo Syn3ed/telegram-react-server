@@ -240,14 +240,14 @@ app.post(`/resumeReq`, async (req, res) => {
           include: [
             {
               model: User,
-              attributes: ['username', 'address', 'telegramId']
+              attributes: ['telegramId']
             }
           ]
         }
       ]
     });
 
-    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам возобновили заявку №${userRequestId}`, {
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам возобновили заявку №${userRequestId}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -331,7 +331,7 @@ app.post(`/replyToUser`, async (req, res) => {
     });
 
 
-    bot.sendMessage(messages[0].UserRequest.User.telegramId,`Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
