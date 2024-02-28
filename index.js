@@ -1356,30 +1356,34 @@ const startBot = async () => {
                   waitingUsers[userId] = false;
                   return;
                 }
-                if (!(reply?.entities[0].type === 'bot_command')){
-                  const timeData = new Date();
-                  const year = timeData.getFullYear();
-                  const month = timeData.getMonth() + 1;
-                  const day = timeData.getDate();
-                  timeData.setHours(timeData.getHours() + 4);
-                  const hours = timeData.getHours();
-                  const minutes = timeData.getMinutes();
-                  const formattedHours = hours < 10 ? '0' + hours : hours;
-                  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                  const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
-
-                  await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
-
-                  await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка regex3*', {
-                    reply_markup: {
-                      inline_keyboard: [
-                        [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-                      ]
-                    }
-                  });
-                  bot.sendMessage(userId, 'Ответ успешно добавлен.');
-                }
+                if (reply.entities && reply.entities.length > 0 && reply.entities[0]) {
+                  if (!(reply.entities)) {
+                    const timeData = new Date();
+                    const year = timeData.getFullYear();
+                    const month = timeData.getMonth() + 1;
+                    const day = timeData.getDate();
+                    timeData.setHours(timeData.getHours() + 4);
+                    const hours = timeData.getHours();
+                    const minutes = timeData.getMinutes();
+                    const formattedHours = hours < 10 ? '0' + hours : hours;
+                    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+  
+                    const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+  
+                    await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
+  
+                    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка regex3*', {
+                      reply_markup: {
+                        inline_keyboard: [
+                          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+                        ]
+                      }
+                    });
+                    bot.sendMessage(userId, 'Ответ успешно добавлен.');
+                  }
+              }
+                
               }
             };
 
