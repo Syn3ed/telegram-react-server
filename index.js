@@ -1539,7 +1539,8 @@ const startBot = async () => {
             const userId = msg.from.id;
             console.log('asd3')
             // const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
-            const createdRequest = dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            console.log(createdRequest)
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
             await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
