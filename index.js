@@ -311,6 +311,9 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
     const timeData = new Date();
+    const year = timeData.getFullYear();
+    const month = timeData.getMonth() + 1; 
+    const day = timeData.getDate();
     timeData.setHours(timeData.getHours() + 7);
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
