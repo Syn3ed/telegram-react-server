@@ -146,6 +146,7 @@ app.post(`/replyToOperator`, async (req, res) => {
       bot.on('text', textHandler);
     });
     if (reply.text === 'Стоп' || reply.text === 'стоп') {
+      await bot.sendMessage(userWebId, 'Хорошо');
       return;
     }
 
@@ -294,6 +295,7 @@ app.post(`/replyToUser`, async (req, res) => {
       bot.on('text', textHandler);
     });
     if (reply.text === 'Стоп' || reply.text === 'стоп') {
+      await bot.sendMessage(userWebId, 'Хорошо');
       return;
     }
     await dbManager.replyToUser(userRequestId, reply.text, operatorId);
