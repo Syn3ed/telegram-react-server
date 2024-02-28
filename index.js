@@ -1356,7 +1356,7 @@ const startBot = async () => {
                   waitingUsers[userId] = false;
                   return;
                 }
-                if (!(test?.entities[0].type === 'bot_command')){
+                if (!(reply?.entities[0].type === 'bot_command')){
                   const timeData = new Date();
                   const year = timeData.getFullYear();
                   const month = timeData.getMonth() + 1;
