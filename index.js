@@ -172,13 +172,13 @@ app.post(`/replyToOperator`, async (req, res) => {
     const year = timeData.getFullYear();
     const month = timeData.getMonth() + 1; 
     const day = timeData.getDate();
-    timeData.setHours(timeData.getHours() + 4);
+    timeData.setHours(timeData.getHours() + 7);
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-    const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+    const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
 
     await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
@@ -311,13 +311,13 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
     const timeData = new Date();
-    timeData.setHours(timeData.getHours() + 4);
+    timeData.setHours(timeData.getHours() + 7);
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-    const timeMess = `${formattedHours}:${formattedMinutes}`;
+    const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
 
     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
 
@@ -433,13 +433,13 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         const year = timeData.getFullYear();
         const month = timeData.getMonth() + 1;
         const day = timeData.getDate();
-        timeData.setHours(timeData.getHours() + 4);
+        timeData.setHours(timeData.getHours() + 7);
         const hours = timeData.getHours();
         const minutes = timeData.getMinutes();
         const formattedHours = hours < 10 ? '0' + hours : hours;
         const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-        const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+        const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
         if (reply.photo) {
           userPhotos[chatId] = userPhotos[chatId] || [];
           userPhotos[chatId].push({
@@ -505,12 +505,12 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         const year = timeData.getFullYear();
         const month = timeData.getMonth() + 1;
         const day = timeData.getDate();
-        timeData.setHours(timeData.getHours() + 4);
+        timeData.setHours(timeData.getHours() + 7);
         const hours = timeData.getHours();
         const minutes = timeData.getMinutes();
         const formattedHours = hours < 10 ? '0' + hours : hours;
         const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-        const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+        const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
         if (reply.photo) {
           userPhotos[chatId] = userPhotos[chatId] || [];
           userPhotos[chatId].push({
@@ -1158,13 +1158,13 @@ const startBot = async () => {
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
                 const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 4);
+                timeData.setHours(timeData.getHours() + 7);
                 const hours = timeData.getHours();
                 const minutes = timeData.getMinutes();
                 const formattedHours = hours < 10 ? '0' + hours : hours;
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
                   userPhotos[chatId].push({
@@ -1252,13 +1252,13 @@ const startBot = async () => {
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
                 const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 4);
+                timeData.setHours(timeData.getHours() + 7);
                 const hours = timeData.getHours();
                 const minutes = timeData.getMinutes();
                 const formattedHours = hours < 10 ? '0' + hours : hours;
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
                   userPhotos[chatId].push({
@@ -1363,13 +1363,13 @@ const startBot = async () => {
                   const year = timeData.getFullYear();
                   const month = timeData.getMonth() + 1;
                   const day = timeData.getDate();
-                  timeData.setHours(timeData.getHours() + 4);
+                  timeData.setHours(timeData.getHours() + 7);
                   const hours = timeData.getHours();
                   const minutes = timeData.getMinutes();
                   const formattedHours = hours < 10 ? '0' + hours : hours;
                   const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                  const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+                  const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
 
                   await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
 
@@ -1421,13 +1421,13 @@ const startBot = async () => {
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
                 const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 4);
+                timeData.setHours(timeData.getHours() + 7);
                 const hours = timeData.getHours();
                 const minutes = timeData.getMinutes();
                 const formattedHours = hours < 10 ? '0' + hours : hours;
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
+                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
 
                 await dbManager.createUserRequestMessage(requestId, reply, userId, 'Operator', 'Оператор', timeMess);
                 await OperatorReq.create({
@@ -1548,13 +1548,13 @@ const startBot = async () => {
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
                 const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 4);
+                timeData.setHours(timeData.getHours() + 7);
                 const hours = timeData.getHours();
                 const minutes = timeData.getMinutes();
                 const formattedHours = hours < 10 ? '0' + hours : hours;
                 const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`;
+                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
                   userPhotos[chatId].push({
