@@ -170,7 +170,7 @@ app.post(`/replyToOperator`, async (req, res) => {
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
     const timeData = new Date();
     const year = timeData.getFullYear();
-    const month = timeData.getMonth() + 1; 
+    const month = timeData.getMonth() + 1;
     const day = timeData.getDate();
     timeData.setHours(timeData.getHours() + 7);
     const hours = timeData.getHours();
@@ -312,7 +312,7 @@ app.post(`/replyToUser`, async (req, res) => {
     }
     const timeData = new Date();
     const year = timeData.getFullYear();
-    const month = timeData.getMonth() + 1; 
+    const month = timeData.getMonth() + 1;
     const day = timeData.getDate();
     timeData.setHours(timeData.getHours() + 7);
     const hours = timeData.getHours();
@@ -1359,8 +1359,8 @@ const startBot = async () => {
                   return;
                 }
 
-                
-                if (!(reply.entities)){
+
+                if (!(reply.entities)) {
                   waitingUsers[userId] = false;
                   const timeData = new Date();
                   const year = timeData.getFullYear();
@@ -1466,7 +1466,7 @@ const startBot = async () => {
                   ]
                 });
 
-                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${requestId} *проверка regex4*` , {
+                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${requestId} *проверка regex4*`, {
                   reply_markup: {
                     inline_keyboard: [
                       [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
@@ -1538,20 +1538,21 @@ const startBot = async () => {
           if (data.isSwitchOn) {
             const userId = msg.from.id;
             console.log('asd3')
-            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            // const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
-            const createdRequestId = createdRequest.dataValues.id;
-            const userRequestId = createdRequestId;
             waitingUsers[userId] = true;
             const textHandler = async (response) => {
               if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
                 const reply = response;
-                
+
                 if (reply?.text === 'Стоп' || reply?.text === 'стоп') {
                   await bot.sendMessage(userId, 'Хорошо');
                   waitingUsers[userId] = false;
                   return;
                 }
+                const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+                const createdRequestId = createdRequest.dataValues.id;
+                const userRequestId = createdRequestId;
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
