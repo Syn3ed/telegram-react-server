@@ -170,9 +170,9 @@ app.post(`/replyToOperator`, async (req, res) => {
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
     const timeData = new Date();
     const year = timeData.getFullYear();
-    const month = timeData.getMonth() + 1; // Месяцы в JavaScript начинаются с 0
+    const month = timeData.getMonth() + 1; 
     const day = timeData.getDate();
-    timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
+    timeData.setHours(timeData.getHours() + 4);
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
@@ -181,7 +181,7 @@ app.post(`/replyToOperator`, async (req, res) => {
     const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}.`
     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
 
-    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
+    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
@@ -339,7 +339,7 @@ app.post(`/replyToUser`, async (req, res) => {
     });
 
 
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId} *проверка postRegex3*`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -1371,7 +1371,7 @@ const startBot = async () => {
 
                   await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
 
-                  await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя', {
+                  await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка regex3*', {
                     reply_markup: {
                       inline_keyboard: [
                         [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
@@ -1461,7 +1461,7 @@ const startBot = async () => {
                   ]
                 });
 
-                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${requestId}`, {
+                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${requestId} *проверка regex4*` , {
                   reply_markup: {
                     inline_keyboard: [
                       [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
