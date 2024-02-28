@@ -216,6 +216,7 @@ app.post('/closeReq', async (req, res) => {
         }
       ]
     });
+    console.log(messages[0].UserRequest.User.telegramId)
     if (userWebId === messages[0].UserRequest.User.telegramId) {
       await bot.sendMessage(userWebId, `Вы закрыли заявку №${userRequestId}`);
       await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${userRequestId}`);
@@ -250,7 +251,7 @@ app.post(`/resumeReq`, async (req, res) => {
         }
       ]
     });
-    console.log(messages)
+    console.log(messages) 
     console.log(messages[0].UserRequest.User.telegramId)
     const masId = messages[0].UserRequest.User.telegramId;
     await bot.sendMessage(masId, `Вам возобновили заявку №${requestId}`, {
