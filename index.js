@@ -145,6 +145,9 @@ app.post(`/replyToOperator`, async (req, res) => {
 
       bot.on('text', textHandler);
     });
+    if (reply.text === 'Стоп' || 'стоп') {
+      return;
+    }
 
     const messages = await Message.findAll({
       where: { id: userRequestId },
@@ -290,6 +293,9 @@ app.post(`/replyToUser`, async (req, res) => {
 
       bot.on('text', textHandler);
     });
+    if (reply.text === 'Стоп' || 'стоп') {
+      return;
+    }
     await dbManager.replyToUser(userRequestId, reply.text, operatorId);
     await OperatorReq.create({
       IdRequest: userRequestId,
@@ -303,7 +309,7 @@ app.post(`/replyToUser`, async (req, res) => {
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
     }
     const timeData = new Date();
-    timeData.setHours(timeData.getHours() + 4); // добавляем 4 часа
+    timeData.setHours(timeData.getHours() + 4);
     const hours = timeData.getHours();
     const minutes = timeData.getMinutes();
     const formattedHours = hours < 10 ? '0' + hours : hours;
@@ -1418,7 +1424,10 @@ const startBot = async () => {
                 // const photo = reply.photo[0];
                 // const fileId = reply.photo[0].file_id;
                 // const mediaRecord = await createMediaRecord(userRequestId, fileId);
-
+                if (reply.text === 'Стоп' || 'стоп'){
+                  waitingUsers[userId] = false;
+                  return;
+                }
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
@@ -1508,7 +1517,10 @@ const startBot = async () => {
                 // const photo = reply.photo[0];
                 // const fileId = reply.photo[0].file_id;
                 // const mediaRecord = await createMediaRecord(userRequestId, fileId);
-
+                if (reply.text === 'Стоп' || 'стоп'){
+                  waitingUsers[userId] = false;
+                  return;
+                }
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
@@ -1554,7 +1566,7 @@ const startBot = async () => {
                   setTimeout(() => {
                     const op = 'Operator'
                     const useName = 'Оператор'
-                    sendMediaGroup(chatId, useName, userRequestId, timeMess,);
+                    sendMediaGroup(chatId, useName, userRequestId, timeMess);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -1612,6 +1624,10 @@ const startBot = async () => {
                     }
                   ]
                 });
+                if (reply === 'Стоп' || 'стоп'){
+                  waitingUsers[userId] = false;
+                  return;
+                }
 
                 const timeData = new Date();
                 const year = timeData.getFullYear();
@@ -1665,7 +1681,10 @@ const startBot = async () => {
                 waitingUsers[userId] = false;
                 bot.off('text', textHandler);
                 const reply = response.text;
-
+                if (reply === 'Стоп' || 'стоп'){
+                  waitingUsers[userId] = false;
+                  return;
+                }
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
