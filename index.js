@@ -1546,7 +1546,12 @@ const startBot = async () => {
             const textHandler = async (response) => {
               if (userId === response.from.id && waitingUsers[userId] && !(response?.entities[0].type === 'bot_command')) {
                 const reply = response;
-
+                
+                if (reply?.text === 'Стоп' || reply?.text === 'стоп') {
+                  await bot.sendMessage(userId, 'Хорошо');
+                  waitingUsers[userId] = false;
+                  return;
+                }
                 const timeData = new Date();
                 const year = timeData.getFullYear();
                 const month = timeData.getMonth() + 1;
@@ -1580,7 +1585,7 @@ const startBot = async () => {
                     mediaGroupId: reply.media_group_id
                   });
                 }
-                if (!sentMediaGroups[chatId]) {
+                if (!sentMediaGroups[chatId] && !reply?.text) {
 
                   setTimeout(() => {
                     const op = 'User'
