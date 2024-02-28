@@ -201,29 +201,10 @@ app.post('/closeReq', async (req, res) => {
   const userWebId = operatorId;
   try {
     const status = 'Заявка закрыта!';
+    const message = `Пользователь закрыл заявку №${userRequestId}`
+    await commandHandler.sendMessagesToUsersWithRoleId(message, userRequestId);
     await dbManager.changeStatusRes(userRequestId, status);
-    const messages = await Message.findAll({
-      where: { id: userRequestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
-            }
-          ]
-        }
-      ]
-    });
-    console.log(messages[0].UserRequest.User.telegramId)
-    if (userWebId === messages[0].UserRequest.User.telegramId) {
-      await bot.sendMessage(userWebId, `Вы закрыли заявку №${userRequestId}`);
-      await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${userRequestId}`);
-    } else {
-      await bot.sendMessage(userId, `Вы закрыли заявку под номером ${userRequestId}`);
-      await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${userRequestId}`)
-    }
+    await bot.sendMessage(userWebId, `Вы закрыли заявку №${userRequestId}`);
   } catch (e) {
     console.log(e)
   }
