@@ -1352,6 +1352,7 @@ const startBot = async () => {
                   ]
                 });
                 if (reply === 'Стоп' || reply === 'стоп') {
+                  await bot.sendMessage(userId, 'Хорошо');
                   waitingUsers[userId] = false;
                   return;
                 }
@@ -1409,6 +1410,7 @@ const startBot = async () => {
                 bot.off('text', textHandler);
                 const reply = response.text;
                 if (reply === 'Стоп' || reply === 'стоп') {
+                  await bot.sendMessage(userId, 'Хорошо');
                   waitingUsers[userId] = false;
                   return;
                 }
