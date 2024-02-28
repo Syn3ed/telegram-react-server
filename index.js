@@ -225,18 +225,40 @@ app.post('/closeReq', async (req, res) => {
 })
 
 app.post(`/resumeReq`, async (req, res) => {
-  try{
-    const {userRequestId} = req.body;
+  try {
+    const { userRequestId } = req.body;
     const requestId = userRequestId;
     const status = 'ожидает ответа оператора';
     await dbManager.changeStatusRes(requestId, status);
     const message = `Возобновлена заявка под номером ${requestId}`
     await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
-  }catch(e){
+    const messages = await Message.findAll({
+      where: { id: userRequestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
+
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+        ]
+      }
+    });
+  } catch (e) {
     console.error('Ошибка при ответе на заявку:', e);
     console.log(e);
   }
-  
+
 })
 
 app.post(`/replyToUser`, async (req, res) => {
@@ -309,7 +331,7 @@ app.post(`/replyToUser`, async (req, res) => {
     });
 
 
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
+    bot.sendMessage(messages[0].UserRequest.User.telegramId,`Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -989,7 +1011,7 @@ const startBot = async () => {
             ]
           });
 
-          bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
+          bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${requestId}`, {
             reply_markup: {
               inline_keyboard: [
                 [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
@@ -1690,7 +1712,7 @@ const startBot = async () => {
                   ]
                 });
 
-                bot.sendMessage(messages[0].UserRequest.User.telegramId, 'Вам пришел ответ на вашу заявку', {
+                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${requestId}`, {
                   reply_markup: {
                     inline_keyboard: [
                       [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
