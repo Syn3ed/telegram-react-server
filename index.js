@@ -1322,7 +1322,7 @@ const startBot = async () => {
 
                   await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
 
-                  await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка regex3*', {
+                  await bot.sendMessage(messages[0].operatorId, `Пришел ответ от пользователя на заявку #${userRequestId} *проверка regex3*`, {
                     reply_markup: {
                       inline_keyboard: [
                         [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
@@ -1412,7 +1412,7 @@ const startBot = async () => {
                   ]
                 });
 
-                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${requestId} *проверка regex4*`, {
+                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку #${requestId} *проверка regex4*`, {
                   reply_markup: {
                     inline_keyboard: [
                       [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
