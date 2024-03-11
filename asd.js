@@ -376,3 +376,27 @@
 //     }
 //   });
 
+ // const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = require('./src/BaseData/bdModel');
+  // (async () => {
+  //   try {
+  //     await User.sync({ force: true });
+  //     await UserRequest.sync({ force: true });
+  //     await Message.sync({ force: true });
+  //     await Role.sync({ force: true });
+  //     await Media.sync({ force: true });
+  //     await MessageChat.sync({ force: true });
+  //     await OperatorReq.sync({ force: true });
+
+  //     console.log('Все таблицы успешно пересозданы.');
+  //   } catch (error) {
+  //     console.error('Ошибка при пересоздании таблиц:', error);
+  //   }
+  // })();
+
+  // Media.sync({ force: true })
+  //   .then(() => {
+  //     console.log('Таблица успешно пересоздана.');
+  //   })
+  //   .catch((error) => {
+  //     console.error('Ошибка при пересоздании таблицы:', error);
+  //   });

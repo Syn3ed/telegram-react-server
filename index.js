@@ -24,12 +24,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const port = process.env.PORT || 3000;
 
-// Объект для хранения фотографий каждого пользователя
 const userPhotos = {};
 
-// Объект для отслеживания отправленных медиагрупп
 const sentMediaGroups = {};
-
 
 
 
@@ -232,7 +229,7 @@ app.post(`/resumeReq`, async (req, res) => {
         }
       ]
     });
-    console.log(messages) 
+    console.log(messages)
     console.log(messages[0].UserRequest.User.telegramId)
     const masId = messages[0].UserRequest.User.telegramId;
     await bot.sendMessage(masId, `Вам возобновили заявку №${requestId}`, {
@@ -957,18 +954,12 @@ const createRoles = async () => {
     console.error(error);
   }
 };
+
+
 async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
-
-    // Фильтруем массив фотографий по mediaGroupId
     const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
-
-
-    // await bot.sendMediaGroup(chatId, groupPhotos.map(photo => ({
-    //     type: 'photo',
-    //     media: photo.media
-    // })));
     const str = JSON.stringify(groupPhotos);
     const mediaRecord = await createMediaRecord(userRequestId, str);
     await MessageChat.create({
@@ -978,42 +969,14 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
       UserRequestId: userRequestId,
       TimeMessages: timeMess,
     })
-
-    // Очищаем массив после отправки
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
-
-    // Сбрасываем флаг отправки медиагруппы
     sentMediaGroups[chatId] = false;
   }
 }
 
 const startBot = async () => {
-  // const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = require('./src/BaseData/bdModel');
-  // (async () => {
-  //   try {
-  //     await User.sync({ force: true });
-  //     await UserRequest.sync({ force: true });
-  //     await Message.sync({ force: true });
-  //     await Role.sync({ force: true });
-  //     await Media.sync({ force: true });
-  //     await MessageChat.sync({ force: true });
-  //     await OperatorReq.sync({ force: true });
-
-  //     console.log('Все таблицы успешно пересозданы.');
-  //   } catch (error) {
-  //     console.error('Ошибка при пересоздании таблиц:', error);
-  //   }
-  // })();
   await connectToDatabase();
   await createRoles();
-  // Media.sync({ force: true })
-  //   .then(() => {
-  //     console.log('Таблица успешно пересоздана.');
-  //   })
-  //   .catch((error) => {
-  //     console.error('Ошибка при пересоздании таблицы:', error);
-  //   });
-
 
   bot.onText('Изменить роль пользователю на оператора', async (msg, match) => {
     try {
@@ -1512,12 +1475,6 @@ const startBot = async () => {
         const userName = msg.from.first_name;
         try {
           const data = JSON.parse(msg?.web_app_data?.data);
-          // console.log('asd1')
-          // console.log(data)
-          // console.log('asd2')
-          // console.log(msg?.web_app_data?.data)
-          // console.log('data.address')
-          // console.log(data.address)
           if (data.isSwitchOn) {
             const userId = msg.from.id;
             console.log('asd3')
@@ -1582,6 +1539,13 @@ const startBot = async () => {
                     const message = `Создана новая заявка под номером ${createdRequestId}`
                     // const message = `Ссылка на заявку`
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                    bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+                      reply_markup: {
+                        inline_keyboard: [
+                          [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                        ]
+                      }
+                    });
                     commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId);
                   }, 1000);
                   sentMediaGroups[chatId] = true;
@@ -1600,10 +1564,17 @@ const startBot = async () => {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
-            bot.sendMessage(chatId, 'Заявка успешно создана');
+            // bot.sendMessage(chatId, 'Заявка успешно создана');
             const message = `Создана новая заявка под номером ${createdRequestId}`
             // const message = `Ссылка на заявку`
             bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+            bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: 'Ваша заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                ]
+              }
+            });
             commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
           }
         }
@@ -1621,6 +1592,3 @@ const startBot = async () => {
 };
 
 startBot();
-console.log(`Сервер запущен на порту ${PORT}`);
-console.log(`Сервер запущен на порту ${PORT}`);
-console.log(`Сервер запущен на порту ${PORT}`);
