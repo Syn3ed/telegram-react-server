@@ -365,7 +365,7 @@ app.post('/handleShowPhoto', async (req, res) => {
   } catch (error) {
     console.log(error)
   }
-
+  
 });
 
 
@@ -1564,10 +1564,7 @@ const startBot = async () => {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
-            // bot.sendMessage(chatId, 'Заявка успешно создана');
             const message = `Создана новая заявка под номером ${createdRequestId}`
-            // const message = `Ссылка на заявку`
-            bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
             bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
               reply_markup: {
                 inline_keyboard: [
