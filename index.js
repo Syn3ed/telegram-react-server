@@ -59,7 +59,7 @@ app.post('/upload', upload.array('files', 5), async (req, res) => {
       });
     }
 
-    res.send('Файлы успешно отправлены в бота Telegram!');
+    res.send('Файлы успешно отправлены в бота Telegram');
   } catch (error) {
     console.error('Ошибка при отправке файлов в бота Telegram:', error);
     res.status(500).send('Произошла ошибка при отправке файлов в бота Telegram');
@@ -197,7 +197,7 @@ app.post('/closeReq', async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const userWebId = operatorId;
   try {
-    const status = 'Заявка закрыта!';
+    const status = 'Заявка закрыта';
     const message = `Пользователь закрыл заявку №${userRequestId}`
     await commandHandler.sendMessagesToUsersWithRoleId(message, userRequestId);
     await dbManager.changeStatusRes(userRequestId, status);
@@ -285,7 +285,7 @@ app.post(`/replyToUser`, async (req, res) => {
     });
     const userRequestStatus = await UserRequest.findByPk(requestId);
     if (userRequestStatus.status === 'ожидает ответа оператора') {
-      const status = 'Заявка в обработке!';
+      const status = 'Заявка в обработке';
       await dbManager.changeStatusRes(requestId, status);
       const message = `Заявка под номером ${requestId} в обработке`
       await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
@@ -935,7 +935,7 @@ const connectToDatabase = async () => {
     await sequelize.authenticate();
     await sequelize.sync();
     console.log('Подключение к БД успешно');
-    const userrole = dbManager.changeRoleUser(1, 3)
+    // const userrole = dbManager.changeRoleUser(1, 3)
     app.listen(PORT, () => {
       console.log(`Сервер запущен на порту ${PORT}`);
     });
@@ -1009,8 +1009,6 @@ const startBot = async () => {
 
   bot.on('callback_query', async (msg) => {
     await callbackHandler.handleMessage(msg);
-
-
   });
 
   bot.on('message', async (msg) => {
@@ -1436,7 +1434,7 @@ const startBot = async () => {
           const requestId = match[1];
 
           try {
-            const status = 'Заявка закрыта!';
+            const status = 'Заявка закрыта';
             await dbManager.changeStatusRes(requestId, status);
             const messages = await Message.findAll({
               where: { id: requestId },
@@ -1456,7 +1454,7 @@ const startBot = async () => {
               bot.sendMessage(userId, `Вы закрыли заявку №${requestId}`);
               await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId}`);
             } else {
-              bot.sendMessage(userId, `Вы закрыли заявку №${requestId} !`);
+              bot.sendMessage(userId, `Вы закрыли заявку №${requestId} `);
               bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`)
             }
           } catch (e) {
@@ -1537,7 +1535,6 @@ const startBot = async () => {
                     bot.off('message', textHandler);
                     bot.sendMessage(chatId, 'Заявка успешно создана');
                     const message = `Создана новая заявка под номером ${createdRequestId}`
-                    // const message = `Ссылка на заявку`
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
                     bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
                       reply_markup: {

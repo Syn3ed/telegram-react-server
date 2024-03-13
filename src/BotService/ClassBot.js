@@ -49,8 +49,12 @@ class BotFunc {
         }
     }
 
+    async startBot(){
+        
+    }
+
     async replyToUser(req) {
-        const { queryId, userRequestId, username, userId, operatorId } = req.body;
+        const { userRequestId,userId, operatorId } = req.body;
         const requestId = userRequestId;
         const userWebId = operatorId;
         try {
