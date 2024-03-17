@@ -971,14 +971,17 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
         }
       ]
     });
-    hndlMed(mediaRecord.id,messages[0].operatorId);
-    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-        ]
-      }
-    });
+    const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
+    if (tt) {
+      await bot.sendMessage(messages[0].operatorId, '*проверка sendMediaGroup Regex*', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+          ]
+        }
+      });
+    }
+
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
     return mediaRecord;
