@@ -314,25 +314,7 @@ app.post(`/replyToUser`, async (req, res) => {
 app.post('/handleShowPhoto', async (req, res) => {
   const { queryId, userRequestId, username, idMedia, operatorId } = req.body;
   try {
-    // const med = await Media.findByPk(idMedia);
-    // if (med) {
-    //   bot.sendPhoto(operatorId, med.idMedia);
-    // }
-    // const med = await Media.findByPk(idMedia);
-    // await bot.sendPhoto(msg.chat.id, med.idMedia);
-    console.log(idMedia)
-    const med = await Media.findByPk(idMedia);
-    console.log(med)
-    if (med) {
-      console.log('asdPHT')
-      console.log(med)
-      const pht = JSON.parse(med.idMedia);
-      await bot.sendMediaGroup(operatorId, pht.map(photo => ({
-        type: photo.type,
-        media: photo.media
-      })));
-    }
-
+    hndlMed(idMedia,operatorId)
     res.status(200).json({ success: true });
   } catch (error) {
     console.log(error)
@@ -340,7 +322,20 @@ app.post('/handleShowPhoto', async (req, res) => {
 
 });
 
-
+const hndlMed = async (idMedia, operatorId) => {
+  console.log(idMedia)
+  const med = await Media.findByPk(idMedia);
+  console.log(med)
+  if (med) {
+    console.log('asdPHT')
+    console.log(med)
+    const pht = JSON.parse(med.idMedia);
+    await bot.sendMediaGroup(operatorId, pht.map(photo => ({
+      type: photo.type,
+      media: photo.media
+    })));
+  }
+}
 
 
 const createMediaRecord = async (userRequestId, idMedia) => {
@@ -366,61 +361,7 @@ const createMediaRecord = async (userRequestId, idMedia) => {
   }
 };
 
-const createMediaRecord1 = async (userRequestId, idMedia) => {
-  try {
-    const userRequest = await UserRequest.findByPk(userRequestId);
 
-    if (!userRequest) {
-      console.error('Заявка не найдена.');
-      return;
-    }
-
-    const mediaRecord = await Media.create({
-      idMedia,
-      UserRequestId: userRequestId,
-    });
-
-    const med = await Media.findByPk(idMedia);
-    console.log(med)
-    if (med) {
-      console.log('asdPHT')
-      console.log(med)
-      const pht = JSON.parse(med.idMedia);
-      const messages = await Message.findAll({
-        where: { id: userRequestId },
-        include: [
-          {
-            model: UserRequest,
-            include: [
-              {
-                model: User,
-                attributes: ['username', 'address', 'telegramId']
-              }
-            ]
-          }
-        ]
-      });
-      await bot.sendMediaGroup(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', pht.map(photo => ({
-        type: photo.type,
-        media: photo.media
-      })), {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-          ]
-        }
-      });
-    }
-
-
-    console.log('Запись в таблице Media успешно создана:', mediaRecord);
-
-    return mediaRecord
-  } catch (error) {
-    console.error('Ошибка при создании записи в таблице Media:', error);
-    throw error;
-  }
-};
 
 
 
@@ -992,7 +933,7 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
     const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
     const str = JSON.stringify(groupPhotos);
-    const mediaRecord = await createMediaRecord1(userRequestId, str);
+    const mediaRecord = await createMediaRecord(userRequestId, str);
     await MessageChat.create({
       IdMedia: mediaRecord.id,
       roleUser: op,
