@@ -517,6 +517,21 @@ app.post(`/resToUserPhoto`, async (req, res) => {
             mediaGroupId: reply.media_group_id
           });
         }
+        const messages = await Message.findAll({
+          where: { id: userRequestId },
+          include: [
+            {
+              model: UserRequest,
+              include: [
+                {
+                  model: User,
+                  attributes: ['username', 'address', 'telegramId']
+                }
+              ]
+            }
+          ]
+        });
+
         if (!sentMediaGroups[chatId] && !reply?.text) {
 
           setTimeout(() => {
@@ -526,6 +541,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
             bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
+            hndlMed1(nno, messages[0].operatorId)
           }, 1000);
           sentMediaGroups[chatId] = true;
         }
