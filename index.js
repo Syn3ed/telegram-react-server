@@ -972,7 +972,6 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
       ]
     });
     const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
-    if (tt) {
       await bot.sendMessage(messages[0].operatorId, '*проверка sendMediaGroup Regex*', {
         reply_markup: {
           inline_keyboard: [
@@ -980,7 +979,6 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
           ]
         }
       });
-    }
 
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
