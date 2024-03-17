@@ -34,37 +34,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
-
-app.post('/upload', upload.array('files', 5), async (req, res) => {
-  try {
-    const files = req.files;
-
-
-    const chatId = '393448227';
-
-    const apiUrl = `https://api.telegram.org/bot${token}/sendDocument`;
-
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append('chat_id', chatId);
-      formData.append('document', file.buffer, { filename: file.originalname });
-
-      await axios.post(apiUrl, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-    }
-
-    res.send('Файлы успешно отправлены в бота Telegram');
-  } catch (error) {
-    console.error('Ошибка при отправке файлов в бота Telegram:', error);
-    res.status(500).send('Произошла ошибка при отправке файлов в бота Telegram');
-  }
-});
 
 
 
@@ -112,6 +82,8 @@ app.get('/test/:id', async (req, res) => {
 
 
 const waitingUsers = {};
+
+
 app.post(`/replyToOperator`, async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const userWebId = operatorId;
@@ -162,7 +134,7 @@ app.post(`/replyToOperator`, async (req, res) => {
       ]
     });
 
-    await dbManager.replyToOperator(userRequestId, reply.text, messages);
+    // await dbManager.replyToOperator(userRequestId, reply.text, messages);
 
     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
     const timeData = new Date();
@@ -365,7 +337,7 @@ app.post('/handleShowPhoto', async (req, res) => {
   } catch (error) {
     console.log(error)
   }
-  
+
 });
 
 
@@ -380,11 +352,11 @@ const createMediaRecord = async (userRequestId, idMedia) => {
       return;
     }
 
-    // Создаем запись в таблице Media
     const mediaRecord = await Media.create({
       idMedia,
       UserRequestId: userRequestId,
     });
+
 
     console.log('Запись в таблице Media успешно создана:', mediaRecord);
     return mediaRecord
@@ -393,6 +365,65 @@ const createMediaRecord = async (userRequestId, idMedia) => {
     throw error;
   }
 };
+
+const createMediaRecord1 = async (userRequestId, idMedia) => {
+  try {
+    const userRequest = await UserRequest.findByPk(userRequestId);
+
+    if (!userRequest) {
+      console.error('Заявка не найдена.');
+      return;
+    }
+
+    const mediaRecord = await Media.create({
+      idMedia,
+      UserRequestId: userRequestId,
+    });
+
+    const pht = await JSON.parse(mediaRecord.idMedia);
+
+    console.log('Запись в таблице Media успешно создана:', mediaRecord);
+    const messages = await Message.findAll({
+      where: { id: userRequestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
+
+    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+        ]
+      }
+    });
+
+    await bot.sendMediaGroup(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', pht.map(photo => ({
+      type: photo.type,
+      media: photo.media
+    })), {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+        ]
+      }
+    });
+    return mediaRecord
+  } catch (error) {
+    console.error('Ошибка при создании записи в таблице Media:', error);
+    throw error;
+  }
+};
+
+
 
 app.post(`/replyToOperatorPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
@@ -445,14 +476,14 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
             mediaGroupId: reply.media_group_id
           });
         }
+
         if (!sentMediaGroups[chatId] && !reply?.text) {
           setTimeout(() => {
             const op = 'User'
-            const useName = 'Оператор'
             sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
-            bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+            bot.sendMessage(chatId, `Файл успешно добавлен к заявке #${userRequestId}`);
           }, 1000);
           sentMediaGroups[chatId] = true;
         }
@@ -961,7 +992,7 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
     const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
     const str = JSON.stringify(groupPhotos);
-    const mediaRecord = await createMediaRecord(userRequestId, str);
+    const mediaRecord = await createMediaRecord1(userRequestId, str);
     await MessageChat.create({
       IdMedia: mediaRecord.id,
       roleUser: op,
@@ -973,6 +1004,8 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
     sentMediaGroups[chatId] = false;
   }
 }
+
+
 
 const startBot = async () => {
   await connectToDatabase();
