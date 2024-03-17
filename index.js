@@ -330,7 +330,7 @@ const hndlMed = async (idMedia, operatorId) => {
     console.log('asdPHT')
     console.log(med)
     const pht = JSON.parse(med.idMedia);
-    await bot.sendMediaGroup(operatorId, pht.map(photo => ({
+    await bot.sendMediaGroup(operatorId,'test)0))', pht.map(photo => ({
       type: photo.type,
       media: photo.media
     })));
