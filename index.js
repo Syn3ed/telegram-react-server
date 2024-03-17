@@ -380,23 +380,40 @@ const createMediaRecord1 = async (userRequestId, idMedia) => {
       UserRequestId: userRequestId,
     });
 
-    const pht = await JSON.parse(mediaRecord.idMedia);
-
-    console.log('Запись в таблице Media успешно создана:', mediaRecord);
-    const messages = await Message.findAll({
-      where: { id: userRequestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
-            }
+    const med = await Media.findByPk(idMedia);
+    console.log(med)
+    if (med) {
+      console.log('asdPHT')
+      console.log(med)
+      const pht = JSON.parse(med.idMedia);
+      const messages = await Message.findAll({
+        where: { id: userRequestId },
+        include: [
+          {
+            model: UserRequest,
+            include: [
+              {
+                model: User,
+                attributes: ['username', 'address', 'telegramId']
+              }
+            ]
+          }
+        ]
+      });
+      await bot.sendMediaGroup(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', pht.map(photo => ({
+        type: photo.type,
+        media: photo.media
+      })), {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
           ]
         }
-      ]
-    });
+      });
+    }
+
+
+    console.log('Запись в таблице Media успешно создана:', mediaRecord);
 
     await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
       reply_markup: {
@@ -406,16 +423,6 @@ const createMediaRecord1 = async (userRequestId, idMedia) => {
       }
     });
 
-    await bot.sendMediaGroup(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', pht.map(photo => ({
-      type: photo.type,
-      media: photo.media
-    })), {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-        ]
-      }
-    });
     return mediaRecord
   } catch (error) {
     console.error('Ошибка при создании записи в таблице Media:', error);
