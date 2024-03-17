@@ -336,20 +336,7 @@ const hndlMed = async (idMedia, operatorId) => {
     })));
   }
 }
-const hndlMed1 = async (idMedia, operatorId) => {
-  console.log(idMedia.id)
-  const med = await Media.findByPk(idMedia.id);
-  console.log(med)
-  if (med) {
-    console.log('asdPHT')
-    console.log(med)
-    const pht = JSON.parse(med.idMedia);
-    await bot.sendMediaGroup(operatorId, pht.map(photo => ({
-      type: photo.type,
-      media: photo.media,
-    })));
-  }
-}
+
 
 
 const createMediaRecord = async (userRequestId, idMedia) => {
@@ -449,11 +436,10 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           setTimeout(() => {
             const op = 'User'
-            const nno = sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
+            sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
             bot.sendMessage(chatId, `Файл успешно добавлен к заявке #${userRequestId}`);
-            hndlMed1(nno, messages[0].operatorId)
           }, 1000);
           sentMediaGroups[chatId] = true;
         }
@@ -517,21 +503,6 @@ app.post(`/resToUserPhoto`, async (req, res) => {
             mediaGroupId: reply.media_group_id
           });
         }
-        const messages = await Message.findAll({
-          where: { id: userRequestId },
-          include: [
-            {
-              model: UserRequest,
-              include: [
-                {
-                  model: User,
-                  attributes: ['username', 'address', 'telegramId']
-                }
-              ]
-            }
-          ]
-        });
-
         if (!sentMediaGroups[chatId] && !reply?.text) {
 
           setTimeout(() => {
@@ -541,7 +512,6 @@ app.post(`/resToUserPhoto`, async (req, res) => {
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
             bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
-            hndlMed1(nno, messages[0].operatorId)
           }, 1000);
           sentMediaGroups[chatId] = true;
         }
@@ -987,6 +957,28 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
       UserRequestId: userRequestId,
       TimeMessages: timeMess,
     })
+    const messages = await Message.findAll({
+      where: { id: userRequestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
+    hndlMed(mediaRecord.id,messages[0].operatorId);
+    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+        ]
+      }
+    });
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
     return mediaRecord;
