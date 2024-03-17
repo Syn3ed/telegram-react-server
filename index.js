@@ -957,28 +957,7 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
       UserRequestId: userRequestId,
       TimeMessages: timeMess,
     })
-    const messages = await Message.findAll({
-      where: { id: userRequestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
-            }
-          ]
-        }
-      ]
-    });
-    const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
-    await bot.sendMessage(messages[0].operatorId, '*проверка sendMediaGroup Regex*', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-        ]
-      }
-    });
+    
 
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
@@ -1212,7 +1191,7 @@ const startBot = async () => {
                   setTimeout(() => {
                     const op = 'User'
                     const useName = 'Оператор'
-                    sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
+                    sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -1306,7 +1285,7 @@ const startBot = async () => {
                   setTimeout(() => {
                     const op = 'Operator'
                     const useName = 'Оператор'
-                    sendMediaGroup(chatId, useName, userRequestId, timeMess, op);
+                    sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
