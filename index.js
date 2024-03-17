@@ -555,7 +555,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
             sendMediaGroup(chatId, useName, userRequestId, timeMess, op);
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
-            bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+            bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
           }, 1000);
           sentMediaGroups[chatId] = true;
         }
