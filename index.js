@@ -332,8 +332,9 @@ const hndlMed = async (idMedia, operatorId) => {
     const pht = JSON.parse(med.idMedia);
     await bot.sendMediaGroup(operatorId, pht.map(photo => ({
       type: photo.type,
-      media: photo.media
-    })),{caption:'asd))'});
+      media: photo.media,
+      caption:'asd))'
+    })));
   }
 }
 
