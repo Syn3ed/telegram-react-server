@@ -415,14 +415,6 @@ const createMediaRecord1 = async (userRequestId, idMedia) => {
 
     console.log('Запись в таблице Media успешно создана:', mediaRecord);
 
-    await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-        ]
-      }
-    });
-
     return mediaRecord
   } catch (error) {
     console.error('Ошибка при создании записи в таблице Media:', error);
@@ -574,6 +566,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
     };
     bot.on('message', textHandler);
   } catch (error) {
+    console.log(error)
   }
 })
 
