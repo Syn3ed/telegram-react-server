@@ -436,7 +436,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           setTimeout(() => {
             const op = 'User'
-            sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
+            sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
             bot.sendMessage(chatId, `Файл успешно добавлен к заявке #${userRequestId}`);
@@ -508,7 +508,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
           setTimeout(() => {
             const op = 'Operator'
             const useName = 'Оператор'
-            sendMediaGroup(chatId, useName, userRequestId, timeMess, op);
+            sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
             bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -972,13 +972,13 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
       ]
     });
     const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
-      await bot.sendMessage(messages[0].operatorId, '*проверка sendMediaGroup Regex*', {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-          ]
-        }
-      });
+    await bot.sendMessage(messages[0].operatorId, '*проверка sendMediaGroup Regex*', {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+        ]
+      }
+    });
 
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
@@ -986,7 +986,59 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
   }
 }
 
+async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
+  if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
+    const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
+    const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
+    const str = JSON.stringify(groupPhotos);
+    const mediaRecord = await createMediaRecord(userRequestId, str);
+    await MessageChat.create({
+      IdMedia: mediaRecord.id,
+      roleUser: op,
+      username: userName,
+      UserRequestId: userRequestId,
+      TimeMessages: timeMess,
+    })
+    const messages = await Message.findAll({
+      where: { id: userRequestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
 
+    const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
+    if(op === 'User'){
+      await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex${op}*`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+          ]
+        }
+      });
+    }else{
+      await bot.sendMessage(chatId, `*проверка sendMediaGroup для Regex ${op}*`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+          ]
+        }
+      });
+    }
+    
+
+    userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
+    sentMediaGroups[chatId] = false;
+    return mediaRecord;
+  }
+}
 
 const startBot = async () => {
   await connectToDatabase();
