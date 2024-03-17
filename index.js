@@ -1019,7 +1019,7 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
       await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex${op}*`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
           ]
         }
       });
@@ -1027,7 +1027,7 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
       await bot.sendMessage(chatId, `*проверка sendMediaGroup для Regex ${op}*`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
           ]
         }
       });
