@@ -314,7 +314,7 @@ app.post(`/replyToUser`, async (req, res) => {
 app.post('/handleShowPhoto', async (req, res) => {
   const { queryId, userRequestId, username, idMedia, operatorId } = req.body;
   try {
-    hndlMed(idMedia,operatorId)
+    hndlMed(idMedia, operatorId)
     res.status(200).json({ success: true });
   } catch (error) {
     console.log(error)
@@ -333,7 +333,20 @@ const hndlMed = async (idMedia, operatorId) => {
     await bot.sendMediaGroup(operatorId, pht.map(photo => ({
       type: photo.type,
       media: photo.media,
-      caption:'asd))'
+    })));
+  }
+}
+const hndlMed1 = async (idMedia, operatorId) => {
+  console.log(idMedia.id)
+  const med = await Media.findByPk(idMedia.id);
+  console.log(med)
+  if (med) {
+    console.log('asdPHT')
+    console.log(med)
+    const pht = JSON.parse(med.idMedia);
+    await bot.sendMediaGroup(operatorId, pht.map(photo => ({
+      type: photo.type,
+      media: photo.media,
     })));
   }
 }
@@ -417,14 +430,30 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
             mediaGroupId: reply.media_group_id
           });
         }
+        const messages = await Message.findAll({
+          where: { id: userRequestId },
+          include: [
+            {
+              model: UserRequest,
+              include: [
+                {
+                  model: User,
+                  attributes: ['username', 'address', 'telegramId']
+                }
+              ]
+            }
+          ]
+        });
+
 
         if (!sentMediaGroups[chatId] && !reply?.text) {
           setTimeout(() => {
             const op = 'User'
-            sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
+            const nno = sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
             bot.sendMessage(chatId, `Файл успешно добавлен к заявке #${userRequestId}`);
+            hndlMed1(nno, messages[0].operatorId)
           }, 1000);
           sentMediaGroups[chatId] = true;
         }
@@ -944,6 +973,7 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
     })
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
+    return mediaRecord;
   }
 }
 
