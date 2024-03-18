@@ -1012,8 +1012,9 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
       ]
     });
 
-    const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
+   
     if (op === 'User') {
+      const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
       await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex${op}*`, {
         reply_markup: {
           inline_keyboard: [
@@ -1022,6 +1023,7 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
         }
       });
     } else {
+      const tt = await hndlMed(mediaRecord.id, messages[0].UserRequest.User.telegramId);
       await bot.sendMessage(messages[0].UserRequest.User.telegramId, `*проверка sendMediaGroup для Regex ${op}*`, {
         reply_markup: {
           inline_keyboard: [
