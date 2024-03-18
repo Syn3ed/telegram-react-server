@@ -1650,7 +1650,7 @@ const startBot = async () => {
   bot.on('callback_query', async (msg) => {
 
     console.log(msg)
-    const chatId = msg.chat.id
+    const chatId = msg.from.id
     const data1 = msg.callbackQuery.data;
 
     if (data1) {
