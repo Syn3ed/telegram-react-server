@@ -465,7 +465,8 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
               }
             });
           }, 1000);
-        } else if (!sentMediaGroups[chatId] && reply.text) {
+        }
+        if (!sentMediaGroups[chatId] && reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
             waitingUsers[userId] = false;
