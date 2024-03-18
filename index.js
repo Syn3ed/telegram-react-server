@@ -468,6 +468,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
           sentMediaGroups[chatId] = true;
         } else if (!sentMediaGroups[chatId] && reply.text) {
           setTimeout(() => {
+            waitingUsers[userId] = false;
             dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
             bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
             bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
