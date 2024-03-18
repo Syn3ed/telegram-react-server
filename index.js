@@ -159,13 +159,13 @@ app.post(`/replyToOperator`, async (req, res) => {
     // });
     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
       reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-              [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
-          ]
+        inline_keyboard: [
+          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+          [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
+        ]
       }
-  });
-  
+    });
+
 
     return res.status(200).json({});
   } catch (error) {
@@ -259,7 +259,7 @@ app.post(`/replyToUser`, async (req, res) => {
       await bot.sendMessage(userWebId, 'Хорошо');
       return;
     }
-    await dbManager.replyToUser(userRequestId, reply.text, operatorId);
+    // await dbManager.replyToUser(userRequestId, reply.text, operatorId);
     await OperatorReq.create({
       IdRequest: userRequestId,
       idUser: userWebId
@@ -302,15 +302,6 @@ app.post(`/replyToUser`, async (req, res) => {
       ]
     });
 
-
-    // bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId} *проверка postRegex3*`, {
-    //   reply_markup: {
-    //     inline_keyboard: [
-    //       [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-    //       [{ text: 'Ваша Заявка', web_app: { callback_query :`/resToUser ${userRequestId}`} }]
-    //     ]
-    //   }
-    // });
     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId} *проверка postRegex3*`, {
       reply_markup: {
         inline_keyboard: [
@@ -414,6 +405,22 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
         const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
+
+        const messages = await Message.findAll({
+          where: { id: userRequestId },
+          include: [
+            {
+              model: UserRequest,
+              include: [
+                {
+                  model: User,
+                  attributes: ['username', 'address', 'telegramId']
+                }
+              ]
+            }
+          ]
+        });
+
         if (reply.photo) {
           userPhotos[chatId] = userPhotos[chatId] || [];
           userPhotos[chatId].push({
@@ -435,21 +442,11 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
             media: reply.video.file_id,
             mediaGroupId: reply.media_group_id
           });
+        } else if (reply.caption) {
+          const caption_text = reply.caption
+          dbManager.createUserRequestMessage(userRequestId, caption_text, operatorId, 'User', username, timeMess);
         }
-        const messages = await Message.findAll({
-          where: { id: userRequestId },
-          include: [
-            {
-              model: UserRequest,
-              include: [
-                {
-                  model: User,
-                  attributes: ['username', 'address', 'telegramId']
-                }
-              ]
-            }
-          ]
-        });
+
 
 
         if (!sentMediaGroups[chatId] && !reply?.text) {
@@ -458,17 +455,33 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
             sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
             waitingUsers[userId] = false;
             bot.off('message', textHandler);
-            bot.sendMessage(chatId, `Файл успешно добавлен к заявке #${userRequestId}`);
+            bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+            bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+                  [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
+                ]
+              }
+            });
           }, 1000);
           sentMediaGroups[chatId] = true;
-        }
-        if (!reply || !reply.photo || !reply.photo[0]) {
-          throw new Error('Не удалось получить фотографию.');
+        } else if (reply.text) {
+          dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
+          bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+                [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
+              ]
+            }
+          });
         }
       }
     };
     bot.on('message', textHandler);
   } catch (error) {
+    console.log(error)
   }
 })
 
@@ -535,9 +548,6 @@ app.post(`/resToUserPhoto`, async (req, res) => {
           sentMediaGroups[chatId] = true;
         }
 
-        if (!reply || !reply.photo || !reply.photo[0]) {
-          throw new Error('Не удалось получить фотографию.');
-        }
       }
     };
     bot.on('message', textHandler);
@@ -1012,7 +1022,7 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
       ]
     });
 
-   
+
     if (op === 'User') {
       const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
       await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex${op}*`, {

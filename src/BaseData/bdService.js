@@ -140,7 +140,6 @@ class DatabaseService {
           TimeMessages
         });
 
-        console.log(`Создано сообщение для заявки с id ${UserRequestId}: ${message.textMessage}`);
       }
     } catch (error) {
       console.error('Ошибка при создании сообщения для заявки:', error);
