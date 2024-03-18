@@ -389,10 +389,9 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
       if (userId === response.from.id && waitingUsers[userId]) {
 
         const reply = response;
-        if (reply?.text === 'Стоп' || reply?.text === 'стоп') {
-          await bot.sendMessage(userId, 'Хорошо');
+        if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
           waitingUsers[userId] = false;
-          return;
+          return bot.sendMessage(userId, 'Хорошо');;
         }
         const timeData = new Date();
         const year = timeData.getFullYear();
@@ -450,6 +449,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
 
 
         if (!sentMediaGroups[chatId] && !reply?.text) {
+          sentMediaGroups[chatId] = true;
           setTimeout(() => {
             const op = 'User'
             sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
@@ -465,8 +465,8 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
               }
             });
           }, 1000);
-          sentMediaGroups[chatId] = true;
         } else if (!sentMediaGroups[chatId] && reply.text) {
+          sentMediaGroups[chatId] = true;
           setTimeout(() => {
             waitingUsers[userId] = false;
             dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
@@ -480,7 +480,6 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
               }
             });
           }, 1000);
-          sentMediaGroups[chatId] = true;
         }
       }
     };
