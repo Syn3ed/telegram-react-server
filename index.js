@@ -467,15 +467,18 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
           }, 1000);
           sentMediaGroups[chatId] = true;
         } else if (reply.text) {
-          dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
-          bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-                [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
-              ]
-            }
-          });
+          setTimeout(() => {
+            dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
+            bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+                  [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
+                ]
+              }
+            });
+          }, 1000);
+          sentMediaGroups[chatId] = true;
         }
       }
     };
