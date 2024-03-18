@@ -1022,7 +1022,7 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
         }
       });
     } else {
-      await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex ${op}*`, {
+      await bot.sendMessage(messages[0].UserRequest.User.telegramId, `*проверка sendMediaGroup для Regex ${op}*`, {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -1030,10 +1030,6 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
         }
       });
     }
-
-    console.log(messages[0].UserRequest.User)
-    console.log(messages[0].UserRequest.User)
-    console.log(messages[0].UserRequest.User)
     console.log('11111111111111111111111111111111111111111111111111111111111111111111111111111111')
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
