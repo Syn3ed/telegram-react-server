@@ -157,11 +157,11 @@ app.post(`/replyToOperator`, async (req, res) => {
     //     ]
     //   }
     // });
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя  заявку #${userRequestId} *проверка postRegex4*`, {
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
       reply_markup: {
           inline_keyboard: [
-            [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-              [{ text: 'Ответить', callback_data: `/resToOperator ${userRequestId}` }]
+            [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+              [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
           ]
       }
   });
@@ -315,7 +315,7 @@ app.post(`/replyToUser`, async (req, res) => {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-          [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
+          [{ text: 'Ответить', callback_data: `/resToOperator ${userRequestId}` }]
         ]
       }
     });
