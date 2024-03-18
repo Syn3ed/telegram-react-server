@@ -13,7 +13,7 @@ const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
 const commandHandler = new commandAndAnswer(bot);
-const callbackHandler = new callbackAnswer(bot);
+// const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -1087,9 +1087,9 @@ const startBot = async () => {
   });
 
 
-  bot.on('callback_query', async (msg) => {
-    await callbackHandler.handleMessage(msg);
-  });
+  // bot.on('callback_query', async (msg) => {
+  //   await callbackHandler.handleMessage(msg);
+  // });
 
   bot.on('message', async (msg) => {
 
