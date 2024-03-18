@@ -1031,10 +1031,9 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
       });
     }
 
-    console.log(messages)
-    console.log(messages)
-    console.log(messages)
-    console.log(messages)
+    console.log(messages[0].UserRequest)
+    console.log(messages[0].UserRequest)
+    console.log(messages[0].UserRequest)
     console.log('11111111111111111111111111111111111111111111111111111111111111111111111111111111')
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
