@@ -1651,7 +1651,7 @@ const startBot = async () => {
 
     console.log(msg)
     const chatId = msg.from.id
-    const data1 = msg.callbackQuery.data;
+    const data1 = msg.callbackQuery.message.data;
 
     if (data1) {
       const regex = /\/handleShowPhoto (\d+)/;
