@@ -441,7 +441,8 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
             media: reply.video.file_id,
             mediaGroupId: reply.media_group_id
           });
-        } else if (reply.caption) {
+        }
+        if (reply.caption) {
           const caption_text = reply.caption
           dbManager.createUserRequestMessage(userRequestId, caption_text, operatorId, 'User', username, timeMess);
         }
