@@ -1829,7 +1829,8 @@ const startBot = async () => {
               }
 
               if (!sentMediaGroups[chatId] && !reply?.text) {
-
+                console.log('gggggggggggggggggggggggggggggggggggg')
+                sentMediaGroups[chatId] = true;
                 setTimeout(() => {
                   const op = 'User'
                   const useName = 'Оператор'
@@ -1838,7 +1839,7 @@ const startBot = async () => {
                   bot.off('message', textHandler);
                   bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
                 }, 1000);
-                sentMediaGroups[chatId] = true;
+
               }
 
               if (!sentMediaGroups[chatId] && reply?.text) {
@@ -1857,6 +1858,8 @@ const startBot = async () => {
                   });
                 }, 1000);
               }
+
+
             }
           };
           bot.on('message', textHandler);
