@@ -1764,7 +1764,7 @@ const startBot = async () => {
         const userName = msg.from.first_name
         try {
 
-          await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
+          await bot.sendMessage(userId, 'Прикрепите файл:');
 
           waitingUsers[userId] = true;
           const textHandler = async (response) => {
@@ -1836,7 +1836,7 @@ const startBot = async () => {
                   sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
                   waitingUsers[userId] = false;
                   bot.off('message', textHandler);
-                  bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+                  bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
                 }, 1000);
                 sentMediaGroups[chatId] = true;
               }
@@ -1871,7 +1871,7 @@ const startBot = async () => {
         const chatId = msg.from.id;
         const userName = msg.from.first_name
         try {
-          await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
+          await bot.sendMessage(userId, 'Прикрепите файл:');
 
           waitingUsers[userId] = true;
           const textHandler = async (response) => {
