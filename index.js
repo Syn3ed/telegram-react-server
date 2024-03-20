@@ -428,9 +428,12 @@ function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeM
 }
 
 function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+  console.log('1212121122121212112212121212121212121212121')
   console.log(messages.Message)
-  console.log(messages.Message[0])
-  console.log(messages[0])
+  console.log(messages.Message)
+  console.log(messages.Message)
+  console.log('333333333333333333333333333333333333333333333333333333')
+  console.log(messages.Promise)
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
