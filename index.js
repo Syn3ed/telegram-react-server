@@ -1158,7 +1158,9 @@ const startBot = async () => {
 
     console.log(msg)
     const chatId = msg.chat.id
-    bot.on("polling_error", console.log);
+    bot.on('polling_error', (error) => {
+      console.log(error.code);  
+    });
     if (msg.text === 'Изменить роль пользователю на админа') {
       try {
         const userId = msg.from.id;
@@ -1171,13 +1173,11 @@ const startBot = async () => {
             bot.off('text', textHandler);
             const reply = response.text;
 
-            // Проверка, является ли введенное значение числом
             if (!isNaN(reply)) {
               const chRole = dbManager.changeRoleUser(reply, 3)
               await bot.sendMessage(reply, 'Вам присвоена роль "Администратор"');
               bot.sendMessage(userId, 'Роль пользователя успешно изменена.');
             } else {
-              // Если введенное значение не является числом, сообщаем об ошибке
               bot.sendMessage(userId, 'Ошибка: Введите, пожалуйста, корректный ID-телеграма пользователя.');
             }
           }
@@ -1775,80 +1775,80 @@ const startBot = async () => {
       if (regex2.test(data1)) {
         const userId = msg.from.id;
         if (!waitingUsers[userId]) {
-        const match = data1.match(regex2);
-        const userRequestId = match[1];
-        const chatId = msg.from.id;
-        const userName = msg.from.first_name
-        try {
+          const match = data1.match(regex2);
+          const userRequestId = match[1];
+          const chatId = msg.from.id;
+          const userName = msg.from.first_name
+          try {
 
-          await bot.sendMessage(userId, 'Прикрепите файл:');
+            await bot.sendMessage(userId, 'Прикрепите файл:');
 
-          waitingUsers[userId] = true;
-          const textHandler = async (response) => {
-            if (userId === response.from.id && waitingUsers[userId]) {
-              const reply = response;
-              if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
-                waitingUsers[userId] = false;
-                return bot.sendMessage(userId, 'Хорошо');;
+            waitingUsers[userId] = true;
+            const textHandler = async (response) => {
+              if (userId === response.from.id && waitingUsers[userId]) {
+                const reply = response;
+                if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
+                  waitingUsers[userId] = false;
+                  return bot.sendMessage(userId, 'Хорошо');;
+                }
+
+                const messages = await messagesFunc(userRequestId)
+
+                const timeMess = timeFunc();
+                if (reply.photo) {
+                  userPhotos[chatId] = userPhotos[chatId] || [];
+                  userPhotos[chatId].push({
+                    type: 'photo',
+                    media: reply.photo[0].file_id,
+                    mediaGroupId: reply.media_group_id
+                  });
+                  console.log('Получена фотография:');
+                  console.log(userPhotos[chatId]);
+                } else if (reply.document) {
+                  userPhotos[chatId].push({
+                    type: 'document',
+                    media: reply.document.file_id,
+                    mediaGroupId: reply.media_group_id
+                  });
+                } else if (reply.video) {
+                  userPhotos[chatId].push({
+                    type: 'video',
+                    media: reply.video.file_id,
+                    mediaGroupId: reply.media_group_id
+                  });
+                }
+
+                if (reply.caption) {
+                  const caption_text = reply.caption
+                  dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
+                }
+
+                if (!sentMediaGroups[chatId] && !reply?.text) {
+                  sentMediaGroups[chatId] = true;
+                  setTimeout(() => {
+                    console.log(sentMediaGroups[chatId])
+                    resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
+                    console.log(waitingUsers[chatId])
+                  }, 1000);
+
+                }
+
+                if (reply?.text) {
+                  setTimeout(() => {
+                    const operatorId = chatId
+                    resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
+                    console.log(waitingUsers[chatId])
+                  }, 1000);
+                }
+
+
               }
-
-              const messages = await messagesFunc(userRequestId)
-
-              const timeMess = timeFunc();
-              if (reply.photo) {
-                userPhotos[chatId] = userPhotos[chatId] || [];
-                userPhotos[chatId].push({
-                  type: 'photo',
-                  media: reply.photo[0].file_id,
-                  mediaGroupId: reply.media_group_id
-                });
-                console.log('Получена фотография:');
-                console.log(userPhotos[chatId]);
-              } else if (reply.document) {
-                userPhotos[chatId].push({
-                  type: 'document',
-                  media: reply.document.file_id,
-                  mediaGroupId: reply.media_group_id
-                });
-              } else if (reply.video) {
-                userPhotos[chatId].push({
-                  type: 'video',
-                  media: reply.video.file_id,
-                  mediaGroupId: reply.media_group_id
-                });
-              }
-
-              if (reply.caption) {
-                const caption_text = reply.caption
-                dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
-              }
-
-              if (!sentMediaGroups[chatId] && !reply?.text) {
-                sentMediaGroups[chatId] = true;
-                setTimeout(() => {
-                  console.log(sentMediaGroups[chatId])
-                  resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
-                  console.log(waitingUsers[chatId])
-                }, 1000);
-
-              }
-
-              if (reply?.text) {
-                setTimeout(() => {
-                  const operatorId = chatId
-                  resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
-                  console.log(waitingUsers[chatId])
-                }, 1000);
-              }
-
-
-            }
-          };
-          bot.on('message', textHandler);
-        } catch (error) {
-          console.log(error)
+            };
+            bot.on('message', textHandler);
+          } catch (error) {
+            console.log(error)
+          }
         }
-      }
       }
       if (regex1.test(data1)) {
         const userId = msg.from.id;
