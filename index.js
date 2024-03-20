@@ -1359,7 +1359,7 @@ const startBot = async () => {
 
 
                 const timeMess = timeFunc();
-                const messages = await (userRequestId)
+                const messages = await messagesFunc(userRequestId)
 
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
