@@ -12,7 +12,7 @@ require('./src/BaseData/bdModel');
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
-// const commandHandler = new commandAndAnswer(bot);
+const commandHandler = new commandAndAnswer(bot);
 // const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
