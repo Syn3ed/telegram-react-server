@@ -12,7 +12,7 @@ require('./src/BaseData/bdModel');
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
-const commandHandler = new commandAndAnswer(bot);
+// const commandHandler = new commandAndAnswer(bot);
 // const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
@@ -520,13 +520,15 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
+            console.log(sentMediaGroups[chatId])
             resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
+            console.log(waitingUsers[chatId])
           }, 1000);
         }
-        if (!sentMediaGroups[chatId] && reply?.text) {
-          sentMediaGroups[chatId] = true;
+        if (reply?.text) {
           setTimeout(() => {
             resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler);
+            console.log(waitingUsers[chatId])
           }, 1000);
         }
       }
@@ -600,14 +602,16 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
+            console.log(sentMediaGroups[chatId])
             resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler);
+            console.log(waitingUsers[chatId])
           }, 1000);
         }
 
-        if (!sentMediaGroups[chatId] && reply?.text) {
-          sentMediaGroups[chatId] = true;
+        if (reply?.text) {
           setTimeout(() => {
             resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler)
+            console.log(waitingUsers[chatId])
           }, 1000);
         }
 
@@ -1110,7 +1114,6 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op) {
     console.log('11111111111111111111111111111111111111111111111111111111111111111111111111111111')
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
-    return mediaRecord;
   }
 }
 
@@ -1311,16 +1314,18 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
+                    console.log(sentMediaGroups[chatId])
                     resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
+                    console.log(waitingUsers[chatId])
                   }, 1000);
 
                 }
 
-                if (!sentMediaGroups[chatId] && reply?.text) {
-                  sentMediaGroups[chatId] = true;
+                if (reply?.text) {
                   setTimeout(() => {
                     const operatorId = chatId
                     resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
+                    console.log(waitingUsers[chatId])
                   }, 1000);
                 }
 
@@ -1385,15 +1390,17 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler)
+                    console.log(sentMediaGroups[chatId])
+                    resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler);
+                    console.log(waitingUsers[chatId])
                   }, 1000);
                 }
 
-                if (!sentMediaGroups[chatId] && reply?.text) {
-                  sentMediaGroups[chatId] = true;
+                if (reply?.text) {
                   setTimeout(() => {
                     const operatorId = chatId;
                     resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
+                    console.log(waitingUsers[chatId])
                   }, 1000);
                 }
 
@@ -1893,8 +1900,7 @@ const startBot = async () => {
                 }, 1000);
 
               }
-              if (!sentMediaGroups[chatId] && reply?.text) {
-                sentMediaGroups[chatId] = true;
+              if (reply?.text) {
                 setTimeout(() => {
                   const operatorId = chatId;
                   resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
