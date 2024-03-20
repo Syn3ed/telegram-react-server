@@ -438,8 +438,8 @@ function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, te
 
 async function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
   waitingUsers[chatId] = false;
-  dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
-  bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
+  await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   await bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
     reply_markup: {
       inline_keyboard: [
@@ -453,8 +453,8 @@ async function resToOperatorTextFunc(userRequestId, reply, operatorId, username,
 
 async function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
   waitingUsers[chatId] = false;
-  dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
-  bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
+  await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
     reply_markup: {
       inline_keyboard: [
