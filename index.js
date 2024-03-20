@@ -1813,6 +1813,7 @@ const startBot = async () => {
               if (!sentMediaGroups[chatId] && !reply?.text) {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
+                  console.log(sentMediaGroups[chatId])
                   resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
                   console.log(waitingUsers[chatId])
                 }, 1000);
@@ -1886,7 +1887,9 @@ const startBot = async () => {
               if (!sentMediaGroups[chatId] && !reply?.text) {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
+                  console.log(sentMediaGroups[chatId])
                   resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler)
+                  console.log(waitingUsers[chatId])
                 }, 1000);
 
               }
@@ -1895,6 +1898,7 @@ const startBot = async () => {
                 setTimeout(() => {
                   const operatorId = chatId;
                   resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
+                  console.log(waitingUsers[chatId])
                 }, 1000);
               }
 
