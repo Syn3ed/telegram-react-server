@@ -436,7 +436,7 @@ function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, te
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
 }
 
-function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler) {
 
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
@@ -448,9 +448,10 @@ function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeM
       ]
     }
   });
+  bot.off('message', textHandler);
 }
 
-function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler) {
   console.log('1212121122121212112212121212121212121212121')
   console.log(messages.Message)
   console.log(messages.Message)
@@ -467,6 +468,7 @@ function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess,
       ]
     }
   });
+  bot.off('message', textHandler);
 }
 
 app.post(`/replyToOperatorPhoto`, async (req, res) => {
@@ -530,7 +532,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
             waitingUsers[userId] = false;
-            resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages);
+            resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler);
           }, 1000);
         }
       }
@@ -612,7 +614,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
             waitingUsers[userId] = false;
-            resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages)
+            resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler)
           }, 1000);
         }
 
@@ -1330,7 +1332,7 @@ const startBot = async () => {
                   setTimeout(() => {
                     waitingUsers[userId] = false;
                     const operatorId = chatId
-                    resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
+                    resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                   }, 1000);
                 }
 
@@ -1404,7 +1406,7 @@ const startBot = async () => {
                   setTimeout(() => {
                     waitingUsers[userId] = false;
                     const operatorId = chatId;
-                    resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
+                    resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                   }, 1000);
                 }
 
@@ -1851,7 +1853,7 @@ const startBot = async () => {
                   //   }
                   // });
                   const operatorId = chatId
-                  resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
+                  resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                 }, 1000);
               }
 
@@ -1939,7 +1941,7 @@ const startBot = async () => {
                   //   }
                   // });
                   const operatorId = chatId;
-                  resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
+                  resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                 }, 1000);
               }
 
