@@ -388,7 +388,7 @@ function timeFunc() {
 }
 
 async function messagesFunc(userRequestId) {
-  return [await Message.findAll({
+  const messages = await Message.findAll({
     where: { id: userRequestId },
     include: [
       {
@@ -401,7 +401,8 @@ async function messagesFunc(userRequestId) {
         ]
       }
     ]
-  })]
+  })
+  return messages
 }
 
 function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId) {
