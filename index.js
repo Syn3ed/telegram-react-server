@@ -12,7 +12,7 @@ require('./src/BaseData/bdModel');
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
-const commandHandler = new commandAndAnswer(bot);
+// const commandHandler = new commandAndAnswer(bot);
 // const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
@@ -35,7 +35,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
+async function sendMessagesToUsersWithRoleId(message, id) {
+  try {
+    const usersWithRoleId2 = await User.findAll({ where: { RoleId: 3 } });
 
+    usersWithRoleId2.forEach(user => {
+      const userId = user.telegramId;
+      this.bot.sendMessage(userId, message, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
+          ]
+        }
+      })
+        .then(sentMessage => {
+          console.log(`Сообщение успешно отправлено пользователю с id ${userId}`);
+        })
+        .catch(error => {
+          console.error(`Ошибка при отправке сообщения пользователю с id ${userId}:`, error);
+        });
+    });
+  } catch (error) {
+    console.error('Ошибка при отправке сообщений пользователям с RoleId = 2:', error);
+  }
+}
 
 
 app.get('/messagesChat', async (req, res) => {
@@ -180,7 +203,7 @@ app.post('/closeReq', async (req, res) => {
   try {
     const status = 'Заявка закрыта';
     const message = `Пользователь закрыл заявку №${userRequestId}`
-    await commandHandler.sendMessagesToUsersWithRoleId(message, userRequestId);
+    await sendMessagesToUsersWithRoleId(message, userRequestId);
     await dbManager.changeStatusRes(userRequestId, status);
     await bot.sendMessage(userWebId, `Вы закрыли заявку №${userRequestId}`);
   } catch (e) {
@@ -195,7 +218,7 @@ app.post(`/resumeReq`, async (req, res) => {
     const status = 'ожидает ответа оператора';
     await dbManager.changeStatusRes(requestId, status);
     const message = `Возобновлена заявка под номером ${requestId}`
-    await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+    await sendMessagesToUsersWithRoleId(message, requestId);
     const messages = await Message.findAll({
       where: { id: userRequestId },
       include: [
@@ -269,7 +292,7 @@ app.post(`/replyToUser`, async (req, res) => {
       const status = 'Заявка в обработке';
       await dbManager.changeStatusRes(requestId, status);
       const message = `Заявка под номером ${requestId} в обработке`
-      await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+      await sendMessagesToUsersWithRoleId(message, requestId);
     }
     const timeData = new Date();
     const year = timeData.getFullYear();
@@ -405,7 +428,7 @@ async function messagesFunc(userRequestId) {
   return messages
 }
 
-function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler) {
+function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler) {
   const op = 'User'
   sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
   waitingUsers[userId] = false;
@@ -500,7 +523,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler);
+            resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
           }, 1000);
         }
         if (!sentMediaGroups[chatId] && reply?.text) {
@@ -518,7 +541,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
   }
 })
 
-function resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler) {
+function resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler) {
   const op = 'Operator'
   const useName = 'Оператор'
   sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
@@ -581,7 +604,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler);
+            resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler);
           }, 1000);
         }
 
@@ -1251,7 +1274,7 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler);
+                    resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
                   }, 1000);
 
                 }
@@ -1326,7 +1349,7 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler)
+                    resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler)
                   }, 1000);
                 }
 
@@ -1473,7 +1496,7 @@ const startBot = async () => {
                   const status = 'Заявка в обработке!';
                   await dbManager.changeStatusRes(requestId, status);
                   const message = `Заявка под номером ${requestId} в обработке`;
-                  await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+                  await sendMessagesToUsersWithRoleId(message, requestId);
                 }
                 const existingMessage = await Message.findByPk(requestId);
                 existingMessage.operatorId = userId;
@@ -1555,7 +1578,7 @@ const startBot = async () => {
           const status = 'ожидает ответа оператора';
           await dbManager.changeStatusRes(requestId, status);
           const message = `Возобновлена заявка под номером ${requestId}`;
-          await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+          await sendMessagesToUsersWithRoleId(message, requestId);
         }
         const userName = msg.from.first_name;
         try {
@@ -1630,7 +1653,7 @@ const startBot = async () => {
                         ]
                       }
                     });
-                    commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId);
+                    sendMessagesToUsersWithRoleId(message, createdRequestId);
                   }, 1000);
                   sentMediaGroups[chatId] = true;
                 }
@@ -1656,7 +1679,7 @@ const startBot = async () => {
                 ]
               }
             });
-            commandHandler.sendMessagesToUsersWithRoleId(message, createdRequestId)
+            sendMessagesToUsersWithRoleId(message, createdRequestId)
           }
         }
         catch (e) {
@@ -1666,7 +1689,52 @@ const startBot = async () => {
     } catch (e) {
       console.log(e)
     }
-    await commandHandler.handleMessage(msg);
+    bot.onText(/\/start/, async (msg) => {
+      try {
+        const chatId = msg.chat.id;
+        await bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
+        await dbManager.createUserWithRole(`${chatId}`, `${msg.from.first_name}`, `User`)
+      } catch (e) {
+        console.log(e)
+      }
+    })
+
+    bot.onText(/\/menu/, async (msg) => {
+      const chatId = msg.chat.id;
+
+      try {
+        const user = await User.findOne({ where: { telegramId: chatId } });
+
+        if (!user) {
+          await bot.sendMessage(chatId, 'Пользователь не найден.');
+          return;
+        }
+
+        let keyboard = [];
+
+        if (user.RoleId == '2') {
+          keyboard = [
+            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+            [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
+          ];
+        } else if (user.RoleId == '3') {
+          keyboard = [
+            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+            [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
+            [{ text: 'Изменить роль пользователю на админа', callback_data: '/resRole' }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+          ];
+        }
+
+        await bot.sendMessage(chatId, 'Меню бота', {
+          reply_markup: {
+            keyboard: keyboard
+          }
+        });
+      } catch (error) {
+        console.error('Ошибка:', error);
+        await bot.sendMessage(chatId, 'Произошла ошибка при обработке команды.');
+      }
+    });
   });
 
   bot.on('callback_query', async (msg) => {
@@ -1762,7 +1830,7 @@ const startBot = async () => {
                   // waitingUsers[userId] = false;
                   // bot.off('message', textHandler);
                   // bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
-                  resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler);
+                  resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
                 }, 1000);
 
               }
@@ -1851,7 +1919,7 @@ const startBot = async () => {
                   // waitingUsers[userId] = false;
                   // bot.off('message', textHandler);
                   // bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
-                  resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler)
+                  resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler)
                 }, 1000);
 
               }
@@ -2009,7 +2077,7 @@ const startBot = async () => {
                 const status = 'Заявка в обработке!';
                 await dbManager.changeStatusRes(requestId, status);
                 const message = `Заявка под номером ${requestId} в обработке`;
-                await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+                await sendMessagesToUsersWithRoleId(message, requestId);
               }
               const existingMessage = await Message.findByPk(requestId);
               existingMessage.operatorId = userId;
@@ -2091,7 +2159,7 @@ const startBot = async () => {
         const status = 'ожидает ответа оператора';
         await dbManager.changeStatusRes(requestId, status);
         const message = `Возобновлена заявка под номером ${requestId}`;
-        await commandHandler.sendMessagesToUsersWithRoleId(message, requestId);
+        await sendMessagesToUsersWithRoleId(message, requestId);
       }
     }
   })
