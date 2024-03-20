@@ -1189,6 +1189,52 @@ const startBot = async () => {
         console.log(e);
       }
     }
+    if (msg.text === '/start') {
+      try {
+        const chatId = msg.chat.id;
+        await bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
+        await dbManager.createUserWithRole(`${chatId}`, `${msg.from.first_name}`, `User`)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    if (msg.text === '/menu'){
+      const chatId = msg.chat.id;
+
+      try {
+        const user = await User.findOne({ where: { telegramId: chatId } });
+
+        if (!user) {
+          await bot.sendMessage(chatId, 'Пользователь не найден.');
+          return;
+        }
+
+        let keyboard = [];
+
+        if (user.RoleId == '2') {
+          keyboard = [
+            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+            [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
+          ];
+        } else if (user.RoleId == '3') {
+          keyboard = [
+            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+            [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
+            [{ text: 'Изменить роль пользователю на админа', callback_data: '/resRole' }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+          ];
+        }
+
+        await bot.sendMessage(chatId, 'Меню бота', {
+          reply_markup: {
+            keyboard: keyboard
+          }
+        });
+      } catch (error) {
+        console.error('Ошибка:', error);
+        await bot.sendMessage(chatId, 'Произошла ошибка при обработке команды.');
+      }
+    }
 
     try {
       if (msg?.web_app_data?.data) {
@@ -1689,52 +1735,7 @@ const startBot = async () => {
     } catch (e) {
       console.log(e)
     }
-    bot.onText(/\/start/, async (msg) => {
-      try {
-        const chatId = msg.chat.id;
-        await bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
-        await dbManager.createUserWithRole(`${chatId}`, `${msg.from.first_name}`, `User`)
-      } catch (e) {
-        console.log(e)
-      }
-    })
 
-    bot.onText(/\/menu/, async (msg) => {
-      const chatId = msg.chat.id;
-
-      try {
-        const user = await User.findOne({ where: { telegramId: chatId } });
-
-        if (!user) {
-          await bot.sendMessage(chatId, 'Пользователь не найден.');
-          return;
-        }
-
-        let keyboard = [];
-
-        if (user.RoleId == '2') {
-          keyboard = [
-            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
-            [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
-          ];
-        } else if (user.RoleId == '3') {
-          keyboard = [
-            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
-            [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
-            [{ text: 'Изменить роль пользователю на админа', callback_data: '/resRole' }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
-          ];
-        }
-
-        await bot.sendMessage(chatId, 'Меню бота', {
-          reply_markup: {
-            keyboard: keyboard
-          }
-        });
-      } catch (error) {
-        console.error('Ошибка:', error);
-        await bot.sendMessage(chatId, 'Произошла ошибка при обработке команды.');
-      }
-    });
   });
 
   bot.on('callback_query', async (msg) => {
