@@ -12,7 +12,7 @@ require('./src/BaseData/bdModel');
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
-// const commandHandler = new commandAndAnswer(bot);
+const commandHandler = new commandAndAnswer(bot);
 // const callbackHandler = new callbackAnswer(bot);
 
 const express = require('express');
@@ -436,7 +436,7 @@ function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, te
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
 }
 
-function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler) {
+function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
   waitingUsers[chatId] = false;
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
@@ -451,7 +451,7 @@ function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeM
   bot.off('message', textHandler);
 }
 
-function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler) {
+function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
   waitingUsers[chatId] = false;
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
@@ -526,7 +526,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler);
+            resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler);
           }, 1000);
         }
       }
@@ -607,7 +607,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler)
+            resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler)
           }, 1000);
         }
 
@@ -1194,7 +1194,7 @@ const startBot = async () => {
       }
     }
 
-    if (msg.text === '/menu'){
+    if (msg.text === '/menu') {
       const chatId = msg.chat.id;
 
       try {
@@ -1324,7 +1324,7 @@ const startBot = async () => {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
                     const operatorId = chatId
-                    resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
+                    resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
                   }, 1000);
                 }
 
@@ -1397,7 +1397,7 @@ const startBot = async () => {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
                     const operatorId = chatId;
-                    resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
+                    resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
                   }, 1000);
                 }
 
@@ -1815,15 +1815,8 @@ const startBot = async () => {
               }
 
               if (!sentMediaGroups[chatId] && !reply?.text) {
-                console.log('gggggggggggggggggggggggggggggggggggg')
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
-                  // const op = 'User'
-                  // const useName = 'Оператор'
-                  // sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
-                  // waitingUsers[userId] = false;
-                  // bot.off('message', textHandler);
-                  // bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
                   resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
                 }, 1000);
 
@@ -1833,7 +1826,7 @@ const startBot = async () => {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
                   const operatorId = chatId
-                  resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
+                  resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
                 }, 1000);
               }
 
@@ -1896,12 +1889,6 @@ const startBot = async () => {
               if (!sentMediaGroups[chatId] && !reply?.text) {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
-                  // const op = 'Operator'
-                  // const useName = 'Оператор'
-                  // sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
-                  // waitingUsers[userId] = false;
-                  // bot.off('message', textHandler);
-                  // bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
                   resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler)
                 }, 1000);
 
@@ -1910,7 +1897,7 @@ const startBot = async () => {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
                   const operatorId = chatId;
-                  resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
+                  resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
                 }, 1000);
               }
 
