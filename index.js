@@ -1408,7 +1408,8 @@ const startBot = async () => {
                   await bot.sendMessage(messages[0].operatorId, `Пришел ответ от пользователя на заявку #${userRequestId} *проверка regex3*`, {
                     reply_markup: {
                       inline_keyboard: [
-                        [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+                        [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+                        [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
                       ]
                     }
                   });
@@ -1498,7 +1499,8 @@ const startBot = async () => {
                 bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку #${requestId} *проверка regex4*`, {
                   reply_markup: {
                     inline_keyboard: [
-                      [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
+                      [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }],
+                      [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${requestId}` }]
                     ]
                   }
                 });
@@ -1942,7 +1944,8 @@ const startBot = async () => {
                 await bot.sendMessage(messages[0].operatorId, `Пришел ответ от пользователя на заявку #${userRequestId} *проверка regex3*`, {
                   reply_markup: {
                     inline_keyboard: [
-                      [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+                      [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+                      [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
                     ]
                   }
                 });
@@ -2032,7 +2035,8 @@ const startBot = async () => {
               bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку #${requestId} *проверка regex4*`, {
                 reply_markup: {
                   inline_keyboard: [
-                    [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
+                    [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }],
+                    [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${requestId}` }]
                   ]
                 }
               });
