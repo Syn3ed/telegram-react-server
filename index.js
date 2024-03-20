@@ -463,7 +463,9 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         const timeMess = timeFunc()
 
         const messages = messagesFunc(userRequestId)
-
+        console.log(messages)
+        console.log(messages)
+        console.log(messages[0])
         if (reply.photo) {
           userPhotos[chatId] = userPhotos[chatId] || [];
           userPhotos[chatId].push({
@@ -543,6 +545,9 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         const timeMess = timeFunc()
 
         const messages = messagesFunc(userRequestId)
+        console.log(messages)
+        console.log(messages)
+        console.log(messages[0])
         if (reply.photo) {
           userPhotos[chatId] = userPhotos[chatId] || [];
           userPhotos[chatId].push({
