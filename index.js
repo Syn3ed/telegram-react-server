@@ -413,6 +413,7 @@ function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId) {
 }
 
 function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
@@ -426,6 +427,9 @@ function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeM
 }
 
 function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+  console.log(messages)
+  console.log(messages)
+  console.log(messages[0])
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
