@@ -1158,6 +1158,7 @@ const startBot = async () => {
 
     console.log(msg)
     const chatId = msg.chat.id
+    bot.on("polling_error", console.log);
     if (msg.text === 'Изменить роль пользователю на админа') {
       try {
         const userId = msg.from.id;
