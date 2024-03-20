@@ -404,7 +404,7 @@ async function messagesFunc(userRequestId) {
   })]
 }
 
-async function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId) {
+function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId) {
   const op = 'User'
   sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
   waitingUsers[userId] = false;
@@ -412,7 +412,7 @@ async function resToOperatorFunc(chatId, userName, userRequestId, timeMess, user
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
 }
 
-async function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
@@ -425,7 +425,7 @@ async function resToOperatorTextFunc(userRequestId, reply, operatorId, username,
   });
 }
 
-async function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
@@ -508,7 +508,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
   }
 })
 
-async function resToUserFunc(chatId, userRequestId, timeMess, userId) {
+function resToUserFunc(chatId, userRequestId, timeMess, userId) {
   const op = 'Operator'
   const useName = 'Оператор'
   sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
