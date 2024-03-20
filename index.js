@@ -548,7 +548,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
 
         const timeMess = timeFunc()
 
-        const messages = messagesFunc(userRequestId)
+        const messages = await messagesFunc(userRequestId)
         console.log(messages)
         console.log(messages)
         console.log(messages[0])
