@@ -373,8 +373,70 @@ const createMediaRecord = async (userRequestId, idMedia) => {
 };
 
 
+function timeFunc() {
+  const timeData = new Date();
+  const year = timeData.getFullYear();
+  const month = timeData.getMonth() + 1;
+  const day = timeData.getDate();
+  timeData.setHours(timeData.getHours() + 7);
+  const hours = timeData.getHours();
+  const minutes = timeData.getMinutes();
+  const formattedHours = hours < 10 ? '0' + hours : hours;
+  const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
+  return `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
+}
 
+async function messagesFunc(userRequestId) {
+  return [await Message.findAll({
+    where: { id: userRequestId },
+    include: [
+      {
+        model: UserRequest,
+        include: [
+          {
+            model: User,
+            attributes: ['username', 'address', 'telegramId']
+          }
+        ]
+      }
+    ]
+  })]
+}
+
+async function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId) {
+  const op = 'User'
+  sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
+  waitingUsers[userId] = false;
+  bot.off('message', textHandler);
+  bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+}
+
+async function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+  dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
+  bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+        [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
+      ]
+    }
+  });
+}
+
+async function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
+  dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
+  bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
+        [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
+      ]
+    }
+  });
+}
 
 app.post(`/replyToOperatorPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
@@ -393,32 +455,10 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
           waitingUsers[userId] = false;
           return bot.sendMessage(userId, 'Хорошо');;
         }
-        const timeData = new Date();
-        const year = timeData.getFullYear();
-        const month = timeData.getMonth() + 1;
-        const day = timeData.getDate();
-        timeData.setHours(timeData.getHours() + 7);
-        const hours = timeData.getHours();
-        const minutes = timeData.getMinutes();
-        const formattedHours = hours < 10 ? '0' + hours : hours;
-        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-        const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
+        const timeMess = timeFunc()
 
-        const messages = await Message.findAll({
-          where: { id: userRequestId },
-          include: [
-            {
-              model: UserRequest,
-              include: [
-                {
-                  model: User,
-                  attributes: ['username', 'address', 'telegramId']
-                }
-              ]
-            }
-          ]
-        });
+        const messages = messagesFunc(userRequestId)
 
         if (reply.photo) {
           userPhotos[chatId] = userPhotos[chatId] || [];
@@ -447,32 +487,17 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
           dbManager.createUserRequestMessage(userRequestId, caption_text, operatorId, 'User', username, timeMess);
         }
 
-
-
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            const op = 'User'
-            sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
-            waitingUsers[userId] = false;
-            bot.off('message', textHandler);
-            bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+            resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId);
           }, 1000);
         }
         if (!sentMediaGroups[chatId] && reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
             waitingUsers[userId] = false;
-            dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
-            bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-            bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-                  [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
-                ]
-              }
-            });
+            resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages);
           }, 1000);
         }
       }
@@ -482,6 +507,15 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
     console.log(error)
   }
 })
+
+async function resToUserFunc(chatId, userRequestId, timeMess, userId) {
+  const op = 'Operator'
+  const useName = 'Оператор'
+  sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
+  waitingUsers[userId] = false;
+  bot.off('message', textHandler);
+  bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
+}
 
 app.post(`/resToUserPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
@@ -501,31 +535,10 @@ app.post(`/resToUserPhoto`, async (req, res) => {
           return bot.sendMessage(userId, 'Хорошо');;
         }
 
-        const timeData = new Date();
-        const year = timeData.getFullYear();
-        const month = timeData.getMonth() + 1;
-        const day = timeData.getDate();
-        timeData.setHours(timeData.getHours() + 7);
-        const hours = timeData.getHours();
-        const minutes = timeData.getMinutes();
-        const formattedHours = hours < 10 ? '0' + hours : hours;
-        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-        const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
 
-        const messages = await Message.findAll({
-          where: { id: userRequestId },
-          include: [
-            {
-              model: UserRequest,
-              include: [
-                {
-                  model: User,
-                  attributes: ['username', 'address', 'telegramId']
-                }
-              ]
-            }
-          ]
-        });
+        const timeMess = timeFunc()
+
+        const messages = messagesFunc(userRequestId)
         if (reply.photo) {
           userPhotos[chatId] = userPhotos[chatId] || [];
           userPhotos[chatId].push({
@@ -555,12 +568,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            const op = 'Operator'
-            const useName = 'Оператор'
-            sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
-            waitingUsers[userId] = false;
-            bot.off('message', textHandler);
-            bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
+            resToUserFunc(chatId, userRequestId, timeMess, userId);
           }, 1000);
         }
 
@@ -568,16 +576,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
             waitingUsers[userId] = false;
-            dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
-            bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-            bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-                  [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-                ]
-              }
-            });
+            resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages)
           }, 1000);
         }
 
@@ -1202,32 +1201,11 @@ const startBot = async () => {
                   return bot.sendMessage(userId, 'Хорошо');;
                 }
 
-                const timeData = new Date();
-                const year = timeData.getFullYear();
-                const month = timeData.getMonth() + 1;
-                const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 7);
-                const hours = timeData.getHours();
-                const minutes = timeData.getMinutes();
-                const formattedHours = hours < 10 ? '0' + hours : hours;
-                const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
 
-                const messages = await Message.findAll({
-                  where: { id: userRequestId },
-                  include: [
-                    {
-                      model: UserRequest,
-                      include: [
-                        {
-                          model: User,
-                          attributes: ['username', 'address', 'telegramId']
-                        }
-                      ]
-                    }
-                  ]
-                });
+                const timeMess = timeFunc();
+
+                const messages = messagesFunc(userRequestId)
 
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
@@ -1260,12 +1238,7 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    const op = 'User'
-                    const useName = 'Оператор'
-                    sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
-                    waitingUsers[userId] = false;
-                    bot.off('message', textHandler);
-                    bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
+                    resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId);
                   }, 1000);
 
                 }
@@ -1274,16 +1247,8 @@ const startBot = async () => {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
                     waitingUsers[userId] = false;
-                    dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, timeMess);
-                    bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-                    bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
-                      reply_markup: {
-                        inline_keyboard: [
-                          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-                          [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
-                        ]
-                      }
-                    });
+                    const operatorId = chatId
+                    resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
                   }, 1000);
                 }
 
@@ -1313,31 +1278,10 @@ const startBot = async () => {
                   return bot.sendMessage(userId, 'Хорошо');;
                 }
 
-                const timeData = new Date();
-                const year = timeData.getFullYear();
-                const month = timeData.getMonth() + 1;
-                const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 7);
-                const hours = timeData.getHours();
-                const minutes = timeData.getMinutes();
-                const formattedHours = hours < 10 ? '0' + hours : hours;
-                const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
-                const messages = await Message.findAll({
-                  where: { id: userRequestId },
-                  include: [
-                    {
-                      model: UserRequest,
-                      include: [
-                        {
-                          model: User,
-                          attributes: ['username', 'address', 'telegramId']
-                        }
-                      ]
-                    }
-                  ]
-                });
+                const timeMess = timeFunc();
+                const messages = messagesFunc(userRequestId)
+
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
                   userPhotos[chatId].push({
@@ -1369,12 +1313,7 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    const op = 'Operator'
-                    const useName = 'Оператор'
-                    sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
-                    waitingUsers[userId] = false;
-                    bot.off('message', textHandler);
-                    bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
+                    resToUserFunc(chatId, userRequestId, timeMess, userId)
                   }, 1000);
                 }
 
@@ -1382,16 +1321,8 @@ const startBot = async () => {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
                     waitingUsers[userId] = false;
-                    dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
-                    bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-                    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
-                      reply_markup: {
-                        inline_keyboard: [
-                          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-                          [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-                        ]
-                      }
-                    });
+                    const operatorId = chatId;
+                    resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
                   }, 1000);
                 }
 
@@ -1774,32 +1705,10 @@ const startBot = async () => {
                 waitingUsers[userId] = false;
                 return bot.sendMessage(userId, 'Хорошо');;
               }
-              const timeData = new Date();
-              const year = timeData.getFullYear();
-              const month = timeData.getMonth() + 1;
-              const day = timeData.getDate();
-              timeData.setHours(timeData.getHours() + 7);
-              const hours = timeData.getHours();
-              const minutes = timeData.getMinutes();
-              const formattedHours = hours < 10 ? '0' + hours : hours;
-              const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-              const messages = await Message.findAll({
-                where: { id: userRequestId },
-                include: [
-                  {
-                    model: UserRequest,
-                    include: [
-                      {
-                        model: User,
-                        attributes: ['username', 'address', 'telegramId']
-                      }
-                    ]
-                  }
-                ]
-              });
+              const messages = messagesFunc(userRequestId)
 
-              const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
+              const timeMess = timeFunc();
               if (reply.photo) {
                 userPhotos[chatId] = userPhotos[chatId] || [];
                 userPhotos[chatId].push({
@@ -1832,12 +1741,13 @@ const startBot = async () => {
                 console.log('gggggggggggggggggggggggggggggggggggg')
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
-                  const op = 'User'
-                  const useName = 'Оператор'
-                  sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
-                  waitingUsers[userId] = false;
-                  bot.off('message', textHandler);
-                  bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
+                  // const op = 'User'
+                  // const useName = 'Оператор'
+                  // sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
+                  // waitingUsers[userId] = false;
+                  // bot.off('message', textHandler);
+                  // bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
+                  resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId);
                 }, 1000);
 
               }
@@ -1846,16 +1756,18 @@ const startBot = async () => {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
                   waitingUsers[userId] = false;
-                  dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, timeMess);
-                  bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-                  bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
-                    reply_markup: {
-                      inline_keyboard: [
-                        [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-                        [{ text: 'Ответить', callback_data: `/resToUserPhoto  ${userRequestId}` }]
-                      ]
-                    }
-                  });
+                  // dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, timeMess);
+                  // bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+                  // bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
+                  //   reply_markup: {
+                  //     inline_keyboard: [
+                  //       [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+                  //       [{ text: 'Ответить', callback_data: `/resToUserPhoto  ${userRequestId}` }]
+                  //     ]
+                  //   }
+                  // });
+                  const operatorId = chatId
+                  resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
                 }, 1000);
               }
 
@@ -1884,31 +1796,10 @@ const startBot = async () => {
                 waitingUsers[userId] = false;
                 return bot.sendMessage(userId, 'Хорошо');;
               }
-              const timeData = new Date();
-              const year = timeData.getFullYear();
-              const month = timeData.getMonth() + 1;
-              const day = timeData.getDate();
-              timeData.setHours(timeData.getHours() + 7);
-              const hours = timeData.getHours();
-              const minutes = timeData.getMinutes();
-              const formattedHours = hours < 10 ? '0' + hours : hours;
-              const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-              const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
-              const messages = await Message.findAll({
-                where: { id: userRequestId },
-                include: [
-                  {
-                    model: UserRequest,
-                    include: [
-                      {
-                        model: User,
-                        attributes: ['username', 'address', 'telegramId']
-                      }
-                    ]
-                  }
-                ]
-              });
+
+              const timeMess = timeFunc();
+              const messages = messagesFunc(userRequestId)
 
               if (reply.photo) {
                 userPhotos[chatId] = userPhotos[chatId] || [];
@@ -1932,13 +1823,6 @@ const startBot = async () => {
                   mediaGroupId: reply.media_group_id
                 });
               }
-              // await MessageChat.create({
-              //   IdMedia: mediaRecord.id,
-              //   roleUser: 'Operator',
-              //   username: 'Оператор',
-              //   UserRequestId: userRequestId,
-              //   TimeMessages: timeMess,
-              // })
               if (reply.caption) {
                 const caption_text = reply.caption
                 dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', 'Оператор', timeMess);
@@ -1946,12 +1830,13 @@ const startBot = async () => {
               if (!sentMediaGroups[chatId] && !reply?.text) {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
-                  const op = 'Operator'
-                  const useName = 'Оператор'
-                  sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
-                  waitingUsers[userId] = false;
-                  bot.off('message', textHandler);
-                  bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
+                  // const op = 'Operator'
+                  // const useName = 'Оператор'
+                  // sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
+                  // waitingUsers[userId] = false;
+                  // bot.off('message', textHandler);
+                  // bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
+                  resToUserFunc(chatId, userRequestId, timeMess, userId)
                 }, 1000);
 
               }
@@ -1959,16 +1844,18 @@ const startBot = async () => {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
                   waitingUsers[userId] = false;
-                  dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
-                  bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-                  bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
-                    reply_markup: {
-                      inline_keyboard: [
-                        [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-                        [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-                      ]
-                    }
-                  });
+                  // dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
+                  // bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+                  // bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
+                  //   reply_markup: {
+                  //     inline_keyboard: [
+                  //       [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
+                  //       [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
+                  //     ]
+                  //   }
+                  // });
+                  const operatorId = chatId;
+                  resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages)
                 }, 1000);
               }
 
