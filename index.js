@@ -547,7 +547,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
     await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Стоп' }]
+          [{ text: 'Стоп', callback_data: 'Стоп' }]
         ]
       }
     });
@@ -640,7 +640,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
     await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Стоп' }]
+          [{ text: 'Стоп', callback_data: 'Стоп' }]
         ]
       }
     });
@@ -1369,7 +1369,7 @@ const startBot = async () => {
             await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: 'Стоп' }]
+                  [{ text: 'Стоп', callback_data: 'Стоп' }]
                 ]
               }
             });
@@ -1453,7 +1453,7 @@ const startBot = async () => {
             await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: 'Стоп' }]
+                  [{ text: 'Стоп', callback_data: 'Стоп' }]
                 ]
               }
             });
@@ -1897,7 +1897,7 @@ const startBot = async () => {
           await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
             reply_markup: {
               inline_keyboard: [
-                [{ text: 'Стоп' }]
+                [{ text: 'Стоп', callback_data: 'Стоп' }]
               ]
             }
           });
@@ -1980,7 +1980,7 @@ const startBot = async () => {
           await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
             reply_markup: {
               inline_keyboard: [
-                [{ text: 'Стоп' }]
+                [{ text: 'Стоп', callback_data: 'Стоп' }]
               ]
             }
           });
