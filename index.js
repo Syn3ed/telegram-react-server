@@ -405,7 +405,7 @@ async function messagesFunc(userRequestId) {
   return messages
 }
 
-function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId) {
+function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler) {
   const op = 'User'
   sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
   waitingUsers[userId] = false;
@@ -500,7 +500,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId);
+            resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler);
           }, 1000);
         }
         if (!sentMediaGroups[chatId] && reply?.text) {
@@ -518,7 +518,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
   }
 })
 
-function resToUserFunc(chatId, userRequestId, timeMess, userId) {
+function resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler) {
   const op = 'Operator'
   const useName = 'Оператор'
   sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
@@ -581,7 +581,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && !reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            resToUserFunc(chatId, userRequestId, timeMess, userId);
+            resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler);
           }, 1000);
         }
 
@@ -1251,7 +1251,7 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId);
+                    resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler);
                   }, 1000);
 
                 }
@@ -1326,7 +1326,7 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && !reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    resToUserFunc(chatId, userRequestId, timeMess, userId)
+                    resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler)
                   }, 1000);
                 }
 
@@ -1760,7 +1760,7 @@ const startBot = async () => {
                   // waitingUsers[userId] = false;
                   // bot.off('message', textHandler);
                   // bot.sendMessage(userId, `Файл успешно добавлен к заявке №${userRequestId}`);
-                  resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId);
+                  resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId,textHandler);
                 }, 1000);
 
               }
@@ -1849,7 +1849,7 @@ const startBot = async () => {
                   // waitingUsers[userId] = false;
                   // bot.off('message', textHandler);
                   // bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
-                  resToUserFunc(chatId, userRequestId, timeMess, userId)
+                  resToUserFunc(chatId, userRequestId, timeMess, userId,textHandler)
                 }, 1000);
 
               }
