@@ -440,6 +440,7 @@ async function resToOperatorTextFunc(userRequestId, reply, operatorId, username,
   waitingUsers[chatId] = false;
   await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
   await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  console.log('resToOperatorTextFunc')
   await bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
     reply_markup: {
       inline_keyboard: [
@@ -448,6 +449,7 @@ async function resToOperatorTextFunc(userRequestId, reply, operatorId, username,
       ]
     }
   });
+  console.log('resToOperatorTextFunc')
   bot.off('message', textHandler);
 }
 
