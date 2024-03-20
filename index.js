@@ -161,7 +161,7 @@ app.post(`/replyToOperator`, async (req, res) => {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-          [{ text: 'Ответить', callback_data: `/resToUser ${userRequestId}` }]
+          [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
         ]
       }
     });
@@ -306,7 +306,7 @@ app.post(`/replyToUser`, async (req, res) => {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-          [{ text: 'Ответить', callback_data: `/resToOperator ${userRequestId}` }]
+          [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
         ]
       }
     });
