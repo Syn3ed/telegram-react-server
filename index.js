@@ -436,11 +436,11 @@ function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, te
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
 }
 
-function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
+async function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
   waitingUsers[chatId] = false;
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-  bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
+  await bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
@@ -451,11 +451,11 @@ function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeM
   bot.off('message', textHandler);
 }
 
-function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
+async function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
   waitingUsers[chatId] = false;
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-  bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
+  await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
