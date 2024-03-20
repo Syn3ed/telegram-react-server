@@ -1203,7 +1203,7 @@ const startBot = async () => {
       const chatId = msg.chat.id;
 
       try {
-        const user = await User.findOne({ where: { telegramId: chatId } });
+        const user = await User.findOne({ where: { telegramId: chatId.toString() } });
 
         if (!user) {
           await bot.sendMessage(chatId, 'Пользователь не найден.');
