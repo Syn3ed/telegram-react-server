@@ -544,7 +544,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
       console.log(error)
     }
   } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
+    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -637,7 +637,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
       console.log(error)
     }
   } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
+    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -1366,7 +1366,7 @@ const startBot = async () => {
               console.log(error)
             }
           } else {
-            await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
+            await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
               reply_markup: {
                 inline_keyboard: [
                   [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -1450,7 +1450,7 @@ const startBot = async () => {
               console.error('Ошибка при обработке команды :', error);
             }
           } else {
-            await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
+            await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
               reply_markup: {
                 inline_keyboard: [
                   [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -1789,7 +1789,13 @@ const startBot = async () => {
     console.log(msg.data)
     const chatId = msg.from.id
     const data1 = msg.data;
-
+    if (data1 === 'Стоп') {
+      const userId = msg.from.id;
+      if (waitingUsers[userId]) { 
+        waitingUsers[userId] = false
+        await bot.sendMessage(chatId, `Вы завершили предыдушие действие.`)
+      }
+    }
     if (data1) {
       const regex = /\/handleShowPhoto (\d+)/;
       const regex1 = /\/resToUserPhoto (\d+)/;
@@ -1894,7 +1900,7 @@ const startBot = async () => {
             console.log(error)
           }
         } else {
-          await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
+          await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
             reply_markup: {
               inline_keyboard: [
                 [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -1977,7 +1983,7 @@ const startBot = async () => {
             console.error('Ошибка при обработке команды :', error);
           }
         } else {
-          await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить`, {
+          await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
             reply_markup: {
               inline_keyboard: [
                 [{ text: 'Стоп', callback_data: 'Стоп' }]
