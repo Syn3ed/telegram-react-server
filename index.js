@@ -428,8 +428,8 @@ function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeM
 }
 
 function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages) {
-  console.log(messages)
-  console.log(messages)
+  console.log(messages.Message)
+  console.log(messages.Message[0])
   console.log(messages[0])
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
