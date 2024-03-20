@@ -437,7 +437,7 @@ function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, te
 }
 
 function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler) {
-
+  waitingUsers[chatId] = false;
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
@@ -452,12 +452,7 @@ function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeM
 }
 
 function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler) {
-  console.log('1212121122121212112212121212121212121212121')
-  console.log(messages.Message)
-  console.log(messages.Message)
-  console.log(messages.Message)
-  console.log('333333333333333333333333333333333333333333333333333333')
-  console.log(messages)
+  waitingUsers[chatId] = false;
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
@@ -531,7 +526,6 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            waitingUsers[userId] = false;
             resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler);
           }, 1000);
         }
@@ -613,7 +607,6 @@ app.post(`/resToUserPhoto`, async (req, res) => {
         if (!sentMediaGroups[chatId] && reply?.text) {
           sentMediaGroups[chatId] = true;
           setTimeout(() => {
-            waitingUsers[userId] = false;
             resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages,textHandler)
           }, 1000);
         }
@@ -1330,7 +1323,6 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    waitingUsers[userId] = false;
                     const operatorId = chatId
                     resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                   }, 1000);
@@ -1404,7 +1396,6 @@ const startBot = async () => {
                 if (!sentMediaGroups[chatId] && reply?.text) {
                   sentMediaGroups[chatId] = true;
                   setTimeout(() => {
-                    waitingUsers[userId] = false;
                     const operatorId = chatId;
                     resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                   }, 1000);
@@ -1841,17 +1832,6 @@ const startBot = async () => {
               if (!sentMediaGroups[chatId] && reply?.text) {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
-                  waitingUsers[userId] = false;
-                  // dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, timeMess);
-                  // bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-                  // bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
-                  //   reply_markup: {
-                  //     inline_keyboard: [
-                  //       [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-                  //       [{ text: 'Ответить', callback_data: `/resToUserPhoto  ${userRequestId}` }]
-                  //     ]
-                  //   }
-                  // });
                   const operatorId = chatId
                   resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                 }, 1000);
@@ -1929,17 +1909,6 @@ const startBot = async () => {
               if (!sentMediaGroups[chatId] && reply?.text) {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
-                  waitingUsers[userId] = false;
-                  // dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
-                  // bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-                  // bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
-                  //   reply_markup: {
-                  //     inline_keyboard: [
-                  //       [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-                  //       [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-                  //     ]
-                  //   }
-                  // });
                   const operatorId = chatId;
                   resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages,textHandler)
                 }, 1000);
