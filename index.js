@@ -541,7 +541,7 @@ function resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler) {
   const op = 'Operator'
   const useName = 'Оператор'
   sendMediaGroup1(chatId, useName, userRequestId, timeMess, op);
-  waitingUsers[userId] = false;
+  waitingUsers[chatId] = false;
   bot.off('message', textHandler);
   bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
 }
@@ -1146,10 +1146,6 @@ const startBot = async () => {
     }
   });
 
-
-  // bot.on('callback_query', async (msg) => {
-  //   await callbackHandler.handleMessage(msg);
-  // });
 
   bot.on('message', async (msg) => {
 
@@ -1818,15 +1814,16 @@ const startBot = async () => {
                 sentMediaGroups[chatId] = true;
                 setTimeout(() => {
                   resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler);
+                  console.log(waitingUsers[chatId])
                 }, 1000);
 
               }
 
-              if (!sentMediaGroups[chatId] && reply?.text) {
-                sentMediaGroups[chatId] = true;
+              if (reply?.text) {
                 setTimeout(() => {
                   const operatorId = chatId
                   resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
+                  console.log(waitingUsers[chatId])
                 }, 1000);
               }
 
