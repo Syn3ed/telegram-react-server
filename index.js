@@ -433,7 +433,7 @@ function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess,
   console.log(messages.Message)
   console.log(messages.Message)
   console.log('333333333333333333333333333333333333333333333333333333')
-  console.log(messages.Promise)
+  console.log(messages)
   dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
   bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*`, {
