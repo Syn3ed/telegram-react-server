@@ -466,7 +466,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
 
         const timeMess = timeFunc()
 
-        const messages = messagesFunc(userRequestId)
+        const messages = await messagesFunc(userRequestId)
         console.log(messages)
         console.log(messages)
         console.log(messages[0])
@@ -1218,7 +1218,7 @@ const startBot = async () => {
 
                 const timeMess = timeFunc();
 
-                const messages = messagesFunc(userRequestId)
+                const messages = await messagesFunc(userRequestId)
 
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
@@ -1293,7 +1293,7 @@ const startBot = async () => {
 
 
                 const timeMess = timeFunc();
-                const messages = messagesFunc(userRequestId)
+                const messages = await (userRequestId)
 
                 if (reply.photo) {
                   userPhotos[chatId] = userPhotos[chatId] || [];
@@ -1719,7 +1719,7 @@ const startBot = async () => {
                 return bot.sendMessage(userId, 'Хорошо');;
               }
 
-              const messages = messagesFunc(userRequestId)
+              const messages = await messagesFunc(userRequestId)
 
               const timeMess = timeFunc();
               if (reply.photo) {
@@ -1812,7 +1812,7 @@ const startBot = async () => {
 
 
               const timeMess = timeFunc();
-              const messages = messagesFunc(userRequestId)
+              const messages = await messagesFunc(userRequestId)
 
               if (reply.photo) {
                 userPhotos[chatId] = userPhotos[chatId] || [];
