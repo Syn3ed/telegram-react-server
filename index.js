@@ -12,9 +12,6 @@ require('./src/BaseData/bdModel');
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
-// const commandHandler = new commandAndAnswer(bot);
-// const callbackHandler = new callbackAnswer(bot);
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq } = require('./src/BaseData/bdModel');
@@ -209,6 +206,7 @@ app.post('/closeReq', async (req, res) => {
   } catch (e) {
     console.log(e)
   }
+  res.status(200).json({ success: true });
 })
 
 app.post(`/resumeReq`, async (req, res) => {
@@ -246,7 +244,7 @@ app.post(`/resumeReq`, async (req, res) => {
   } catch (e) {
     console.log(e);
   }
-
+  res.status(200).json({ success: true });
 })
 
 app.post(`/replyToUser`, async (req, res) => {
@@ -425,7 +423,7 @@ async function messagesFunc(userRequestId) {
       }
     ]
   })
-  return messages
+  return messages;
 }
 
 async function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler, caption_text) {
@@ -434,6 +432,7 @@ async function resToOperatorFunc(chatId, userName, userRequestId, timeMess, user
   waitingUsers[userId] = false;
   bot.off('message', textHandler);
   await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  return;
 }
 
 async function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
@@ -451,6 +450,7 @@ async function resToOperatorTextFunc(userRequestId, reply, operatorId, username,
   });
   console.log('resToOperatorTextFunc')
   bot.off('message', textHandler);
+  return;
 }
 
 async function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
@@ -468,6 +468,7 @@ async function resToUserTextFunc(userRequestId, reply, operatorId, username, tim
   });
   console.log('resToUserTextFunc')
   bot.off('message', textHandler);
+  return;
 }
 
 app.post(`/replyToOperatorPhoto`, async (req, res) => {
@@ -552,7 +553,9 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
       }
     });
   }
-})
+  res.status(200).json({ success: true });
+}
+)
 
 async function resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler, caption_text) {
   const op = 'Operator'
@@ -561,6 +564,7 @@ async function resToUserFunc(chatId, userRequestId, timeMess, userId, textHandle
   waitingUsers[chatId] = false;
   bot.off('message', textHandler);
   bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
+  return;
 }
 
 app.post(`/resToUserPhoto`, async (req, res) => {
@@ -645,6 +649,7 @@ app.post(`/resToUserPhoto`, async (req, res) => {
       }
     });
   }
+  res.status(200).json({ success: true });
 })
 
 
@@ -1145,6 +1150,7 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op, ca
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
   }
+  return;
 }
 
 const startBot = async () => {
@@ -1791,7 +1797,7 @@ const startBot = async () => {
     const data1 = msg.data;
     if (data1 === 'Стоп') {
       const userId = msg.from.id;
-      if (waitingUsers[userId]) { 
+      if (waitingUsers[userId]) {
         waitingUsers[userId] = false
         await bot.sendMessage(chatId, `Вы завершили предыдушие действие.`)
       }
@@ -1907,7 +1913,8 @@ const startBot = async () => {
               ]
             }
           });
-        }
+        } 
+        return;
       }
       if (regex1.test(data1)) {
         const userId = msg.from.id;
@@ -1991,6 +1998,7 @@ const startBot = async () => {
             }
           });
         }
+        return;
       }
       if (regex3.test(data1)) {
         const match = data1.match(regex3);
