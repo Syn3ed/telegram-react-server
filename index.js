@@ -1661,6 +1661,7 @@ const startBot = async () => {
     console.log(msg.data)
     const chatId = msg.from.id
     const data1 = msg.data;
+    const callbackQueryId = msg.id
     if (data1 === 'Стоп') {
       const userId = msg.from.id;
       if (waitingUsers[userId]) {
@@ -1921,6 +1922,7 @@ const startBot = async () => {
       }
     }
   })
+  await bot.answerCallbackQuery(callbackQueryId);
   return;
 };
 
