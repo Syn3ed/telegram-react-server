@@ -471,32 +471,32 @@ async function resToUserTextFunc(userRequestId, reply, operatorId, username, tim
   return;
 }
 
-app.post(`/replyToOperatorPhoto`, async (req, res) => {
-  const { queryId, userRequestId, username, operatorId } = req.body;
-  const userId = operatorId;
-  const chatId = operatorId;
-  const userName = username;
+async function MethodToOperator(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     try {
-      await bot.sendMessage(chatId, 'Прикрепите файл:');
+      await bot.sendMessage(chatId, 'Введите сообщение или прикрепите файл(ы).\nТак же можете отменить действие нажав на кнопку "Стоп"', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Стоп', callback_data: 'Стоп' }]
+          ]
+        }
+      });
 
-      waitingUsers[userId] = true;
+      waitingUsers[chatId] = true;
       const textHandler = async (response) => {
-        if (userId === response.from.id && waitingUsers[userId]) {
+        if (chatId === response.from.id && waitingUsers[chatId]) {
 
           const reply = response;
-          if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
-            waitingUsers[userId] = false;
-            return bot.sendMessage(userId, 'Хорошо');;
+          if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
+            waitingUsers[chatId] = false;
+            return bot.sendMessage(chatId, 'Хорошо');;
           }
 
           const timeMess = timeFunc()
           let caption_text;
 
           const messages = await messagesFunc(userRequestId)
-          console.log(messages)
-          console.log(messages)
-          console.log(messages[0])
+
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             userPhotos[chatId].push({
@@ -521,20 +521,20 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
           }
           if (reply.caption) {
             caption_text = reply.caption
-            dbManager.createUserRequestMessage(userRequestId, caption_text, operatorId, 'User', username, timeMess);
+            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
           }
 
           if (!sentMediaGroups[chatId] && !reply?.text) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
               console.log(sentMediaGroups[chatId])
-              resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler, caption_text);
+              resToOperatorFunc(chatId, userName, userRequestId, timeMess, chatId, textHandler, caption_text);
               console.log(waitingUsers[chatId])
             }, 1000);
           }
           if (reply?.text) {
             setTimeout(() => {
-              resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler);
+              resToOperatorTextFunc(userRequestId, reply, chatId, userName, timeMess, chatId, messages, textHandler);
               console.log(waitingUsers[chatId])
             }, 1000);
           }
@@ -553,6 +553,107 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
       }
     });
   }
+}
+
+async function MethodToUser(userRequestId, userName, chatId) {
+  if (!waitingUsers[chatId]) {
+    try {
+      await bot.sendMessage(chatId, 'Введите сообщение или прикрепите файл(ы).\nТак же можете отменить действие нажав на кнопку "Стоп"', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Стоп', callback_data: 'Стоп' }]
+          ]
+        }
+      });
+      
+      waitingUsers[chatId] = true;
+      const textHandler = async (response) => {
+        if (chatId === response.from.id && waitingUsers[chatId]) {
+
+          const reply = response;
+          if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
+            waitingUsers[chatId] = false;
+            return bot.sendMessage(chatId, 'Хорошо');;
+          }
+          let caption_text;
+
+          const timeMess = timeFunc()
+          const messages = await messagesFunc(userRequestId)
+          if (reply.photo) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
+            userPhotos[chatId].push({
+              type: 'photo',
+              media: reply.photo[0].file_id,
+              mediaGroupId: reply.media_group_id
+            });
+            console.log('Получена фотография:');
+            console.log(userPhotos[chatId]);
+          } else if (reply.document) {
+            userPhotos[chatId].push({
+              type: 'document',
+              media: reply.document.file_id,
+              mediaGroupId: reply.media_group_id
+            });
+          } else if (reply.video) {
+            userPhotos[chatId].push({
+              type: 'video',
+              media: reply.video.file_id,
+              mediaGroupId: reply.media_group_id
+            });
+          }
+          const userRequestStatus = await UserRequest.findByPk(userRequestId);
+          if (userRequestStatus.status === 'ожидает ответа оператора') {
+            const status = 'Заявка в обработке';
+            await dbManager.changeStatusRes(userRequestId, status);
+            const message = `Заявка под номером ${userRequestId} в обработке`;
+            await sendMessagesToUsersWithRoleId(message, userRequestId);
+          }
+          const existingMessage = await Message.findByPk(userRequestId);
+          existingMessage.operatorId = chatId;
+          await existingMessage.save();
+
+          if (reply.caption) {
+            caption_text = reply.caption
+            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', 'Оператор', timeMess);
+          }
+          if (!sentMediaGroups[chatId] && !reply?.text) {
+            sentMediaGroups[chatId] = true;
+            setTimeout(() => {
+              console.log(sentMediaGroups[chatId])
+              resToUserFunc(chatId, userRequestId, timeMess, chatId, textHandler, caption_text);
+              console.log(waitingUsers[chatId])
+            }, 1000);
+          }
+
+          if (reply?.text) {
+            setTimeout(() => {
+              resToUserTextFunc(userRequestId, reply, chatId, username, timeMess, chatId, messages, textHandler)
+              console.log(waitingUsers[chatId])
+            }, 1000);
+          }
+
+        }
+      };
+      bot.on('message', textHandler);
+    } catch (error) {
+      console.log(error)
+    }
+  } else {
+    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Стоп', callback_data: 'Стоп' }]
+        ]
+      }
+    });
+  }
+}
+
+app.post(`/replyToOperatorPhoto`, async (req, res) => {
+  const { queryId, userRequestId, username, operatorId } = req.body;
+  const chatId = operatorId;
+  const userName = username;
+  MethodToOperator(userRequestId, userName, chatId)
   res.status(200).json({ success: true });
 }
 )
@@ -569,86 +670,9 @@ async function resToUserFunc(chatId, userRequestId, timeMess, userId, textHandle
 
 app.post(`/resToUserPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
-  const userId = operatorId;
   const chatId = operatorId;
   const userName = username;
-  if (!waitingUsers[chatId]) {
-    try {
-      await bot.sendMessage(userId, 'Прикрепите файл:');
-
-      waitingUsers[userId] = true;
-      const textHandler = async (response) => {
-        if (userId === response.from.id && waitingUsers[userId]) {
-
-          const reply = response;
-          if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
-            waitingUsers[userId] = false;
-            return bot.sendMessage(userId, 'Хорошо');;
-          }
-          let caption_text;
-
-          const timeMess = timeFunc()
-          const messages = await messagesFunc(userRequestId)
-          console.log(messages)
-          console.log(messages)
-          console.log(messages[0])
-          if (reply.photo) {
-            userPhotos[chatId] = userPhotos[chatId] || [];
-            userPhotos[chatId].push({
-              type: 'photo',
-              media: reply.photo[0].file_id,
-              mediaGroupId: reply.media_group_id
-            });
-            console.log('Получена фотография:');
-            console.log(userPhotos[chatId]);
-          } else if (reply.document) {
-            userPhotos[chatId].push({
-              type: 'document',
-              media: reply.document.file_id,
-              mediaGroupId: reply.media_group_id
-            });
-          } else if (reply.video) {
-            userPhotos[chatId].push({
-              type: 'video',
-              media: reply.video.file_id,
-              mediaGroupId: reply.media_group_id
-            });
-          }
-          if (reply.caption) {
-            caption_text = reply.caption
-            dbManager.createUserRequestMessage(userRequestId, caption_text, operatorId, 'Opeartor', 'Оператор', timeMess);
-          }
-          if (!sentMediaGroups[chatId] && !reply?.text) {
-            sentMediaGroups[chatId] = true;
-            setTimeout(() => {
-              console.log(sentMediaGroups[chatId])
-              resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler, caption_text);
-              console.log(waitingUsers[chatId])
-            }, 1000);
-          }
-
-          if (reply?.text) {
-            setTimeout(() => {
-              resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler)
-              console.log(waitingUsers[chatId])
-            }, 1000);
-          }
-
-        }
-      };
-      bot.on('message', textHandler);
-    } catch (error) {
-      console.log(error)
-    }
-  } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Стоп', callback_data: 'Стоп' }]
-        ]
-      }
-    });
-  }
+  MethodToUser(userRequestId, userName, chatId)
   res.status(200).json({ success: true });
 })
 
@@ -1120,18 +1144,20 @@ async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op, ca
 
 
     if (op === 'User') {
-      const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
-      if (caption_text) {
-        await bot.sendMessage(messages[0].operatorId, caption_text)
-      }
-      await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex${op}*`, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-            [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
-          ]
+      if (messages[0].operatorId) {
+        const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
+        if (caption_text) {
+          await bot.sendMessage(messages[0].operatorId, caption_text)
         }
-      });
+        await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex${op}*`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+              [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
+            ]
+          }
+        });
+      }
     } else {
       const tt = await hndlMed(mediaRecord.id, messages[0].UserRequest.User.telegramId);
       if (caption_text) {
@@ -1294,176 +1320,16 @@ const startBot = async () => {
         if (msg?.web_app_data?.data && regex2.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex2);
           const userRequestId = match[1];
-          const userId = msg.from.id;
           const chatId = msg.from.id;
           const userName = msg.from.first_name
-          if (!waitingUsers[chatId]) {
-            try {
-
-              await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
-              let caption_text;
-              waitingUsers[userId] = true;
-              const textHandler = async (response) => {
-                if (userId === response.from.id && waitingUsers[userId]) {
-
-                  const reply = response;
-                  if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
-                    waitingUsers[userId] = false;
-                    return bot.sendMessage(userId, 'Хорошо');;
-                  }
-
-
-
-                  const timeMess = timeFunc();
-
-                  const messages = await messagesFunc(userRequestId)
-
-                  if (reply.photo) {
-                    userPhotos[chatId] = userPhotos[chatId] || [];
-                    userPhotos[chatId].push({
-                      type: 'photo',
-                      media: reply.photo[0].file_id,
-                      mediaGroupId: reply.media_group_id
-                    });
-                    console.log('Получена фотография:');
-                    console.log(userPhotos[chatId]);
-                  } else if (reply.document) {
-                    userPhotos[chatId].push({
-                      type: 'document',
-                      media: reply.document.file_id,
-                      mediaGroupId: reply.media_group_id
-                    });
-                  } else if (reply.video) {
-                    userPhotos[chatId].push({
-                      type: 'video',
-                      media: reply.video.file_id,
-                      mediaGroupId: reply.media_group_id
-                    });
-                  }
-
-                  if (reply.caption) {
-                    caption_text = reply.caption
-                    dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
-                  }
-
-                  if (!sentMediaGroups[chatId] && !reply?.text) {
-                    sentMediaGroups[chatId] = true;
-                    setTimeout(() => {
-                      console.log(sentMediaGroups[chatId])
-                      resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler, caption_text);
-                      console.log(waitingUsers[chatId])
-                    }, 1000);
-
-                  }
-
-                  if (reply?.text) {
-                    setTimeout(() => {
-                      const operatorId = chatId
-                      resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
-                      console.log(waitingUsers[chatId])
-                    }, 1000);
-                  }
-
-
-                }
-              };
-              bot.on('message', textHandler);
-            } catch (error) {
-              console.log(error)
-            }
-          } else {
-            await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: 'Стоп', callback_data: 'Стоп' }]
-                ]
-              }
-            });
-          }
+          MethodToOperator(userRequestId, userName, chatId)
         }
         if (msg?.web_app_data?.data && regex1.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex1);
           const userRequestId = match[1];
-          const userId = msg.from.id;
           const chatId = msg.from.id;
           const userName = msg.from.first_name
-          if (!waitingUsers[chatId]) {
-            try {
-              await bot.sendMessage(msg.chat.id, 'Прикрепите файл:');
-
-              waitingUsers[userId] = true;
-              const textHandler = async (response) => {
-                if (userId === response.from.id && waitingUsers[userId]) {
-                  const reply = response;
-                  if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
-                    waitingUsers[userId] = false;
-                    return bot.sendMessage(userId, 'Хорошо');;
-                  }
-
-                  let caption_text;
-                  const timeMess = timeFunc();
-                  const messages = await messagesFunc(userRequestId)
-
-                  if (reply.photo) {
-                    userPhotos[chatId] = userPhotos[chatId] || [];
-                    userPhotos[chatId].push({
-                      type: 'photo',
-                      media: reply.photo[0].file_id,
-                      mediaGroupId: reply.media_group_id
-                    });
-                    console.log('Получена фотография:');
-                    console.log(userPhotos[chatId]);
-                  } else if (reply.document) {
-                    userPhotos[chatId].push({
-                      type: 'document',
-                      media: reply.document.file_id,
-                      mediaGroupId: reply.media_group_id
-                    });
-                  } else if (reply.video) {
-                    userPhotos[chatId].push({
-                      type: 'video',
-                      media: reply.video.file_id,
-                      mediaGroupId: reply.media_group_id
-                    });
-                  }
-
-                  if (reply.caption) {
-                    caption_text = reply.caption
-                    dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', 'Оператор', timeMess);
-                  }
-
-                  if (!sentMediaGroups[chatId] && !reply?.text) {
-                    sentMediaGroups[chatId] = true;
-                    setTimeout(() => {
-                      console.log(sentMediaGroups[chatId])
-                      resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler, caption_text);
-                      console.log(waitingUsers[chatId])
-                    }, 1000);
-                  }
-
-                  if (reply?.text) {
-                    setTimeout(() => {
-                      const operatorId = chatId;
-                      resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
-                      console.log(waitingUsers[chatId])
-                    }, 1000);
-                  }
-
-                }
-              };
-              bot.on('message', textHandler);
-            } catch (error) {
-              console.error('Ошибка при обработке команды :', error);
-            }
-          } else {
-            await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: 'Стоп', callback_data: 'Стоп' }]
-                ]
-              }
-            });
-          }
+          MethodToUser(userRequestId, userName, chatId)
 
         }
         if (msg?.web_app_data?.data && regex3.test(msg.web_app_data.data)) {
@@ -1589,7 +1455,7 @@ const startBot = async () => {
 
                 const userRequestStatus = await UserRequest.findByPk(requestId);
                 if (userRequestStatus.status === 'ожидает ответа оператора') {
-                  const status = 'Заявка в обработке!';
+                  const status = 'Заявка в обработке';
                   await dbManager.changeStatusRes(requestId, status);
                   const message = `Заявка под номером ${requestId} в обработке`;
                   await sendMessagesToUsersWithRoleId(message, requestId);
@@ -1762,8 +1628,7 @@ const startBot = async () => {
               }
             };
             bot.on('message', textHandler);
-          }
-          else {
+          } else {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
@@ -1771,7 +1636,7 @@ const startBot = async () => {
             bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
               reply_markup: {
                 inline_keyboard: [
-                  [{ text: 'Ваша заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                  [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
                 ]
               }
             });
@@ -1828,177 +1693,18 @@ const startBot = async () => {
         console.log(idMed);
       }
       if (regex2.test(data1)) {
-        const userId = msg.from.id;
-        if (!waitingUsers[userId]) {
-          const match = data1.match(regex2);
-          const userRequestId = match[1];
-          const chatId = msg.from.id;
-          const userName = msg.from.first_name
-          try {
-
-            await bot.sendMessage(userId, 'Прикрепите файл:');
-
-            waitingUsers[userId] = true;
-            const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
-                const reply = response;
-                if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
-                  waitingUsers[userId] = false;
-                  return bot.sendMessage(userId, 'Хорошо');;
-                }
-
-                let caption_text;
-
-                const messages = await messagesFunc(userRequestId)
-
-                const timeMess = timeFunc();
-                if (reply.photo) {
-                  userPhotos[chatId] = userPhotos[chatId] || [];
-                  userPhotos[chatId].push({
-                    type: 'photo',
-                    media: reply.photo[0].file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                  console.log('Получена фотография:');
-                  console.log(userPhotos[chatId]);
-                } else if (reply.document) {
-                  userPhotos[chatId].push({
-                    type: 'document',
-                    media: reply.document.file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                } else if (reply.video) {
-                  userPhotos[chatId].push({
-                    type: 'video',
-                    media: reply.video.file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                }
-
-                if (reply.caption) {
-                  caption_text = reply.caption
-                  dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
-                }
-
-                if (!sentMediaGroups[chatId] && !reply?.text) {
-                  sentMediaGroups[chatId] = true;
-                  setTimeout(() => {
-                    console.log(sentMediaGroups[chatId])
-                    resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler, caption_text);
-                    console.log(waitingUsers[chatId])
-                  }, 1000);
-
-                }
-
-                if (reply?.text) {
-                  setTimeout(() => {
-                    const operatorId = chatId
-                    resToOperatorTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
-                    console.log(waitingUsers[chatId])
-                  }, 1000);
-                }
-
-
-              }
-            };
-            bot.on('message', textHandler);
-          } catch (error) {
-            console.log(error)
-          }
-        } else {
-          await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: 'Стоп', callback_data: 'Стоп' }]
-              ]
-            }
-          });
-        } 
-        return;
+        const match = data1.match(regex2);
+        const userRequestId = match[1];
+        const chatId = msg.from.id;
+        const userName = msg.from.first_name
+        MethodToOperator(userRequestId, userName, chatId);
       }
       if (regex1.test(data1)) {
-        const userId = msg.from.id;
-        if (!waitingUsers[userId]) {
-          const match = data1.match(regex1);
-          const userRequestId = match[1];
-          const chatId = msg.from.id;
-          const userName = msg.from.first_name
-          try {
-            await bot.sendMessage(userId, 'Прикрепите файл:');
-
-            waitingUsers[userId] = true;
-            const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
-                const reply = response;
-                if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[userId]) {
-                  waitingUsers[userId] = false;
-                  return bot.sendMessage(userId, 'Хорошо');
-                }
-
-                let caption_text;
-                const timeMess = timeFunc();
-                const messages = await messagesFunc(userRequestId)
-
-                if (reply.photo) {
-                  userPhotos[chatId] = userPhotos[chatId] || [];
-                  userPhotos[chatId].push({
-                    type: 'photo',
-                    media: reply.photo[0].file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                  console.log('Получена фотография:');
-                  console.log(userPhotos[chatId]);
-                } else if (reply.document) {
-                  userPhotos[chatId].push({
-                    type: 'document',
-                    media: reply.document.file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                } else if (reply.video) {
-                  userPhotos[chatId].push({
-                    type: 'video',
-                    media: reply.video.file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                }
-                if (reply.caption) {
-                  caption_text = reply.caption
-                  dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', 'Оператор', timeMess);
-                }
-                if (!sentMediaGroups[chatId] && !reply?.text) {
-                  sentMediaGroups[chatId] = true;
-                  setTimeout(() => {
-                    console.log(sentMediaGroups[chatId])
-                    resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler, caption_text)
-                    console.log(waitingUsers[chatId])
-                  }, 1000);
-
-                }
-                if (reply?.text) {
-                  setTimeout(() => {
-                    const operatorId = chatId;
-                    resToUserTextFunc(userRequestId, reply, operatorId, userName, timeMess, chatId, messages, textHandler)
-                    console.log(waitingUsers[chatId])
-                  }, 1000);
-                }
-
-
-              }
-            };
-            bot.on('message', textHandler);
-          } catch (error) {
-            console.error('Ошибка при обработке команды :', error);
-          }
-        } else {
-          await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: 'Стоп', callback_data: 'Стоп' }]
-              ]
-            }
-          });
-        }
-        return;
+        const match = data1.match(regex1);
+        const userRequestId = match[1];
+        const chatId = msg.from.id;
+        const userName = msg.from.first_name
+        MethodToUser(userRequestId, userName, chatId);
       }
       if (regex3.test(data1)) {
         const match = data1.match(regex3);
