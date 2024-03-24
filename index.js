@@ -1666,6 +1666,8 @@ const startBot = async () => {
       if (waitingUsers[userId]) {
         waitingUsers[userId] = false
         await bot.sendMessage(chatId, `Вы завершили предыдушие действие.`)
+      } else {
+        await bot.sendMessage(chatId, `Вы уже завершили предыдушие действие.`)
       }
     }
     if (data1) {
@@ -1919,7 +1921,7 @@ const startBot = async () => {
       }
     }
   })
-
+  return;
 };
 
 startBot();
