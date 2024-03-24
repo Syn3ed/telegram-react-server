@@ -557,6 +557,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
 async function MethodToUser(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
+    const username = userName
     try {
       await bot.sendMessage(chatId, 'Введите сообщение или прикрепите файл(ы).\nТак же можете отменить действие нажав на кнопку "Стоп"', {
         reply_markup: {
@@ -565,7 +566,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
           ]
         }
       });
-      
+
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
