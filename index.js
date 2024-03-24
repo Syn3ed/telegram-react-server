@@ -1666,8 +1666,10 @@ const startBot = async () => {
       const userId = msg.from.id;
       if (waitingUsers[userId]) {
         waitingUsers[userId] = false
+        await bot.answerCallbackQuery(callbackQueryId);
         await bot.sendMessage(chatId, `Вы завершили предыдушие действие.`)
       } else {
+        await bot.answerCallbackQuery(callbackQueryId);
         await bot.sendMessage(chatId, `Вы уже завершили предыдушие действие.`)
       }
     }
@@ -1702,6 +1704,7 @@ const startBot = async () => {
         const chatId = msg.from.id;
         const userName = msg.from.first_name
         MethodToOperator(userRequestId, userName, chatId);
+        await bot.answerCallbackQuery(callbackQueryId);
       }
       if (regex1.test(data1)) {
         const match = data1.match(regex1);
@@ -1709,6 +1712,7 @@ const startBot = async () => {
         const chatId = msg.from.id;
         const userName = msg.from.first_name
         MethodToUser(userRequestId, userName, chatId);
+        await bot.answerCallbackQuery(callbackQueryId);
       }
       if (regex3.test(data1)) {
         const match = data1.match(regex3);
