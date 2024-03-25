@@ -7,7 +7,6 @@ const bot = new TelegramBot(token, { polling: true });
 const appUrl = process.env.WEB_APP_URL;
 const sequelize = require('./src/BaseData/bdConnect');
 const DatabaseService = require(`./src/BaseData/bdService`)
-const { commandAndAnswer, callbackAnswer } = require('./src/BotService/botService');
 require('./src/BaseData/bdModel');
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
@@ -19,7 +18,6 @@ const { where } = require('sequelize');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const port = process.env.PORT || 3000;
 
 const userPhotos = {};
 
@@ -474,7 +472,7 @@ async function resToUserTextFunc(userRequestId, reply, operatorId, username, tim
 async function MethodToOperator(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     try {
-      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы). Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -559,7 +557,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     const username = userName
     try {
-      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы). Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -652,9 +650,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
 app.post(`/replyToOperatorPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
-  const chatId = operatorId;
-  const userName = username;
-  MethodToOperator(userRequestId, userName, chatId)
+  MethodToOperator(userRequestId, username, operatorId)
   res.status(200).json({ success: true });
 }
 )
@@ -671,9 +667,7 @@ async function resToUserFunc(chatId, userRequestId, timeMess, userId, textHandle
 
 app.post(`/resToUserPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
-  const chatId = operatorId;
-  const userName = username;
-  MethodToUser(userRequestId, userName, chatId)
+  MethodToUser(userRequestId, username, operatorId)
   res.status(200).json({ success: true });
 })
 
@@ -1659,9 +1653,10 @@ const startBot = async () => {
     console.log(msg)
     console.log('11111111111111111111111111111111111111111111111111111111111111111111111111')
     console.log(msg.data)
-    const chatId = msg.from.id
     const data1 = msg.data;
     const callbackQueryId = msg.id
+    const chatId = msg.from.id;
+    const userName = msg.from.first_name
     if (data1 === 'Стоп') {
       const userId = msg.from.id;
       if (waitingUsers[userId]) {
@@ -1701,16 +1696,12 @@ const startBot = async () => {
       if (regex2.test(data1)) {
         const match = data1.match(regex2);
         const userRequestId = match[1];
-        const chatId = msg.from.id;
-        const userName = msg.from.first_name
         MethodToOperator(userRequestId, userName, chatId);
         await bot.answerCallbackQuery(callbackQueryId);
       }
       if (regex1.test(data1)) {
         const match = data1.match(regex1);
         const userRequestId = match[1];
-        const chatId = msg.from.id;
-        const userName = msg.from.first_name
         MethodToUser(userRequestId, userName, chatId);
         await bot.answerCallbackQuery(callbackQueryId);
       }
