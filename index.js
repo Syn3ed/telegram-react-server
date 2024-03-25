@@ -1911,6 +1911,7 @@ const startBot = async () => {
             bot.sendMessage(userId, `Вы закрыли заявку №${requestId} `);
             bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`)
           }
+          await bot.answerCallbackQuery(callbackQueryId);
         } catch (e) {
           console.log(e)
         }
@@ -1923,6 +1924,7 @@ const startBot = async () => {
         await dbManager.changeStatusRes(requestId, status);
         const message = `Возобновлена заявка под номером ${requestId}`;
         await sendMessagesToUsersWithRoleId(message, requestId);
+        await bot.answerCallbackQuery(callbackQueryId);
       }
     }
   })
