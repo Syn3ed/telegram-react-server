@@ -8,6 +8,7 @@ const appUrl = process.env.WEB_APP_URL;
 const sequelize = require('./src/BaseData/bdConnect');
 const DatabaseService = require(`./src/BaseData/bdService`)
 require('./src/BaseData/bdModel');
+const BotClass =  require('./src/BotService/ClassBot')
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
@@ -1920,7 +1921,7 @@ const startBot = async () => {
     }
   })
   await bot.answerCallbackQuery(callbackQueryId);
-  return;
 };
 
+// const botClass = new BotClass(bot)
 startBot();
