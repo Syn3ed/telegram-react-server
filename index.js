@@ -8,7 +8,7 @@ const appUrl = process.env.WEB_APP_URL;
 const sequelize = require('./src/BaseData/bdConnect');
 const DatabaseService = require(`./src/BaseData/bdService`)
 require('./src/BaseData/bdModel');
-const BotClass =  require('./src/BotService/ClassBot')
+const BotClass = require('./src/BotService/ClassBot')
 const dbManager = new DatabaseService(sequelize)
 const cors = require('cors');
 
@@ -425,18 +425,21 @@ async function messagesFunc(userRequestId) {
   return messages;
 }
 
-async function resToOperatorFunc(chatId, userName, userRequestId, timeMess, userId, textHandler, caption_text) {
-  const op = 'User'
-  await sendMediaGroup1(chatId, userName, userRequestId, timeMess, op, caption_text);
-  waitingUsers[userId] = false;
+async function resToOperatorFunc(data) {
+  const { chatId, userName, userRequestId, timeMess, textHandler, caption_text } = data
+  const op = 'User';
+  const dataForMedia = { chatId, userName, userRequestId, timeMess, op, caption_text }
+  await sendMediaGroup1(dataForMedia);
+  waitingUsers[chatId] = false;
   bot.off('message', textHandler);
   await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   return;
 }
 
-async function resToOperatorTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
+async function resToOperatorTextFunc(data) {
+  const { userRequestId, reply, chatId, username, timeMess, messages, textHandler } = data
   waitingUsers[chatId] = false;
-  await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
+  await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', username, timeMess);
   await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   console.log('resToOperatorTextFunc')
   await bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
@@ -452,9 +455,10 @@ async function resToOperatorTextFunc(userRequestId, reply, operatorId, username,
   return;
 }
 
-async function resToUserTextFunc(userRequestId, reply, operatorId, username, timeMess, chatId, messages, textHandler) {
+async function resToUserTextFunc(data) {
+  const { userRequestId, reply, timeMess, chatId, messages, textHandler } = data
   waitingUsers[chatId] = false;
-  await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
+  await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
   await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   console.log('resToUserTextFunc')
   await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
@@ -527,13 +531,30 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
               console.log(sentMediaGroups[chatId])
-              resToOperatorFunc(chatId, userName, userRequestId, timeMess, chatId, textHandler, caption_text);
+              const data = {
+                chatId,
+                userName,
+                userRequestId,
+                timeMess,
+                textHandler,
+                caption_text
+              }
+              resToOperatorFunc(data);
               console.log(waitingUsers[chatId])
             }, 1000);
           }
           if (reply?.text) {
             setTimeout(() => {
-              resToOperatorTextFunc(userRequestId, reply, chatId, userName, timeMess, chatId, messages, textHandler);
+              const data = {
+                userRequestId,
+                reply,
+                chatId,
+                userName,
+                timeMess,
+                messages,
+                textHandler
+              }
+              resToOperatorTextFunc(data);
               console.log(waitingUsers[chatId])
             }, 1000);
           }
@@ -620,14 +641,29 @@ async function MethodToUser(userRequestId, userName, chatId) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
               console.log(sentMediaGroups[chatId])
-              resToUserFunc(chatId, userRequestId, timeMess, chatId, textHandler, caption_text);
+              const data = {
+                chatId,
+                userRequestId,
+                timeMess,
+                textHandler,
+                caption_text
+              }
+              resToUserFunc(data);
               console.log(waitingUsers[chatId])
             }, 1000);
           }
 
           if (reply?.text) {
             setTimeout(() => {
-              resToUserTextFunc(userRequestId, reply, chatId, username, timeMess, chatId, messages, textHandler)
+              const data = {
+                userRequestId,
+                reply,
+                chatId,
+                timeMess,
+                messages,
+                textHandler
+              }
+              resToUserTextFunc(data)
               console.log(waitingUsers[chatId])
             }, 1000);
           }
@@ -656,10 +692,12 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
 }
 )
 
-async function resToUserFunc(chatId, userRequestId, timeMess, userId, textHandler, caption_text) {
+async function resToUserFunc(data) {
+  const { chatId, userRequestId, timeMess, textHandler, caption_text } = data
   const op = 'Operator'
   const useName = 'Оператор'
-  await sendMediaGroup1(chatId, useName, userRequestId, timeMess, op, caption_text);
+  const dataForMedia = { chatId, useName, userRequestId, timeMess, op, caption_text }
+  await sendMediaGroup1(dataForMedia);
   waitingUsers[chatId] = false;
   bot.off('message', textHandler);
   bot.sendMessage(chatId, `Файл успешно добавлен к заявке №${userRequestId}`);
@@ -1110,8 +1148,9 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
   }
 }
 
-async function sendMediaGroup1(chatId, userName, userRequestId, timeMess, op, caption_text) {
+async function sendMediaGroup1(data) {
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
+    const { chatId, userName, userRequestId, timeMess, op, caption_text } = data;
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
     const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
     const str = JSON.stringify(groupPhotos);
