@@ -1334,6 +1334,9 @@ const startBot = async () => {
         const regex4 = /\/resToUser (\d+)/;
         const regex5 = /\/closeReq (\d+)/;
         const regex6 = /\/resumeReq (\d+)/;
+        const regex7 = /\/changeRoleUser (\d+)/;
+        const regex8 = /\/changeRoleOperator (\d+)/;
+        const regex9 = /\/changeRoleUser (\d+)/;
         if (msg?.web_app_data?.data && regex.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex);
           const idMed = match[1];
@@ -1576,6 +1579,33 @@ const startBot = async () => {
           await dbManager.changeStatusRes(requestId, status);
           const message = `Возобновлена заявка под номером ${requestId}`;
           await sendMessagesToUsersWithRoleId(message, requestId);
+        }
+        if (msg?.web_app_data?.data && regex7.test(msg.web_app_data.data)) {
+          const match = msg.web_app_data.data.match(regex7);
+          const chatId = msg.from.id;
+          const userId = match[1];
+          console.log(msg)
+          const chRole = dbManager.changeRoleUser(userId, 2)
+          await bot.sendMessage(userId, 'Вам присвоена роль "Пользователь"');
+          bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        }
+        if (msg?.web_app_data?.data && regex8.test(msg.web_app_data.data)) {
+          const match = msg.web_app_data.data.match(regex8);
+          const chatId = msg.from.id;
+          const userId = match[1];
+          console.log(msg)
+          const chRole = dbManager.changeRoleUser(userId, 1)
+          await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
+          bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        }
+        if (msg?.web_app_data?.data && regex7.test(msg.web_app_data.data)) {
+          const match = msg.web_app_data.data.match(regex9);
+          const chatId = msg.from.id;
+          const userId = match[1];
+          console.log(msg)
+          const chRole = dbManager.changeRoleUser(userId, 3)
+          await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
+          bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
         }
         const userName = msg.from.first_name;
         try {
