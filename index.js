@@ -1594,7 +1594,7 @@ const startBot = async () => {
           const chatId = msg.from.id;
           const userId = match[1];
           console.log(msg)
-          const chRole = dbManager.changeRoleUser(userId, 1)
+          const chRole = dbManager.changeRoleUser(userId, 3)
           await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
           bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
         }
@@ -1603,7 +1603,7 @@ const startBot = async () => {
           const chatId = msg.from.id;
           const userId = match[1];
           console.log(msg)
-          const chRole = dbManager.changeRoleUser(userId, 3)
+          const chRole = dbManager.changeRoleUser(userId, 1)
           await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
           bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
         }
