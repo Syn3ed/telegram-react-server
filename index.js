@@ -1288,41 +1288,44 @@ const startBot = async () => {
       }
     }
 
+    async function keyboardRole(chatId) {
+      // const chatId = msg.chat.id;
+      const user = await User.findOne({ where: { telegramId: chatId.toString() } });
+
+      if (!user) {
+        await bot.sendMessage(chatId, 'Пользователь не найден.');
+        return;
+      }
+
+      let keyboard = [];
+
+      if (user.RoleId == '2') {
+        keyboard = [
+          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+          [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
+        ];
+      } else if (user.RoleId == '1') {
+        keyboard = [
+          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+          [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
+          [{ text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+        ];
+      } else if (user.RoleId == '3') {
+        keyboard = [
+          [{ text: `Текущие заявки`, web_app: { url: appUrl } }],
+        ];
+      }
+
+      await bot.sendMessage(chatId, 'Обновление меню бота', {
+        reply_markup: {
+          keyboard: keyboard
+        }
+      });
+      return
+    }
     if (msg.text === '/menu') {
-      const chatId = msg.chat.id;
-
       try {
-        const user = await User.findOne({ where: { telegramId: chatId.toString() } });
-
-        if (!user) {
-          await bot.sendMessage(chatId, 'Пользователь не найден.');
-          return;
-        }
-
-        let keyboard = [];
-
-        if (user.RoleId == '2') {
-          keyboard = [
-            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
-            [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
-          ];
-        } else if (user.RoleId == '1') {
-          keyboard = [
-            [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
-            [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
-            [ { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
-          ];
-        } else if (user.RoleId == '3') {
-          keyboard = [
-            [{ text: `Текущие заявки`, web_app: { url: appUrl } }],
-          ];
-        }
-
-        await bot.sendMessage(chatId, 'Меню бота', {
-          reply_markup: {
-            keyboard: keyboard
-          }
-        });
+        keyboardRole(chatId)
       } catch (error) {
         console.error('Ошибка:', error);
         await bot.sendMessage(chatId, 'Произошла ошибка при обработке команды.');
@@ -1583,6 +1586,7 @@ const startBot = async () => {
           await dbManager.changeStatusRes(requestId, status);
           const message = `Возобновлена заявка под номером ${requestId}`;
           await sendMessagesToUsersWithRoleId(message, requestId);
+          keyboardRole(userId)
         }
         if (msg?.web_app_data?.data && regex7.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex7);
@@ -1601,6 +1605,7 @@ const startBot = async () => {
           const chRole = dbManager.changeRoleUser(userId, 3)
           await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
           bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+          keyboardRole(userId)
         }
         if (msg?.web_app_data?.data && regex7.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex9);
@@ -1610,6 +1615,7 @@ const startBot = async () => {
           const chRole = dbManager.changeRoleUser(userId, 1)
           await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
           bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+          keyboardRole(userId)
         }
         const userName = msg.from.first_name;
         try {
