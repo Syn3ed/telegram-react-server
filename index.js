@@ -1306,11 +1306,15 @@ const startBot = async () => {
             [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
             [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
           ];
-        } else if (user.RoleId == '3') {
+        } else if (user.RoleId == '1') {
           keyboard = [
             [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
             [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
-            [{ text: 'Изменить роль пользователю на админа', callback_data: '/resRole' }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+            [ { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+          ];
+        } else if (user.RoleId == '3') {
+          keyboard = [
+            [{ text: `Текущие заявки`, web_app: { url: appUrl } }],
           ];
         }
 
