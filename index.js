@@ -495,14 +495,16 @@ async function resToOperatorTextFunc1(data) {
     const operatorIds = messages[0].operatorId.split(',');
     console.log('9999999999999999999999999')
     console.log(operatorIds)
-    await bot.sendMessage(operatorIds, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-          [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
-        ]
-      }
-    });
+    for (const operatorId of operatorIds) {
+      await bot.sendMessage(operatorId.trim(), `Вам пришел ответ от пользователя на заявку #${userRequestId}\n${reply.text}`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+            [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
+          ]
+        }
+      });
+    }
     console.log('resToOperatorTextFunc')
 
     bot.off('message', textHandler);
