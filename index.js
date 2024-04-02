@@ -53,7 +53,7 @@ async function sendMessagesToUsersWithRoleId(message, id) {
         });
     });
   } catch (error) {
-    console.error('Ошибка при отправке сообщений пользователям с RoleId = 2:', error);
+    console.error('Ошибка при отправке сообщений пользователям с RoleId = 1 или 3:', error);
   }
 }
 
