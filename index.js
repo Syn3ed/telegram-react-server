@@ -33,8 +33,7 @@ app.use(bodyParser.json());
 
 async function sendMessagesToUsersWithRoleId(message, id) {
   try {
-    const usersWithRoleId2 = await User.findAll({ where: { RoleId: { $in: [1, 3] } } });
-
+    const usersWithRoleId2 = await User.findAll({ where: { RoleId: [1, 3] } });
 
     usersWithRoleId2.forEach(user => {
       const userId = user.telegramId;
@@ -55,6 +54,7 @@ async function sendMessagesToUsersWithRoleId(message, id) {
   } catch (error) {
     console.error('Ошибка при отправке сообщений пользователям с RoleId = 1 или 3:', error);
   }
+
 }
 
 
