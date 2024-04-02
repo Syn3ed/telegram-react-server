@@ -407,6 +407,31 @@ function timeFunc() {
   return `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
 }
 
+async function processUserRequest(requestId, userId) {
+  const userRequestStatus = await UserRequest.findByPk(requestId);
+  if (userRequestStatus.status === 'ожидает ответа оператора') {
+    const status = 'Заявка в обработке';
+    await dbManager.changeStatusRes(requestId, status);
+    const message = `Заявка под номером ${requestId} в обработке`;
+    await sendMessagesToUsersWithRoleId(message, requestId);
+  }
+
+  const existingMessage = await Message.findByPk(requestId);
+  const separator = ',';
+  let operatorIds = [];
+  if (existingMessage.operatorId) {
+    operatorIds = existingMessage.operatorId.split(separator);
+  }
+
+  if (!operatorIds.includes(userId.toString())) {
+    operatorIds.push(userId.toString());
+  }
+
+  existingMessage.operatorId = operatorIds.join(separator);
+  console.log(existingMessage)
+  await existingMessage.save();
+}
+
 async function messagesFunc(userRequestId) {
   const messages = await Message.findAll({
     where: { id: userRequestId },
@@ -426,13 +451,18 @@ async function messagesFunc(userRequestId) {
 }
 
 async function resToOperatorFunc(data) {
-  const { chatId, userName, userRequestId, timeMess, textHandler, caption_text } = data
-  const op = 'User';
-  const dataForMedia = { chatId, userName, userRequestId, timeMess, op, caption_text }
-  await sendMediaGroup1(dataForMedia);
-  waitingUsers[chatId] = false;
-  bot.off('message', textHandler);
-  await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  try {
+    const { chatId, userName, userRequestId, timeMess, textHandler, caption_text } = data
+    const op = 'User';
+    const dataForMedia = { chatId, userName, userRequestId, timeMess, op, caption_text }
+
+    await sendMediaGroup1(dataForMedia);
+    waitingUsers[chatId] = false;
+    bot.off('message', textHandler);
+    await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+  } catch (e) {
+    console.log(e)
+  }
   return;
 }
 
@@ -455,22 +485,85 @@ async function resToOperatorTextFunc(data) {
   return;
 }
 
+async function resToOperatorTextFunc1(data) {
+  try {
+    const { userRequestId, reply, chatId, username, timeMess, messages, textHandler } = data
+    waitingUsers[chatId] = false;
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', username, timeMess);
+    await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+    console.log('resToOperatorTextFunc')
+    const operatorIds = messages[0].operatorId.split(',');
+    await bot.sendMessage(operatorIds, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+          [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
+        ]
+      }
+    });
+    console.log('resToOperatorTextFunc')
+
+    bot.off('message', textHandler);
+  } catch (e) {
+    console.log(e)
+    const { chatId, textHandler } = data
+    waitingUsers[chatId] = false;
+    bot.off('message', textHandler);
+  }
+  return;
+}
+
 async function resToUserTextFunc(data) {
-  const { userRequestId, reply, timeMess, chatId, messages, textHandler } = data
-  waitingUsers[chatId] = false;
-  await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
-  await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
-  console.log('resToUserTextFunc')
-  await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-        [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-      ]
-    }
-  });
-  console.log('resToUserTextFunc')
-  bot.off('message', textHandler);
+  try {
+    const { userRequestId, reply, timeMess, chatId, messages, textHandler } = data
+    waitingUsers[chatId] = false;
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
+    // await processUserRequest(userRequestId, chatId)
+    await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+    console.log('resToUserTextFunc')
+    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
+          [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
+        ]
+      }
+    });
+    console.log('resToUserTextFunc')
+    bot.off('message', textHandler);
+  } catch (e) {
+    console.log(e)
+    const { chatId, textHandler } = data
+    waitingUsers[chatId] = false;
+    bot.off('message', textHandler);
+  }
+  return;
+}
+
+async function resToUserTextFunc1(data) {
+  try {
+    const { userRequestId, reply, timeMess, chatId, messages, textHandler } = data
+    waitingUsers[chatId] = false;
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
+    await processUserRequest(userRequestId, chatId)
+    await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
+    console.log('resToUserTextFunc')
+    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
+          [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
+        ]
+      }
+    });
+    console.log('resToUserTextFunc')
+    bot.off('message', textHandler);
+  } catch (e) {
+    console.log(e)
+    const { chatId, textHandler } = data
+    waitingUsers[chatId] = false;
+    bot.off('message', textHandler);
+  }
   return;
 }
 
@@ -554,7 +647,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 messages,
                 textHandler
               }
-              resToOperatorTextFunc(data);
+              resToOperatorTextFunc1(data);
               console.log(waitingUsers[chatId])
             }, 1000);
           }
@@ -622,21 +715,23 @@ async function MethodToUser(userRequestId, userName, chatId) {
               mediaGroupId: reply.media_group_id
             });
           }
-          const userRequestStatus = await UserRequest.findByPk(userRequestId);
-          if (userRequestStatus.status === 'ожидает ответа оператора') {
-            const status = 'Заявка в обработке';
-            await dbManager.changeStatusRes(userRequestId, status);
-            const message = `Заявка под номером ${userRequestId} в обработке`;
-            await sendMessagesToUsersWithRoleId(message, userRequestId);
-          }
-          const existingMessage = await Message.findByPk(userRequestId);
-          existingMessage.operatorId = chatId;
-          await existingMessage.save();
+
+          // const userRequestStatus = await UserRequest.findByPk(userRequestId);
+          // if (userRequestStatus.status === 'ожидает ответа оператора') {
+          //   const status = 'Заявка в обработке';
+          //   await dbManager.changeStatusRes(userRequestId, status);
+          //   const message = `Заявка под номером ${userRequestId} в обработке`;
+          //   await sendMessagesToUsersWithRoleId(message, userRequestId);
+          // }
+          // const existingMessage = await Message.findByPk(userRequestId);
+          // existingMessage.operatorId = chatId;
+          // await existingMessage.save();
 
           if (reply.caption) {
             caption_text = reply.caption
             dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', 'Оператор', timeMess);
           }
+          await processUserRequest(userRequestId, chatId)
           if (!sentMediaGroups[chatId] && !reply?.text) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
@@ -1506,10 +1601,21 @@ const startBot = async () => {
                   await sendMessagesToUsersWithRoleId(message, requestId);
                 }
                 const existingMessage = await Message.findByPk(requestId);
-                existingMessage.operatorId = userId;
-                await existingMessage.save();
+                const separator = ',';
+                let operatorIds = [];
+                if (existingMessage.operatorId) {
+                  operatorIds = existingMessage.operatorId.split(separator);
+                }
 
-                const userTelegramId = await dbManager.findUserToReq(requestId);
+                if (!operatorIds.includes(userId.toString())) {
+                  operatorIds.push(userId.toString());
+                }
+                // existingMessage.operatorId = userId;
+                // await existingMessage.save();
+                existingMessage.operatorId = operatorIds.join(separator);
+
+                await existingMessage.save();
+                await dbManager.findUserToReq(requestId);
 
                 const messages = await Message.findAll({
                   where: { id: requestId },
@@ -1677,7 +1783,7 @@ const startBot = async () => {
 
                   setTimeout(() => {
                     const op = 'User'
-                    sendMediaGroup(chatId, userName, userRequestId, timeMess, op);
+                    sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
                     waitingUsers[userId] = false;
                     bot.off('message', textHandler);
                     bot.sendMessage(chatId, 'Заявка успешно создана');
