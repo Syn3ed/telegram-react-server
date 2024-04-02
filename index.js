@@ -37,7 +37,7 @@ async function sendMessagesToUsersWithRoleId(message, id) {
 
     usersWithRoleId2.forEach(user => {
       const userId = user.telegramId;
-      this.bot.sendMessage(userId, message, {
+      bot.sendMessage(userId, message, {
         reply_markup: {
           inline_keyboard: [
             [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
