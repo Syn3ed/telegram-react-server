@@ -1443,7 +1443,7 @@ const startBot = async () => {
         const regex6 = /\/resumeReq (\d+)/;
         const regex7 = /\/changeRoleUser (\d+)/;
         const regex8 = /\/changeRoleOperator (\d+)/;
-        const regex9 = /\/changeRoleUser (\d+)/;
+        const regex9 = /\/changeRoleAdmin (\d+)/;
         if (msg?.web_app_data?.data && regex.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex);
           const idMed = match[1];
@@ -1718,7 +1718,7 @@ const startBot = async () => {
           bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
           keyboardRole(userId)
         }
-        if (msg?.web_app_data?.data && regex7.test(msg.web_app_data.data)) {
+        if (msg?.web_app_data?.data && regex9.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex9);
           const chatId = msg.from.id;
           const userId = match[1];
