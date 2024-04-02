@@ -493,6 +493,8 @@ async function resToOperatorTextFunc1(data) {
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
     console.log('resToOperatorTextFunc')
     const operatorIds = messages[0].operatorId.split(',');
+    console.log('9999999999999999999999999')
+    console.log(operatorIds)
     await bot.sendMessage(operatorIds, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
       reply_markup: {
         inline_keyboard: [
