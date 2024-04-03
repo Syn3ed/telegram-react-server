@@ -343,7 +343,7 @@ app.post(`/replyToUser`, async (req, res) => {
 
 
 app.post('/handleShowPhoto', async (req, res) => {
-  const { queryId, userRequestId, username, idMedia, operatorId } = req.body;
+  const { idMedia, operatorId } = req.body;
   try {
     hndlMed(idMedia, operatorId)
     res.status(200).json({ success: true });
