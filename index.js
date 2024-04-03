@@ -748,7 +748,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                   ]
                 }
               });
-              // sendMessagesToUsersWithRoleId(message, userRequestId)
+              sendMessagesToUsersWithRoleId(message, userRequestId)
             }, 1000);
           }
           if (reply?.text) {
@@ -772,7 +772,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                   ]
                 }
               });
-              // sendMessagesToUsersWithRoleId(message, userRequestId)
+              sendMessagesToUsersWithRoleId(message, userRequestId)
             }, 1000);
           }
 
