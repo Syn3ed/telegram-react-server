@@ -2313,7 +2313,7 @@ const startBot = async () => {
 
       }
       if (regex8.test(data1)) {
-        const match = data1.match(regex9);
+        const match = data1.match(regex8);
         const chatId = msg.from.id;
         const userId = match[1];
         console.log(msg)
@@ -2333,7 +2333,7 @@ const startBot = async () => {
         keyboardRole(userId)
       }
       if (regex10.test(data1)) {
-        const match = data1.match(regex9);
+        const match = data1.match(regex10);
         const chatId = msg.from.id;
         const userId = match[1];
         console.log(msg)
