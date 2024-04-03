@@ -1734,86 +1734,95 @@ const startBot = async () => {
           if (data.isSwitchOn) {
             const userId = msg.from.id;
             console.log('asd3')
-            // const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             console.log(createdRequest)
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
-            await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
-            waitingUsers[userId] = true;
-            const textHandler = async (response) => {
-              if (userId === response.from.id && waitingUsers[userId]) {
-                const reply = response;
+            // await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
+            // waitingUsers[userId] = true;
+            // const textHandler = async (response) => {
+            //   if (userId === response.from.id && waitingUsers[userId]) {
+            //     const reply = response;
 
-                if (reply?.text === 'Стоп' || reply?.text === 'стоп') {
-                  await bot.sendMessage(userId, 'Хорошо');
-                  waitingUsers[userId] = false;
-                  return;
-                }
+            //     if (reply?.text === 'Стоп' || reply?.text === 'стоп') {
+            //       await bot.sendMessage(userId, 'Хорошо');
+            //       waitingUsers[userId] = false;
+            //       return;
+            //     }
 
-                const timeData = new Date();
-                const year = timeData.getFullYear();
-                const month = timeData.getMonth() + 1;
-                const day = timeData.getDate();
-                timeData.setHours(timeData.getHours() + 7);
-                const hours = timeData.getHours();
-                const minutes = timeData.getMinutes();
-                const formattedHours = hours < 10 ? '0' + hours : hours;
-                const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+            //     const timeData = new Date();
+            //     const year = timeData.getFullYear();
+            //     const month = timeData.getMonth() + 1;
+            //     const day = timeData.getDate();
+            //     timeData.setHours(timeData.getHours() + 7);
+            //     const hours = timeData.getHours();
+            //     const minutes = timeData.getMinutes();
+            //     const formattedHours = hours < 10 ? '0' + hours : hours;
+            //     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-                const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
-                if (reply.photo) {
-                  userPhotos[chatId] = userPhotos[chatId] || [];
-                  userPhotos[chatId].push({
-                    type: 'photo',
-                    media: reply.photo[0].file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                  console.log('Получена фотография:');
-                  console.log(userPhotos[chatId]);
-                } else if (reply.document) {
-                  userPhotos[chatId].push({
-                    type: 'document',
-                    media: reply.document.file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                } else if (reply.video) {
-                  userPhotos[chatId].push({
-                    type: 'video',
-                    media: reply.video.file_id,
-                    mediaGroupId: reply.media_group_id
-                  });
-                }
-                if (!sentMediaGroups[chatId] && !reply?.text) {
+            //     const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
+            //     if (reply.photo) {
+            //       userPhotos[chatId] = userPhotos[chatId] || [];
+            //       userPhotos[chatId].push({
+            //         type: 'photo',
+            //         media: reply.photo[0].file_id,
+            //         mediaGroupId: reply.media_group_id
+            //       });
+            //       console.log('Получена фотография:');
+            //       console.log(userPhotos[chatId]);
+            //     } else if (reply.document) {
+            //       userPhotos[chatId].push({
+            //         type: 'document',
+            //         media: reply.document.file_id,
+            //         mediaGroupId: reply.media_group_id
+            //       });
+            //     } else if (reply.video) {
+            //       userPhotos[chatId].push({
+            //         type: 'video',
+            //         media: reply.video.file_id,
+            //         mediaGroupId: reply.media_group_id
+            //       });
+            //     }
+            //     if (!sentMediaGroups[chatId] && !reply?.text) {
 
-                  setTimeout(() => {
-                    const op = 'User'
-                    sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
-                    waitingUsers[userId] = false;
-                    bot.off('message', textHandler);
-                    bot.sendMessage(chatId, 'Заявка успешно создана');
-                    const message = `Создана новая заявка под номером ${createdRequestId}`
-                    bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-                    bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
-                      reply_markup: {
-                        inline_keyboard: [
-                          [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-                        ]
-                      }
-                    });
-                    sendMessagesToUsersWithRoleId(message, createdRequestId);
-                  }, 1000);
-                  sentMediaGroups[chatId] = true;
-                }
+            //       setTimeout(() => {
+            //         const op = 'User'
+            //         sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
+            //         waitingUsers[userId] = false;
+            //         bot.off('message', textHandler);
+            //         bot.sendMessage(chatId, 'Заявка успешно создана');
+            //         const message = `Создана новая заявка под номером ${createdRequestId}`
+            //         bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
+            //         bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+            //           reply_markup: {
+            //             inline_keyboard: [
+            //               [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+            //             ]
+            //           }
+            //         });
+            //         sendMessagesToUsersWithRoleId(message, createdRequestId);
+            //       }, 1000);
+            //       sentMediaGroups[chatId] = true;
+            //     }
 
-                if (!reply || !reply.photo || !reply.photo[0]) {
-                  throw new Error('Не удалось получить фотографию.');
-                }
+            //     if (!reply || !reply.photo || !reply.photo[0]) {
+            //       throw new Error('Не удалось получить фотографию.');
+            //     }
 
 
+            //   }
+            // };
+            // bot.on('message', textHandler);
+            await MethodToOperator(userRequestId,userName,userId)
+            const message = `Создана новая заявка под номером ${createdRequestId}`
+            bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                ]
               }
-            };
-            bot.on('message', textHandler);
+            });
+            sendMessagesToUsersWithRoleId(message, createdRequestId)
           } else {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
