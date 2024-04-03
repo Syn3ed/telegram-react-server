@@ -1493,7 +1493,7 @@ const startBot = async () => {
 
             bot.off('text', textHandler);
             const chatId = response.text;
-
+            console.log(chatId)
             if (!isNaN(chatId)) {
               waitingUsers[userId] = false;
               const user = await User.findOne({ where: { telegramId: chatId.toString() } });
@@ -1524,8 +1524,10 @@ const startBot = async () => {
                   inline_keyboard: keyboard
                 }
               });
+              bot.off('text', textHandler);
             } else {
               bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
+              bot.off('text', textHandler);
             }
           }
         }
