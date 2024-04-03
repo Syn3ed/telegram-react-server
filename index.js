@@ -1813,9 +1813,22 @@ const startBot = async () => {
             //   }
             // };
             // bot.on('message', textHandler);
-            try {
-              MethodToOperator(userRequestId, userName, userId).then(respons => {
-                const message = `Создана новая заявка под номером ${createdRequestId}`
+            // MethodToOperator(userRequestId, userName, userId).then(respons => {
+            //   const message = `Создана новая заявка под номером ${createdRequestId}`
+            //   bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+            //     reply_markup: {
+            //       inline_keyboard: [
+            //         [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+            //       ]
+            //     }
+            //   });
+            //   sendMessagesToUsersWithRoleId(message, createdRequestId)
+            // })
+
+            async function processUserRequest(userRequestId, userName, userId) {
+              try {
+                const respons = await MethodToOperator(userRequestId, userName, userId);
+                const message = `Создана новая заявка под номером ${createdRequestId}`;
                 bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
                   reply_markup: {
                     inline_keyboard: [
@@ -1823,11 +1836,13 @@ const startBot = async () => {
                     ]
                   }
                 });
-                sendMessagesToUsersWithRoleId(message, createdRequestId)
-              })
-            } catch (e) {
-              console.log(e)
+                sendMessagesToUsersWithRoleId(message, createdRequestId);
+              } catch (error) {
+                console.error('Произошла ошибка:', error);
+              }
             }
+
+            processUserRequest(userRequestId, userName, userId);
 
           } else {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
