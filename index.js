@@ -673,6 +673,116 @@ async function MethodToOperator(userRequestId, userName, chatId) {
   }
 }
 
+async function MethodToOperator1(userRequestId, userName, chatId) {
+  if (!waitingUsers[chatId]) {
+    try {
+      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Стоп', callback_data: 'Стоп' }]
+          ]
+        }
+      });
+
+      waitingUsers[chatId] = true;
+      const textHandler = async (response) => {
+        if (chatId === response.from.id && waitingUsers[chatId]) {
+
+          const reply = response;
+          if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
+            waitingUsers[chatId] = false;
+            return bot.sendMessage(chatId, 'Хорошо');;
+          }
+
+          const timeMess = timeFunc()
+          let caption_text;
+
+          const messages = await messagesFunc(userRequestId)
+
+          if (reply.photo) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
+            userPhotos[chatId].push({
+              type: 'photo',
+              media: reply.photo[0].file_id,
+              mediaGroupId: reply.media_group_id
+            });
+            console.log('Получена фотография:');
+            console.log(userPhotos[chatId]);
+          } else if (reply.document) {
+            userPhotos[chatId].push({
+              type: 'document',
+              media: reply.document.file_id,
+              mediaGroupId: reply.media_group_id
+            });
+          } else if (reply.video) {
+            userPhotos[chatId].push({
+              type: 'video',
+              media: reply.video.file_id,
+              mediaGroupId: reply.media_group_id
+            });
+          }
+          if (reply.caption) {
+            caption_text = reply.caption
+            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
+          }
+
+          if (!sentMediaGroups[chatId] && !reply?.text) {
+            sentMediaGroups[chatId] = true;
+            setTimeout(() => {
+              console.log(sentMediaGroups[chatId])
+              const data = {
+                chatId,
+                userName,
+                userRequestId,
+                timeMess,
+                textHandler,
+                caption_text
+              }
+              resToOperatorFunc(data);
+              console.log(waitingUsers[chatId])
+            }, 1000);
+          }
+          if (reply?.text) {
+            setTimeout(() => {
+              const data = {
+                userRequestId,
+                reply,
+                chatId,
+                userName,
+                timeMess,
+                messages,
+                textHandler
+              }
+              resToOperatorTextFunc1(data);
+              console.log(waitingUsers[chatId])
+            }, 1000);
+          }
+        }
+      };
+      bot.on('message', textHandler);
+      const message = `Создана новая заявка под номером ${userRequestId}`
+      bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+          ]
+        }
+      });
+      sendMessagesToUsersWithRoleId(message, userRequestId)
+    } catch (error) {
+      console.log(error)
+    }
+  } else {
+    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: 'Стоп', callback_data: 'Стоп' }]
+        ]
+      }
+    });
+  }
+}
+
 async function MethodToUser(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     const username = userName
@@ -1813,36 +1923,17 @@ const startBot = async () => {
             //   }
             // };
             // bot.on('message', textHandler);
-            // MethodToOperator(userRequestId, userName, userId).then(respons => {
-            //   const message = `Создана новая заявка под номером ${createdRequestId}`
-            //   bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
-            //     reply_markup: {
-            //       inline_keyboard: [
-            //         [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-            //       ]
-            //     }
-            //   });
-            //   sendMessagesToUsersWithRoleId(message, createdRequestId)
-            // })
-
-            async function processUserRequest(userRequestId, userName, userId) {
-              try {
-                const respons = await MethodToOperator(userRequestId, userName, userId);
-                const message = `Создана новая заявка под номером ${createdRequestId}`;
-                bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
-                  reply_markup: {
-                    inline_keyboard: [
-                      [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-                    ]
-                  }
-                });
-                sendMessagesToUsersWithRoleId(message, createdRequestId);
-              } catch (error) {
-                console.error('Произошла ошибка:', error);
+            MethodToOperator1(userRequestId, userName, userId)
+            const message = `Создана новая заявка под номером ${createdRequestId}`
+            bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                ]
               }
-            }
+            });
+            sendMessagesToUsersWithRoleId(message, createdRequestId)
 
-            processUserRequest(userRequestId, userName, userId);
 
           } else {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
