@@ -1479,9 +1479,8 @@ const startBot = async () => {
     if (msg.text === `Изменить роль пользователя по его Id`) {
       try {
         const userId = msg.from.id;
-        waitingUsers[userId] = true;
 
-        await bot.sendMessage(chatId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+        await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
           reply_markup: {
             inline_keyboard: [
               [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -1489,6 +1488,7 @@ const startBot = async () => {
           }
         });
         const textHandler = async (response) => {
+          waitingUsers[userId] = true;
           if (userId === response.from.id && waitingUsers[userId]) {
 
             const chatId = response.text;
@@ -1530,6 +1530,7 @@ const startBot = async () => {
               bot.off('text', textHandler);
             }
           }
+
         }
       } catch (e) {
         console.log(e)
