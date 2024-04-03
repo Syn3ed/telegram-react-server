@@ -1450,7 +1450,7 @@ const startBot = async () => {
     if (msg.text === `Изменить роль пользователя по его Id`) {
       try {
         const userId = msg.from.id;
-        bot.on('text', textHandler);
+       
         await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
           reply_markup: {
             inline_keyboard: [
@@ -1515,6 +1515,7 @@ const startBot = async () => {
 
           }
         }
+        bot.on('text', textHandler);
       } catch (e) {
         console.log(e)
       }
