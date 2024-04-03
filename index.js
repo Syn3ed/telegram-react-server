@@ -1490,10 +1490,11 @@ const startBot = async () => {
         waitingUsers[userId] = true;
 
         // Добавляем обработчик события text
-        bot.on('text', textHandler);
-
+        
         const textHandler = async (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
+            bot.on('text', textHandler);
+
             console.log(`Изменить роль пользователя по его Id`)
             const chatId = response.text;
             console.log(chatId)
