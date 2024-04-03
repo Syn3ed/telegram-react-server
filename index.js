@@ -1935,15 +1935,15 @@ const startBot = async () => {
             // };
             // bot.on('message', textHandler);
             MethodToOperator1(userRequestId, userName, userId)
-            const message = `Создана новая заявка под номером ${createdRequestId}`
-            bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
-              reply_markup: {
-                inline_keyboard: [
-                  [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-                ]
-              }
-            });
-            sendMessagesToUsersWithRoleId(message, createdRequestId)
+            // const message = `Создана новая заявка под номером ${createdRequestId}`
+            // bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+            //   reply_markup: {
+            //     inline_keyboard: [
+            //       [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+            //     ]
+            //   }
+            // });
+            // sendMessagesToUsersWithRoleId(message, createdRequestId)
 
 
           } else {
