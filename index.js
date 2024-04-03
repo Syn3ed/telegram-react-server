@@ -1370,8 +1370,8 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
 }
 
 async function sendMediaGroup1(data) {
+  const { chatId, userName, userRequestId, timeMess, op, caption_text } = data;
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
-    const { chatId, userName, userRequestId, timeMess, op, caption_text } = data;
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
     const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
     const str = JSON.stringify(groupPhotos);
