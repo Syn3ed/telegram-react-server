@@ -1488,6 +1488,10 @@ const startBot = async () => {
           }
         });
         waitingUsers[userId] = true;
+
+        // Добавляем обработчик события text
+        bot.on('text', textHandler);
+
         const textHandler = async (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
             console.log(`Изменить роль пользователя по его Id`)
@@ -1524,19 +1528,22 @@ const startBot = async () => {
                   inline_keyboard: keyboard
                 }
               });
+
+              // Удаляем обработчик события text после обработки сообщения
               bot.off('text', textHandler);
             } else {
               bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
+
+              // Удаляем обработчик события text после обработки сообщения
               bot.off('text', textHandler);
             }
           }
-
         }
       } catch (e) {
         console.log(e)
       }
-
     }
+
 
 
     if (msg.text === '/start') {
