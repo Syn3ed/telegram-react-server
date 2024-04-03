@@ -740,6 +740,15 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
               }
               resToOperatorFunc(data);
               console.log(waitingUsers[chatId])
+              const message = `Создана новая заявка под номером ${userRequestId}`
+              bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+                reply_markup: {
+                  inline_keyboard: [
+                    [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                  ]
+                }
+              });
+              sendMessagesToUsersWithRoleId(message, userRequestId)
             }, 1000);
           }
           if (reply?.text) {
@@ -755,20 +764,22 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
               }
               resToOperatorTextFunc1(data);
               console.log(waitingUsers[chatId])
+              const message = `Создана новая заявка под номером ${userRequestId}`
+              bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+                reply_markup: {
+                  inline_keyboard: [
+                    [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                  ]
+                }
+              });
+              sendMessagesToUsersWithRoleId(message, userRequestId)
             }, 1000);
           }
+
+
         }
       };
       bot.on('message', textHandler);
-      const message = `Создана новая заявка под номером ${userRequestId}`
-      bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-          ]
-        }
-      });
-      sendMessagesToUsersWithRoleId(message, userRequestId)
     } catch (error) {
       console.log(error)
     }
