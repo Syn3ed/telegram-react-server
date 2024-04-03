@@ -1472,9 +1472,65 @@ const startBot = async () => {
 
     console.log(msg)
     const chatId = msg.chat.id
-    if (msg.text === 'Узнать id' || msg.text === `/userId`) {
+    if (msg.text === 'Узнать id' || msg.text === `Мой id`) {
       await bot.sendMessage(chatId, `Ваш id \n${chatId}`)
     }
+
+    if (msg.text === `Изменить роль пользователя по его Id`) {
+      const match = data1.match(regex7);
+      const userId = msg.from.id;
+      try {
+        const userId = msg.from.id;
+        waitingUsers[userId] = true;
+
+        await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
+        const textHandler = async (response) => {
+          if (userId === response.from.id && waitingUsers[userId]) {
+            waitingUsers[userId] = false;
+            bot.off('text', textHandler);
+            const chatId = response.text;
+
+            if (!isNaN(chatId)) {
+              const user = await User.findOne({ where: { telegramId: chatId.toString() } });
+
+              if (!user) {
+                await bot.sendMessage(userId, 'Пользователь не найден.');
+                return;
+              }
+
+              let keyboard = [];
+
+              if (user.RoleId == '2') {
+                keyboard = [
+                  [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
+                ];
+              } else if (user.RoleId == '1') {
+                keyboard = [
+                  [{ text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
+                ];
+              } else if (user.RoleId == '3') {
+                keyboard = [
+                  [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }]
+                ];
+              }
+
+              await bot.sendMessage(userId, `Чтобы изменить роль пользователю выберете роль`, {
+                reply_markup: {
+                  inline_keyboard: keyboard
+                }
+              });
+            } else {
+              bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
+            }
+          }
+        }
+      } catch (e) {
+        console.log(e)
+      }
+
+    }
+
+
     if (msg.text === '/start') {
       try {
         const chatId = msg.chat.id;
