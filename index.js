@@ -1489,18 +1489,19 @@ const startBot = async () => {
         });
         waitingUsers[userId] = true;
 
-        
+
         const textHandler = async (response) => {
           console.log(`Изменить роль пользователя по его Id`)
           if (userId === response.from.id && waitingUsers[userId]) {
             bot.on('text', textHandler);
-            
+
             console.log(`Изменить роль пользователя по его Id`)
             const chatId = response.text;
             console.log(chatId)
-
+            waitingUsers[userId] = false;
+            
             if (!isNaN(chatId)) {
-              waitingUsers[userId] = false;
+             
               const user = await User.findOne({ where: { telegramId: chatId.toString() } });
 
               if (!user) {
