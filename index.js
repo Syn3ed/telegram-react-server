@@ -1477,13 +1477,17 @@ const startBot = async () => {
     }
 
     if (msg.text === `Изменить роль пользователя по его Id`) {
-      const match = data1.match(regex7);
-      const userId = msg.from.id;
       try {
         const userId = msg.from.id;
         waitingUsers[userId] = true;
 
-        await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
+        await bot.sendMessage(chatId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: 'Стоп', callback_data: 'Стоп' }]
+            ]
+          }
+        });
         const textHandler = async (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
             waitingUsers[userId] = false;
