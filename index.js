@@ -1439,65 +1439,41 @@ const startBot = async () => {
   await connectToDatabase();
   await createRoles();
 
-  bot.onText('Изменить роль пользователю на оператора', async (msg, match) => {
-    try {
-      const userId = msg.from.id;
-      waitingUsers[userId] = true;
+  // bot.onText('Изменить роль пользователю на оператора', async (msg, match) => {
+  //   try {
+  //     const userId = msg.from.id;
+  //     waitingUsers[userId] = true;
 
-      await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
-      const textHandler = async (response) => {
-        if (userId === response.from.id && waitingUsers[userId]) {
-          waitingUsers[userId] = false;
-          bot.off('text', textHandler);
-          const reply = response.text;
+  //     await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
+  //     const textHandler = async (response) => {
+  //       if (userId === response.from.id && waitingUsers[userId]) {
+  //         waitingUsers[userId] = false;
+  //         bot.off('text', textHandler);
+  //         const reply = response.text;
 
-          if (!isNaN(reply)) {
-            const chRole = dbManager.changeRoleUser(reply, 3)
-            await bot.sendMessage(reply, 'Роль изменена');
-            bot.sendMessage(userId, 'Изменение прошло успешно.');
-          } else {
-            bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
-          }
-        }
-      };
+  //         if (!isNaN(reply)) {
+  //           const chRole = dbManager.changeRoleUser(reply, 3)
+  //           await bot.sendMessage(reply, 'Роль изменена');
+  //           bot.sendMessage(userId, 'Изменение прошло успешно.');
+  //         } else {
+  //           bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
+  //         }
+  //       }
+  //     };
 
-      bot.on('text', textHandler);
-    } catch (e) {
-      console.log(e)
-    }
-  });
+  //     bot.on('text', textHandler);
+  //   } catch (e) {
+  //     console.log(e)
+  //   }
+  // });
 
 
   bot.on('message', async (msg) => {
 
     console.log(msg)
     const chatId = msg.chat.id
-    if (msg.text === 'Изменить роль пользователю на админа') {
-      try {
-        const userId = msg.from.id;
-        waitingUsers[userId] = true;
-
-        await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
-        const textHandler = async (response) => {
-          if (userId === response.from.id && waitingUsers[userId]) {
-            waitingUsers[userId] = false;
-            bot.off('text', textHandler);
-            const reply = response.text;
-
-            if (!isNaN(reply)) {
-              const chRole = dbManager.changeRoleUser(reply, 3)
-              await bot.sendMessage(reply, 'Вам присвоена роль "Администратор"');
-              bot.sendMessage(userId, 'Роль пользователя успешно изменена.');
-            } else {
-              bot.sendMessage(userId, 'Ошибка: Введите, пожалуйста, корректный ID-телеграма пользователя.');
-            }
-          }
-        };
-
-        bot.on('text', textHandler);
-      } catch (e) {
-        console.log(e);
-      }
+    if (msg.text === 'Узнать id' || msg.text === `/userId`) {
+      await bot.sendMessage(chatId, `Ваш id \n${chatId}`)
     }
     if (msg.text === '/start') {
       try {
@@ -1522,18 +1498,18 @@ const startBot = async () => {
 
       if (user.RoleId == '2') {
         keyboard = [
-          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
           [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
         ];
       } else if (user.RoleId == '1') {
         keyboard = [
-          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }],
+          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
           [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
-          [{ text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+          [{ text: 'Изменить роль пользователя по его Id', callback_data: `/resRole` }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
         ];
       } else if (user.RoleId == '3') {
         keyboard = [
-          [{ text: `Текущие заявки`, web_app: { url: appUrl } }],
+          [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Мой id', callback_data: `/userId` }]
         ];
       }
 
@@ -1859,7 +1835,6 @@ const startBot = async () => {
             console.log(createdRequest)
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
-            // await bot.sendMessage(chatId, 'Пожалуйста, прикрепите фото к вашей заявке.');
             // waitingUsers[userId] = true;
             // const textHandler = async (response) => {
             //   if (userId === response.from.id && waitingUsers[userId]) {
@@ -1935,17 +1910,6 @@ const startBot = async () => {
             // };
             // bot.on('message', textHandler);
             MethodToOperator1(userRequestId, userName, userId)
-            // const message = `Создана новая заявка под номером ${createdRequestId}`
-            // bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
-            //   reply_markup: {
-            //     inline_keyboard: [
-            //       [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-            //     ]
-            //   }
-            // });
-            // sendMessagesToUsersWithRoleId(message, createdRequestId)
-
-
           } else {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
@@ -1991,6 +1955,9 @@ const startBot = async () => {
         await bot.sendMessage(chatId, `Вы уже завершили предыдушие действие.`)
       }
     }
+    if (data1 === '/userId') {
+      await bot.sendMessage(chatId, `Ваш Telegram ID: \n${chatId}`);
+    }
     if (data1) {
       const regex = /\/handleShowPhoto (\d+)/;
       const regex1 = /\/resToUserPhoto (\d+)/;
@@ -1999,6 +1966,10 @@ const startBot = async () => {
       const regex4 = /\/resToUser (\d+)/;
       const regex5 = /\/closeReq (\d+)/;
       const regex6 = /\/resumeReq (\d+)/;
+      const regex7 = /\/resRole/;
+      const regex8 = /\/changeRoleUser (\d+)/;
+      const regex9 = /\/changeRoleOperator (\d+)/;
+      const regex10 = /\/changeRoleAdmin (\d+)/;
       if (regex.test(data1)) {
         const match = data1.match(regex);
         const idMed = match[1];
@@ -2239,6 +2210,89 @@ const startBot = async () => {
         const message = `Возобновлена заявка под номером ${requestId}`;
         await sendMessagesToUsersWithRoleId(message, requestId);
         await bot.answerCallbackQuery(callbackQueryId);
+      }
+      if (regex7.test(data1)) {
+        const match = data1.match(regex7);
+        const userId = msg.from.id;
+        try {
+          const userId = msg.from.id;
+          waitingUsers[userId] = true;
+
+          await bot.sendMessage(userId, 'Введите ID-телеграма пользователя:');
+          const textHandler = async (response) => {
+            if (userId === response.from.id && waitingUsers[userId]) {
+              waitingUsers[userId] = false;
+              bot.off('text', textHandler);
+              const chatId = response.text;
+
+              if (!isNaN(chatId)) {
+                const user = await User.findOne({ where: { telegramId: chatId.toString() } });
+
+                if (!user) {
+                  await bot.sendMessage(userId, 'Пользователь не найден.');
+                  return;
+                }
+
+                let keyboard = [];
+
+                if (user.RoleId == '2') {
+                  keyboard = [
+                    [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
+                  ];
+                } else if (user.RoleId == '1') {
+                  keyboard = [
+                    [{ text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
+                  ];
+                } else if (user.RoleId == '3') {
+                  keyboard = [
+                    [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }]
+                  ];
+                }
+
+                await bot.sendMessage(userId, `Чтобы изменить роль пользователю выберете роль`, {
+                  reply_markup: {
+                    inline_keyboard: keyboard
+                  }
+                });
+              } else {
+                bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
+              }
+            }
+          }
+        } catch (e) {
+          console.log(e)
+        }
+
+      }
+      if (regex8.test(data1)) {
+        const match = data1.match(regex9);
+        const chatId = msg.from.id;
+        const userId = match[1];
+        console.log(msg)
+        const chRole = dbManager.changeRoleUser(userId, 2)
+        await bot.sendMessage(userId, 'Вам присвоена роль "Пользователь"');
+        bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        keyboardRole(userId)
+      }
+      if (regex9.test(data1)) {
+        const match = data1.match(regex9);
+        const chatId = msg.from.id;
+        const userId = match[1];
+        console.log(msg)
+        const chRole = dbManager.changeRoleUser(userId, 3)
+        await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
+        bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        keyboardRole(userId)
+      }
+      if (regex10.test(data1)) {
+        const match = data1.match(regex9);
+        const chatId = msg.from.id;
+        const userId = match[1];
+        console.log(msg)
+        const chRole = dbManager.changeRoleUser(userId, 1)
+        await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
+        bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        keyboardRole(userId)
       }
     }
   })
