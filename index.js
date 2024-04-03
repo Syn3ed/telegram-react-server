@@ -1813,21 +1813,21 @@ const startBot = async () => {
             //   }
             // };
             // bot.on('message', textHandler);
-            try{
-            await MethodToOperator(userRequestId, userName, userId).then(respons => {
-              const message = `Создана новая заявка под номером ${createdRequestId}`
-              bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
-                reply_markup: {
-                  inline_keyboard: [
-                    [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-                  ]
-                }
-              });
-              sendMessagesToUsersWithRoleId(message, createdRequestId)
-            })
-          }catch(e){
-            console.log(e)
-          }
+            try {
+              MethodToOperator(userRequestId, userName, userId).then(respons => {
+                const message = `Создана новая заявка под номером ${createdRequestId}`
+                bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+                  reply_markup: {
+                    inline_keyboard: [
+                      [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
+                    ]
+                  }
+                });
+                sendMessagesToUsersWithRoleId(message, createdRequestId)
+              })
+            } catch (e) {
+              console.log(e)
+            }
 
           } else {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
