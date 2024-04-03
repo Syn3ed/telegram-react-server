@@ -1487,10 +1487,10 @@ const startBot = async () => {
             ]
           }
         });
+        waitingUsers[userId] = true;
         const textHandler = async (response) => {
-          waitingUsers[userId] = true;
           if (userId === response.from.id && waitingUsers[userId]) {
-
+            console.log(`Изменить роль пользователя по его Id`)
             const chatId = response.text;
             console.log(chatId)
 
