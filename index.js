@@ -1439,79 +1439,6 @@ const startBot = async () => {
   await connectToDatabase();
   await createRoles();
 
-  bot.onText('Изменить роль пользователя по его Id', async (msg, match) => {
-    try {
-      const userId = msg.from.id;
-
-      await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Стоп', callback_data: 'Стоп' }]
-          ]
-        }
-      });
-      waitingUsers[userId] = true;
-
-
-      const textHandler = async (response) => {
-        try {
-          console.log(`Изменить роль пользователя по его Id`)
-          if (userId === response.from.id && waitingUsers[userId]) {
-            bot.on('text', textHandler);
-
-            console.log(`Изменить роль пользователя по его Id`)
-            const chatId = response.text;
-            console.log(chatId)
-            waitingUsers[userId] = false;
-
-            if (!isNaN(chatId)) {
-
-              const user = await User.findOne({ where: { telegramId: chatId.toString() } });
-
-              if (!user) {
-                await bot.sendMessage(userId, 'Пользователь не найден.');
-                return;
-              }
-
-              let keyboard = [];
-
-              if (user.RoleId == '2') {
-                keyboard = [
-                  [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
-                ];
-              } else if (user.RoleId == '1') {
-                keyboard = [
-                  [{ text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
-                ];
-              } else if (user.RoleId == '3') {
-                keyboard = [
-                  [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }]
-                ];
-              }
-
-              await bot.sendMessage(userId, `Чтобы изменить роль пользователю выберете роль`, {
-                reply_markup: {
-                  inline_keyboard: keyboard
-                }
-              });
-
-              bot.off('text', textHandler);
-            } else {
-              bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
-
-              bot.off('text', textHandler);
-            }
-          }
-        } catch (e) {
-
-        }
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  });
-
-
   bot.on('message', async (msg) => {
 
     console.log(msg)
@@ -1520,79 +1447,78 @@ const startBot = async () => {
       await bot.sendMessage(chatId, `Ваш id \n${chatId}`)
     }
 
-    // if (msg.text === `Изменить роль пользователя по его Id`) {
-    //   try {
-    //     const userId = msg.from.id;
+    if (msg.text === `Изменить роль пользователя по его Id`) {
+      try {
+        const userId = msg.from.id;
+        bot.on('text', textHandler);
+        await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: 'Стоп', callback_data: 'Стоп' }]
+            ]
+          }
+        });
+        waitingUsers[userId] = true;
 
-    //     await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
-    //       reply_markup: {
-    //         inline_keyboard: [
-    //           [{ text: 'Стоп', callback_data: 'Стоп' }]
-    //         ]
-    //       }
-    //     });
-    //     waitingUsers[userId] = true;
 
+        const textHandler = async (response) => {
+          try {
+            console.log(`Изменить роль пользователя по его Id`)
+            if (userId === response.from.id && waitingUsers[userId]) {
 
-    //     const textHandler = async (response) => {
-    //       try {
-    //         console.log(`Изменить роль пользователя по его Id`)
-    //         if (userId === response.from.id && waitingUsers[userId]) {
-    //           bot.on('text', textHandler);
+              console.log(`Изменить роль пользователя по его Id`)
+              const chatId = response.text;
+              console.log(chatId)
+              waitingUsers[userId] = false;
 
-    //           console.log(`Изменить роль пользователя по его Id`)
-    //           const chatId = response.text;
-    //           console.log(chatId)
-    //           waitingUsers[userId] = false;
+              if (!isNaN(chatId)) {
 
-    //           if (!isNaN(chatId)) {
+                const user = await User.findOne({ where: { telegramId: chatId.toString() } });
 
-    //             const user = await User.findOne({ where: { telegramId: chatId.toString() } });
+                if (!user) {
+                  await bot.sendMessage(userId, 'Пользователь не найден.');
+                  return;
+                }
 
-    //             if (!user) {
-    //               await bot.sendMessage(userId, 'Пользователь не найден.');
-    //               return;
-    //             }
+                let keyboard = [];
 
-    //             let keyboard = [];
+                if (user.RoleId == '2') {
+                  keyboard = [
+                    [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
+                  ];
+                } else if (user.RoleId == '1') {
+                  keyboard = [
+                    [{ text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
+                  ];
+                } else if (user.RoleId == '3') {
+                  keyboard = [
+                    [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }]
+                  ];
+                }
 
-    //             if (user.RoleId == '2') {
-    //               keyboard = [
-    //                 [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
-    //               ];
-    //             } else if (user.RoleId == '1') {
-    //               keyboard = [
-    //                 [{ text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }, { text: 'Оператор', callback_data: `/changeRoleOperator ${chatId}` }]
-    //               ];
-    //             } else if (user.RoleId == '3') {
-    //               keyboard = [
-    //                 [{ text: 'Администратор', callback_data: `/changeRoleAdmin ${chatId}` }, { text: 'Пользователь', callback_data: `/changeRoleUser ${chatId}` }]
-    //               ];
-    //             }
+                await bot.sendMessage(userId, `Чтобы изменить роль пользователю выберете роль`, {
+                  reply_markup: {
+                    inline_keyboard: keyboard
+                  }
+                });
 
-    //             await bot.sendMessage(userId, `Чтобы изменить роль пользователю выберете роль`, {
-    //               reply_markup: {
-    //                 inline_keyboard: keyboard
-    //               }
-    //             });
+                // Удаляем обработчик события text после обработки сообщения
+                bot.off('text', textHandler);
+              } else {
+                bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
 
-    //             // Удаляем обработчик события text после обработки сообщения
-    //             bot.off('text', textHandler);
-    //           } else {
-    //             bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
+                // Удаляем обработчик события text после обработки сообщения
+                bot.off('text', textHandler);
+              }
+            }
+          } catch (e) {
 
-    //             // Удаляем обработчик события text после обработки сообщения
-    //             bot.off('text', textHandler);
-    //           }
-    //         }
-    //       } catch (e) {
-
-    //       }
-    //     }
-    //   } catch (e) {
-    //     console.log(e)
-    //   }
-    // }
+          }
+        }
+      } catch (e) {
+        console.log(e)
+      }
+    }
 
 
 
