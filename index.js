@@ -906,6 +906,42 @@ async function MethodToUser(userRequestId, userName, chatId) {
   }
 }
 
+async function keyboardRole(chatId) {
+  // const chatId = msg.chat.id;
+  const user = await User.findOne({ where: { telegramId: chatId.toString() } });
+
+  if (!user) {
+    await bot.sendMessage(chatId, 'Пользователь не найден.');
+    return;
+  }
+
+  let keyboard = [];
+
+  if (user.RoleId == '2') {
+    keyboard = [
+      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
+      [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
+    ];
+  } else if (user.RoleId == '1') {
+    keyboard = [
+      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
+      [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
+      [{ text: 'Изменить роль пользователя по его Id', callback_data: `/resRole` }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+    ];
+  } else if (user.RoleId == '3') {
+    keyboard = [
+      [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Мой id', callback_data: `/userId` }]
+    ];
+  }
+
+  await bot.sendMessage(chatId, 'Обновление меню бота', {
+    reply_markup: {
+      keyboard: keyboard
+    }
+  });
+  return
+}
+
 app.post(`/replyToOperatorPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
   MethodToOperator(userRequestId, username, operatorId)
@@ -1533,41 +1569,7 @@ const startBot = async () => {
       }
     }
 
-    async function keyboardRole(chatId) {
-      // const chatId = msg.chat.id;
-      const user = await User.findOne({ where: { telegramId: chatId.toString() } });
-
-      if (!user) {
-        await bot.sendMessage(chatId, 'Пользователь не найден.');
-        return;
-      }
-
-      let keyboard = [];
-
-      if (user.RoleId == '2') {
-        keyboard = [
-          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
-          [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
-        ];
-      } else if (user.RoleId == '1') {
-        keyboard = [
-          [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
-          [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
-          [{ text: 'Изменить роль пользователя по его Id', callback_data: `/resRole` }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
-        ];
-      } else if (user.RoleId == '3') {
-        keyboard = [
-          [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Мой id', callback_data: `/userId` }]
-        ];
-      }
-
-      await bot.sendMessage(chatId, 'Обновление меню бота', {
-        reply_markup: {
-          keyboard: keyboard
-        }
-      });
-      return
-    }
+   
     if (msg.text === '/menu') {
       try {
         keyboardRole(chatId)
