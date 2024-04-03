@@ -1491,9 +1491,9 @@ const startBot = async () => {
         const textHandler = async (response) => {
           if (userId === response.from.id && waitingUsers[userId]) {
 
-            bot.off('text', textHandler);
             const chatId = response.text;
             console.log(chatId)
+
             if (!isNaN(chatId)) {
               waitingUsers[userId] = false;
               const user = await User.findOne({ where: { telegramId: chatId.toString() } });
