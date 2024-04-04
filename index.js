@@ -177,7 +177,7 @@ app.post(`/replyToOperator`, async (req, res) => {
     //     ]
     //   }
     // });
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*`, {
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
@@ -323,7 +323,7 @@ app.post(`/replyToUser`, async (req, res) => {
       ]
     });
 
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId} *проверка postRegex3*`, {
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
@@ -473,7 +473,7 @@ async function resToOperatorTextFunc(data) {
   await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', username, timeMess);
   await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
   console.log('resToOperatorTextFunc')
-  await bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
+  await bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId}\n${reply.text}`, {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
@@ -526,7 +526,7 @@ async function resToUserTextFunc(data) {
     // await processUserRequest(userRequestId, chatId)
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
     console.log('resToUserTextFunc')
-    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
+    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId}\n${reply.text}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
@@ -553,7 +553,7 @@ async function resToUserTextFunc1(data) {
     await processUserRequest(userRequestId, chatId)
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
     console.log('resToUserTextFunc')
-    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId} *проверка postRegex4*\n${reply.text}`, {
+    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку #${userRequestId}\n${reply.text}`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
@@ -741,7 +741,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
               resToOperatorFunc(data);
               console.log(waitingUsers[chatId])
               const message = `Создана новая заявка под номером ${userRequestId}`
-              bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+              bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId}`, {
                 reply_markup: {
                   inline_keyboard: [
                     [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -765,7 +765,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
               resToOperatorTextFunc1(data);
               console.log(waitingUsers[chatId])
               const message = `Создана новая заявка под номером ${userRequestId}`
-              bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+              bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId}`, {
                 reply_markup: {
                   inline_keyboard: [
                     [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -1441,7 +1441,7 @@ async function sendMediaGroup1(data) {
         if (caption_text) {
           await bot.sendMessage(messages[0].operatorId, caption_text)
         }
-        await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex${op}*`, {
+        await bot.sendMessage(messages[0].operatorId, `*проверка sendMediaGroup для Regex ${op}*`, {
           reply_markup: {
             inline_keyboard: [
               [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
@@ -1682,7 +1682,7 @@ const startBot = async () => {
 
                   await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
 
-                  await bot.sendMessage(messages[0].operatorId, `Пришел ответ от пользователя на заявку #${userRequestId} *проверка regex3*`, {
+                  await bot.sendMessage(messages[0].operatorId, `Пришел ответ от пользователя на заявку #${userRequestId}`, {
                     reply_markup: {
                       inline_keyboard: [
                         [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
@@ -1784,7 +1784,7 @@ const startBot = async () => {
                   ]
                 });
 
-                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку #${requestId} *проверка regex4*`, {
+                bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку #${requestId}`, {
                   reply_markup: {
                     inline_keyboard: [
                       [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }],
@@ -1939,7 +1939,7 @@ const startBot = async () => {
             //         bot.sendMessage(chatId, 'Заявка успешно создана');
             //         const message = `Создана новая заявка под номером ${createdRequestId}`
             //         bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-            //         bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+            //         bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} `, {
             //           reply_markup: {
             //             inline_keyboard: [
             //               [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -1965,7 +1965,7 @@ const startBot = async () => {
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
             const message = `Создана новая заявка под номером ${createdRequestId}`
-            bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} *проверка regexIsSwitch${data.isSwitchOn}*`, {
+            bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId}`, {
               reply_markup: {
                 inline_keyboard: [
                   [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
@@ -2107,7 +2107,7 @@ const startBot = async () => {
 
                 await dbManager.createUserRequestMessage(userRequestId, reply, userId, 'User', username, timeMess);
 
-                await bot.sendMessage(messages[0].operatorId, `Пришел ответ от пользователя на заявку #${userRequestId} *проверка regex3*`, {
+                await bot.sendMessage(messages[0].operatorId, `Пришел ответ от пользователя на заявку #${userRequestId}`, {
                   reply_markup: {
                     inline_keyboard: [
                       [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
@@ -2198,7 +2198,7 @@ const startBot = async () => {
                 ]
               });
 
-              bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку #${requestId} *проверка regex4*`, {
+              bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку #${requestId}`, {
                 reply_markup: {
                   inline_keyboard: [
                     [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }],
