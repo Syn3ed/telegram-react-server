@@ -490,7 +490,7 @@ async function resToOperatorTextFunc1(data) {
   try {
     const { userRequestId, reply, chatId, userName, timeMess, messages, textHandler } = data
     waitingUsers[chatId] = false;
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', username, timeMess);
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, timeMess);
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
     console.log('resToOperatorTextFunc')
     const operatorIds = messages[0].operatorId.split(',');
