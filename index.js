@@ -1474,7 +1474,9 @@ async function sendMediaGroup1(data) {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-
+  await UserRequest.destroy({
+    where: {}, 
+  });
   bot.on('message', async (msg) => {
 
     console.log(msg)
@@ -1885,80 +1887,6 @@ const startBot = async () => {
             console.log(createdRequest)
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
-            // waitingUsers[userId] = true;
-            // const textHandler = async (response) => {
-            //   if (userId === response.from.id && waitingUsers[userId]) {
-            //     const reply = response;
-
-            //     if (reply?.text === 'Стоп' || reply?.text === 'стоп') {
-            //       await bot.sendMessage(userId, 'Хорошо');
-            //       waitingUsers[userId] = false;
-            //       return;
-            //     }
-
-            //     const timeData = new Date();
-            //     const year = timeData.getFullYear();
-            //     const month = timeData.getMonth() + 1;
-            //     const day = timeData.getDate();
-            //     timeData.setHours(timeData.getHours() + 7);
-            //     const hours = timeData.getHours();
-            //     const minutes = timeData.getMinutes();
-            //     const formattedHours = hours < 10 ? '0' + hours : hours;
-            //     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-
-            //     const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
-            //     if (reply.photo) {
-            //       userPhotos[chatId] = userPhotos[chatId] || [];
-            //       userPhotos[chatId].push({
-            //         type: 'photo',
-            //         media: reply.photo[0].file_id,
-            //         mediaGroupId: reply.media_group_id
-            //       });
-            //       console.log('Получена фотография:');
-            //       console.log(userPhotos[chatId]);
-            //     } else if (reply.document) {
-            //       userPhotos[chatId].push({
-            //         type: 'document',
-            //         media: reply.document.file_id,
-            //         mediaGroupId: reply.media_group_id
-            //       });
-            //     } else if (reply.video) {
-            //       userPhotos[chatId].push({
-            //         type: 'video',
-            //         media: reply.video.file_id,
-            //         mediaGroupId: reply.media_group_id
-            //       });
-            //     }
-            //     if (!sentMediaGroups[chatId] && !reply?.text) {
-
-            //       setTimeout(() => {
-            //         const op = 'User'
-            //         sendMediaGroup1(chatId, userName, userRequestId, timeMess, op);
-            //         waitingUsers[userId] = false;
-            //         bot.off('message', textHandler);
-            //         bot.sendMessage(chatId, 'Заявка успешно создана');
-            //         const message = `Создана новая заявка под номером ${createdRequestId}`
-            //         bot.sendMessage(msg.chat.id, `Файл успешно добавлен к заявке №${userRequestId}`);
-            //         bot.sendMessage(chatId, `Ваша заявка создана с номером ${userRequestId} `, {
-            //           reply_markup: {
-            //             inline_keyboard: [
-            //               [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-            //             ]
-            //           }
-            //         });
-            //         sendMessagesToUsersWithRoleId(message, createdRequestId);
-            //       }, 1000);
-            //       sentMediaGroups[chatId] = true;
-            //     }
-
-            //     if (!reply || !reply.photo || !reply.photo[0]) {
-            //       throw new Error('Не удалось получить фотографию.');
-            //     }
-
-
-            //   }
-            // };
-            // bot.on('message', textHandler);
             MethodToOperator1(userRequestId, userName, userId)
           } else {
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
@@ -2040,12 +1968,14 @@ const startBot = async () => {
       if (regex2.test(data1)) {
         const match = data1.match(regex2);
         const userRequestId = match[1];
+        const userName = msg.from.first_name
         MethodToOperator(userRequestId, userName, chatId);
         await bot.answerCallbackQuery(callbackQueryId);
       }
       if (regex1.test(data1)) {
         const match = data1.match(regex1);
         const userRequestId = match[1];
+        const userName = msg.from.first_name
         MethodToUser(userRequestId, userName, chatId);
         await bot.answerCallbackQuery(callbackQueryId);
       }
