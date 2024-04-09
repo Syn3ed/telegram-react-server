@@ -1474,9 +1474,6 @@ async function sendMediaGroup1(data) {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  await UserRequest.destroy({
-    where: {}, 
-  });
   bot.on('message', async (msg) => {
 
     console.log(msg)
