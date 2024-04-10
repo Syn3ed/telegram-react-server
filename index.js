@@ -1361,7 +1361,8 @@ app.get('/mes/:userRequestId', async (req, res) => {
 const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
-    await sequelize.sync();
+    // await sequelize.sync();
+    await sequelize.sync({ force: true });
     console.log('Подключение к БД успешно');
     // const userrole = dbManager.changeRoleUser(1, 3)
     app.listen(PORT, () => {
