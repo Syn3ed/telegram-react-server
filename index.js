@@ -1423,12 +1423,18 @@ async function getUnansweredRequestsOneWeek() {
   }
 }
 
+const NotificationRequest = {};
+
 async function notifyOperators(requests) {
   requests.forEach(request => {
-    const message = `Заявка №${request.id} не получила ответа в течение 15 минут`;
-    sendMessagesToUsersWithRoleId(message, request.id)
+    if (!NotificationRequest[request.id]) {
+      const message = `Заявка №${request.id} не получила ответа в течение 15 минут`;
+      sendMessagesToUsersWithRoleId(message, request.id);
+      NotificationRequest[request.id] = true; 
+    }
   });
 }
+
 
 async function checkRequestsMin15() {
   const unansweredRequests = await getUnansweredRequestsMin15();
