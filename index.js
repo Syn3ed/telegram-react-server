@@ -1478,6 +1478,10 @@ const startBot = async () => {
   // await UserRequest.destroy({
   //   where: {}, 
   // });
+  await UserRequest.drop();
+
+  // Создание таблицы заново с новой структурой
+  await UserRequest.sync();
   bot.on('message', async (msg) => {
 
     console.log(msg)
@@ -1489,7 +1493,7 @@ const startBot = async () => {
     if (msg.text === `Изменить роль пользователя по его Id`) {
       try {
         const userId = msg.from.id;
-       
+
         await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
           reply_markup: {
             inline_keyboard: [
@@ -1572,7 +1576,7 @@ const startBot = async () => {
       }
     }
 
-   
+
     if (msg.text === '/menu') {
       try {
         keyboardRole(chatId)
