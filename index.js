@@ -1270,7 +1270,7 @@ app.get('/reqUser/:id', async (req, res) => {
       userRequests: userRequests,
     };
 
-    res.json(formattedUser.userRequests);
+    res.json(formattedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
