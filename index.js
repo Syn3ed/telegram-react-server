@@ -1425,7 +1425,7 @@ async function getUnansweredRequestsOneWeek() {
 
 async function notifyOperators(requests) {
   requests.forEach(request => {
-    const message = `Заявка №${requests.id} не получила ответа в течение 15 минут`;
+    const message = `Заявка №${request.id} не получила ответа в течение 15 минут`;
     sendMessagesToUsersWithRoleId(message, request.id)
   });
 }
@@ -1446,7 +1446,7 @@ async function checkRequestsOneWeek() {
 
 async function notifyOperatorsOneWeek(requests) {
   requests.forEach(request => {
-    const userRequestId = requests.id;
+    const userRequestId = request.id;
     const message = `Заявка №${userRequestId} не получила ответа в течение недели и была закрыта`;
     const status = 'Заявка закрыта';
     const messages = messagesFunc(userRequestId)
