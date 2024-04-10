@@ -1445,19 +1445,32 @@ async function checkRequestsOneWeek() {
 }
 
 async function notifyOperatorsOneWeek(requests) {
-  requests.forEach(request => {
+  for (const request of requests) {
     const userRequestId = request.id;
     const message = `Заявка №${userRequestId} не получила ответа в течение недели и была закрыта`;
     const status = 'Заявка закрыта';
-    const messages = messagesFunc(userRequestId)
-    sendMessagesToUsersWithRoleId(message, userRequestId);
-    dbManager.changeStatusRes(userRequestId, status);
-    console.log('111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111')
+    const messages = await Message.findAll({
+      where: { id: userRequestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
+    await sendMessagesToUsersWithRoleId(message, userRequestId);
+    await dbManager.changeStatusRes(userRequestId, status);
     console.log(messages)
     console.log(messages[0])
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Ваша заявка №${userRequestId} была закрыта по истечению времени`);
-  });
+    await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Ваша заявка №${userRequestId} была закрыта по истечению времени`);
+  }
 }
+
 
 
 async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
