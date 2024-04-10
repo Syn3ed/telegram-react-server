@@ -1478,9 +1478,9 @@ const startBot = async () => {
   // await UserRequest.destroy({
   //   where: {}, 
   // });
-  await UserRequest.drop({ cascade: true });
+  // await UserRequest.drop({ cascade: true });
 
-  await UserRequest.sync();
+  // await UserRequest.sync();
   bot.on('message', async (msg) => {
 
     console.log(msg)
