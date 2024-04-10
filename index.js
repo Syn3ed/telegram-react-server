@@ -1386,13 +1386,16 @@ const createRoles = async () => {
     console.error(error);
   }
 };
-async function getUnansweredRequests() {
+const oneWeek = 7 * 24 * 60 * 60 * 1000;
+const min_15 = 15 * 60 * 1000;
+
+async function getUnansweredRequestsMin15() {
   try {
     const unansweredRequests = await UserRequest.findAll({
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.lt]: new Date(new Date() - 1 * 60 * 1000) // createdAt < (текущее время - 15 минут)
+          [Sequelize.Op.lt]: new Date(new Date() - 1 * 60 * 1000)
         }
       }
     });
@@ -1402,19 +1405,57 @@ async function getUnansweredRequests() {
     return [];
   }
 }
-async function notifyOperators(requests) {
+
+async function getUnansweredRequestsOneWeek() {
+  try {
+    const unansweredRequests = await UserRequest.findAll({
+      where: {
+        status: 'ожидает ответа оператора',
+        createdAt: {
+          [Sequelize.Op.lt]: new Date(new Date() - 2 * 60 * 1000)
+        }
+      }
+    });
+    return unansweredRequests;
+  } catch (error) {
+    console.error('Error retrieving unanswered requests:', error);
+    return [];
+  }
+}
+
+async function notifyOperators(requests, message) {
   requests.forEach(request => {
-    const message = `Заявка №${request.id} не получила ответа в течение 15 минут`;
-    bot.sendMessage('393448227', message);
+    sendMessagesToUsersWithRoleId(message, request.id)
   });
 }
 
-async function checkRequestsPeriodically() {
-  const unansweredRequests = await getUnansweredRequests();
+async function checkRequestsMin15() {
+  const unansweredRequests = await getUnansweredRequestsMin15();
   if (unansweredRequests.length > 0) {
-    notifyOperators(unansweredRequests);
+    const message = `Заявка №${requests.id} не получила ответа в течение 15 минут`;
+    notifyOperators(unansweredRequests, message);
   }
 }
+
+async function checkRequestsOneWeek() {
+  const unansweredRequests = await getUnansweredRequestsOneWeek();
+  if (unansweredRequests.length > 0) {
+    notifyOperatorsOneWeek(unansweredRequests)
+  }
+}
+
+async function notifyOperatorsOneWeek(requests) {
+  requests.forEach(request => {
+    const userRequestId = requests.id;
+    const message = `Заявка №${userRequestId} не получила ответа в течение недели и была закрыта`;
+    const status = 'Заявка закрыта';
+    const messages = messagesFunc(userRequestId)
+    sendMessagesToUsersWithRoleId(message, userRequestId);
+    dbManager.changeStatusRes(userRequestId, status);
+    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Ваша заявка №${userRequestId} была закрыта по истечению времени`);
+  });
+}
+
 
 async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
@@ -1506,7 +1547,8 @@ async function sendMediaGroup1(data) {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  setInterval(checkRequestsPeriodically, 30000);
+  setInterval(checkRequestsMin15, 60000 * 1);
+  setInterval(checkRequestsOneWeek, 60000 * 2);
   bot.on('message', async (msg) => {
 
     console.log(msg)
