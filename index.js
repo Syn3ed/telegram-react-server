@@ -1565,7 +1565,7 @@ const startBot = async () => {
     if (msg.text === '/start') {
       try {
         const chatId = msg.chat.id;
-        const existingUser = await dbManager.getUserByChatId(chatId);
+        const existingUser = await dbManager.getUserByChatId(`${chatId}`);
         if (existingUser) {
           await bot.sendMessage(chatId, `Добро пожаловать снова, ${msg.from.first_name}!`);
         } else {
