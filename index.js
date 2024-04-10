@@ -1452,6 +1452,9 @@ async function notifyOperatorsOneWeek(requests) {
     const messages = messagesFunc(userRequestId)
     sendMessagesToUsersWithRoleId(message, userRequestId);
     dbManager.changeStatusRes(userRequestId, status);
+    console.log('111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111')
+    console.log(messages)
+    console.log(messages[0])
     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Ваша заявка №${userRequestId} была закрыта по истечению времени`);
   });
 }
