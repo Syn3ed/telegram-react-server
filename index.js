@@ -592,7 +592,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
-     
+
           const timeMess = timeFunc()
           let caption_text;
 
@@ -1565,12 +1565,31 @@ const startBot = async () => {
     if (msg.text === '/start') {
       try {
         const chatId = msg.chat.id;
-        await bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
-        await dbManager.createUserWithRole(`${chatId}`, `${msg.from.first_name}`, `User`)
+        const existingUser = await dbManager.getUserByChatId(chatId);
+        if (existingUser) {
+          await bot.sendMessage(chatId, `Добро пожаловать снова, ${msg.from.first_name}!`);
+        } else {
+          await bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
+          try {
+            waitingUsers[chatId] = true;
+            await bot.sendMessage(chatId, 'Введите своё ФИО:');
+            const textHandler = async (response) => {
+              if (chatId === response.from.id && waitingUsers[chatId]) {
+                waitingUsers[chatId] = false;
+                bot.off('text', textHandler);
+                const FullName = response.text;
+                await dbManager.createUserWithRole(`${chatId}`, `${FullName}`, `User`);
+              }
+            }
+          } catch (e) {
+            console.log(e)
+          }
+        }
       } catch (e) {
-        console.log(e)
+        console.log(e);
       }
     }
+
 
 
     if (msg.text === '/menu') {

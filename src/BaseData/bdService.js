@@ -1,5 +1,5 @@
 const sequelize = require('./bdConnect');
-const { Message, UserRequest, User,MessageChat } = require('./bdModel');
+const { Message, UserRequest, User, MessageChat } = require('./bdModel');
 
 class DatabaseService {
   constructor(sequelize) {
@@ -11,6 +11,16 @@ class DatabaseService {
       const Role = this.sequelize.models.Role;
       return await Role.create({ name });
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUserByChatId(chatId) {
+    try {
+      const user = await User.findOne({ where: { telegramId: chatId } });
+      return user;
+    } catch (error) {
+      console.error('Ошибка при запросе пользователя из базы данных:', error);
       throw error;
     }
   }
@@ -127,10 +137,10 @@ class DatabaseService {
   }
 
 
-  async createUserRequestMessage(UserRequestId, textMessage, idUser, roleUser,username,TimeMessages) {
+  async createUserRequestMessage(UserRequestId, textMessage, idUser, roleUser, username, TimeMessages) {
     try {
       const userRequest = await UserRequest.findByPk(UserRequestId);
-      if(userRequest){
+      if (userRequest) {
         const message = await MessageChat.create({
           textMessage,
           idUser,
@@ -166,7 +176,7 @@ class DatabaseService {
 
   async changeRoleUser(userId, newRoleId) {
     try {
-      const user = await User.findOne({where:{telegramId:userId}})
+      const user = await User.findOne({ where: { telegramId: userId } })
 
       if (user) {
         user.RoleId = newRoleId;
