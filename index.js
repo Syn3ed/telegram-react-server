@@ -2280,7 +2280,7 @@ const startBot = async () => {
       }
     }
   })
-  // await bot.answerCallbackQuery(callbackQueryId);
+  await bot.answerCallbackQuery(callbackQueryId);
 };
 
 // const botClass = new BotClass(bot)
