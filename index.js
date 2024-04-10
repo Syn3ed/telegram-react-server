@@ -592,7 +592,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
-
+     
           const timeMess = timeFunc()
           let caption_text;
 
@@ -608,12 +608,14 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             console.log('Получена фотография:');
             console.log(userPhotos[chatId]);
           } else if (reply.document) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
             userPhotos[chatId].push({
               type: 'document',
               media: reply.document.file_id,
               mediaGroupId: reply.media_group_id
             });
           } else if (reply.video) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
             userPhotos[chatId].push({
               type: 'video',
               media: reply.video.file_id,
@@ -1476,12 +1478,6 @@ const startBot = async () => {
   await connectToDatabase();
   await createRoles();
 
-  // await UserRequest.destroy({
-  //   where: {}, 
-  // });
-  // await UserRequest.drop({ cascade: true });
-
-  // await UserRequest.sync();
   bot.on('message', async (msg) => {
 
     console.log(msg)
