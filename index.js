@@ -1478,9 +1478,8 @@ const startBot = async () => {
   // await UserRequest.destroy({
   //   where: {}, 
   // });
-  await UserRequest.drop();
+  await UserRequest.drop({ cascade: true });
 
-  // Создание таблицы заново с новой структурой
   await UserRequest.sync();
   bot.on('message', async (msg) => {
 
