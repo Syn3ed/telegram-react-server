@@ -1259,7 +1259,7 @@ app.get('/reqUser/:id', async (req, res) => {
       id: userRequest.id,
       status: userRequest.status,
       messageReq: userRequest.messageReq,
-      username: userRequest.username,
+      username: user.username,
       category: userRequest.category
     }));
 
@@ -1270,7 +1270,7 @@ app.get('/reqUser/:id', async (req, res) => {
       userRequests: userRequests,
     };
 
-    res.json(formattedUser);
+    res.json(formattedUser.userRequests);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
