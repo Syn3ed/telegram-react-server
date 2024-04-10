@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { Op } = require('sequelize');
 const multer = require('multer');
+const { Sequelize, DataTypes } = require('sequelize');
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
@@ -1385,7 +1386,35 @@ const createRoles = async () => {
     console.error(error);
   }
 };
+async function getUnansweredRequests() {
+  try {
+    const unansweredRequests = await UserRequest.findAll({
+      where: {
+        status: 'ожидает ответа оператора',
+        createdAt: {
+          [Sequelize.Op.lt]: new Date(new Date() - 1 * 60 * 1000) // createdAt < (текущее время - 15 минут)
+        }
+      }
+    });
+    return unansweredRequests;
+  } catch (error) {
+    console.error('Error retrieving unanswered requests:', error);
+    return [];
+  }
+}
+async function notifyOperators(requests) {
+  requests.forEach(request => {
+    const message = `Заявка №${request.id} не получила ответа в течение 15 минут`;
+    bot.sendMessage('393448227', message);
+  });
+}
 
+async function checkRequestsPeriodically() {
+  const unansweredRequests = await getUnansweredRequests();
+  if (unansweredRequests.length > 0) {
+    notifyOperators(unansweredRequests);
+  }
+}
 
 async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
@@ -1477,7 +1506,7 @@ async function sendMediaGroup1(data) {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-
+  setInterval(checkRequestsPeriodically, 30000);
   bot.on('message', async (msg) => {
 
     console.log(msg)
