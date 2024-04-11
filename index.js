@@ -32,6 +32,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
+
 async function sendMessagesToUsersWithRoleId(message, id) {
   try {
     const usersWithRoleId2 = await User.findAll({ where: { RoleId: [1, 3] } });
@@ -101,95 +102,95 @@ app.get('/test/:id', async (req, res) => {
 
 const waitingUsers = {};
 
-app.post(`/replyToOperator`, async (req, res) => {
-  const { queryId, userRequestId, username, userId, operatorId } = req.body;
-  const userWebId = operatorId;
+// app.post(`/replyToOperator`, async (req, res) => {
+//   const { queryId, userRequestId, username, userId, operatorId } = req.body;
+//   const userWebId = operatorId;
 
-  try {
-    const user = await User.findByPk(userId);
-    const userRequest = await dbManager.findReq(userRequestId);
+//   try {
+//     const user = await User.findByPk(userId);
+//     const userRequest = await dbManager.findReq(userRequestId);
 
-    if (!userRequest) {
-      bot.sendMessage(userWebId, 'Заявка не найдена.');
-      return res.status(400).json({ error: 'Заявка не найдена.' });
-    }
+//     if (!userRequest) {
+//       bot.sendMessage(userWebId, 'Заявка не найдена.');
+//       return res.status(400).json({ error: 'Заявка не найдена.' });
+//     }
 
-    waitingUsers[userWebId] = true;
+//     waitingUsers[userWebId] = true;
 
-    await bot.sendMessage(userWebId, 'Введите сообщение:');
+//     await bot.sendMessage(userWebId, 'Введите сообщение:');
 
-    const reply = await new Promise((resolve) => {
-      const textHandler = (msg) => {
-        const userId = msg.from.id;
-        if (userId === userWebId && waitingUsers[userWebId]) {
-          waitingUsers[userWebId] = false;
-          bot.off('text', textHandler);
-          resolve(msg);
-        }
-      };
-
-
-      bot.on('text', textHandler);
-    });
-    if (reply.text === 'Стоп' || reply.text === 'стоп') {
-      await bot.sendMessage(userWebId, 'Хорошо');
-      return;
-    }
-
-    const messages = await Message.findAll({
-      where: { id: userRequestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
-            }
-          ]
-        }
-      ]
-    });
-
-    // await dbManager.replyToOperator(userRequestId, reply.text, messages);
-
-    bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
-    const timeData = new Date();
-    const year = timeData.getFullYear();
-    const month = timeData.getMonth() + 1;
-    const day = timeData.getDate();
-    timeData.setHours(timeData.getHours() + 7);
-    const hours = timeData.getHours();
-    const minutes = timeData.getMinutes();
-    const formattedHours = hours < 10 ? '0' + hours : hours;
-    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-
-    const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
-
-    // await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
-    //   reply_markup: {
-    //     inline_keyboard: [
-    //       [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-    //     ]
-    //   }
-    // });
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId}`, {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-          [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
-        ]
-      }
-    });
+//     const reply = await new Promise((resolve) => {
+//       const textHandler = (msg) => {
+//         const userId = msg.from.id;
+//         if (userId === userWebId && waitingUsers[userWebId]) {
+//           waitingUsers[userWebId] = false;
+//           bot.off('text', textHandler);
+//           resolve(msg);
+//         }
+//       };
 
 
-    return res.status(200).json({});
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
-  }
-});
+//       bot.on('text', textHandler);
+//     });
+//     if (reply.text === 'Стоп' || reply.text === 'стоп') {
+//       await bot.sendMessage(userWebId, 'Хорошо');
+//       return;
+//     }
+
+//     const messages = await Message.findAll({
+//       where: { id: userRequestId },
+//       include: [
+//         {
+//           model: UserRequest,
+//           include: [
+//             {
+//               model: User,
+//               attributes: ['username', 'address', 'telegramId']
+//             }
+//           ]
+//         }
+//       ]
+//     });
+
+//     // await dbManager.replyToOperator(userRequestId, reply.text, messages);
+
+//     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
+//     const timeData = new Date();
+//     const year = timeData.getFullYear();
+//     const month = timeData.getMonth() + 1;
+//     const day = timeData.getDate();
+//     timeData.setHours(timeData.getHours() + 7);
+//     const hours = timeData.getHours();
+//     const minutes = timeData.getMinutes();
+//     const formattedHours = hours < 10 ? '0' + hours : hours;
+//     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+
+//     const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
+//     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
+
+//     // await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
+//     //   reply_markup: {
+//     //     inline_keyboard: [
+//     //       [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
+//     //     ]
+//     //   }
+//     // });
+//     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя заявку #${userRequestId}`, {
+//       reply_markup: {
+//         inline_keyboard: [
+//           [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+//           [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
+//         ]
+//       }
+//     });
+
+
+//     return res.status(200).json({});
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+//   }
+// });
 
 app.post('/closeReq', async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
@@ -244,97 +245,97 @@ app.post(`/resumeReq`, async (req, res) => {
   res.status(200).json({ success: true });
 })
 
-app.post(`/replyToUser`, async (req, res) => {
-  const { queryId, userRequestId, username, userId, operatorId } = req.body;
-  const requestId = userRequestId;
-  const userWebId = operatorId;
-  try {
-    const userRequest = await dbManager.findReq(userRequestId);
-    const user = await User.findByPk(userId);
-    if (!userRequest) {
-      bot.sendMessage(operatorId, 'Заявка не найдена.');
-      return;
-    }
+// app.post(`/replyToUser`, async (req, res) => {
+//   const { queryId, userRequestId, username, userId, operatorId } = req.body;
+//   const requestId = userRequestId;
+//   const userWebId = operatorId;
+//   try {
+//     const userRequest = await dbManager.findReq(userRequestId);
+//     const user = await User.findByPk(userId);
+//     if (!userRequest) {
+//       bot.sendMessage(operatorId, 'Заявка не найдена.');
+//       return;
+//     }
 
-    waitingUsers[userWebId] = true;
+//     waitingUsers[userWebId] = true;
 
-    await bot.sendMessage(userWebId, 'Введите сообщение:');
+//     await bot.sendMessage(userWebId, 'Введите сообщение:');
 
-    const reply = await new Promise((resolve) => {
-      const textHandler = (msg) => {
-        const userId = msg.from.id;
-        if (userId === userWebId && waitingUsers[userWebId]) {
-          waitingUsers[userWebId] = false;
-          bot.off('text', textHandler);
-          resolve(msg);
-        }
-      };
+//     const reply = await new Promise((resolve) => {
+//       const textHandler = (msg) => {
+//         const userId = msg.from.id;
+//         if (userId === userWebId && waitingUsers[userWebId]) {
+//           waitingUsers[userWebId] = false;
+//           bot.off('text', textHandler);
+//           resolve(msg);
+//         }
+//       };
 
 
-      bot.on('text', textHandler);
-    });
-    if (reply.text === 'Стоп' || reply.text === 'стоп') {
-      await bot.sendMessage(userWebId, 'Хорошо');
-      return;
-    }
-    // await dbManager.replyToUser(userRequestId, reply.text, operatorId);
-    await OperatorReq.create({
-      IdRequest: userRequestId,
-      idUser: userWebId
-    });
-    const userRequestStatus = await UserRequest.findByPk(requestId);
-    if (userRequestStatus.status === 'ожидает ответа оператора') {
-      const status = 'Заявка в обработке';
-      await dbManager.changeStatusRes(requestId, status);
-      const message = `Заявка под номером ${requestId} в обработке`
-      await sendMessagesToUsersWithRoleId(message, requestId);
-    }
-    const timeData = new Date();
-    const year = timeData.getFullYear();
-    const month = timeData.getMonth() + 1;
-    const day = timeData.getDate();
-    timeData.setHours(timeData.getHours() + 7);
-    const hours = timeData.getHours();
-    const minutes = timeData.getMinutes();
-    const formattedHours = hours < 10 ? '0' + hours : hours;
-    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+//       bot.on('text', textHandler);
+//     });
+//     if (reply.text === 'Стоп' || reply.text === 'стоп') {
+//       await bot.sendMessage(userWebId, 'Хорошо');
+//       return;
+//     }
+//     // await dbManager.replyToUser(userRequestId, reply.text, operatorId);
+//     await OperatorReq.create({
+//       IdRequest: userRequestId,
+//       idUser: userWebId
+//     });
+//     const userRequestStatus = await UserRequest.findByPk(requestId);
+//     if (userRequestStatus.status === 'ожидает ответа оператора') {
+//       const status = 'Заявка в обработке';
+//       await dbManager.changeStatusRes(requestId, status);
+//       const message = `Заявка под номером ${requestId} в обработке`
+//       await sendMessagesToUsersWithRoleId(message, requestId);
+//     }
+//     const timeData = new Date();
+//     const year = timeData.getFullYear();
+//     const month = timeData.getMonth() + 1;
+//     const day = timeData.getDate();
+//     timeData.setHours(timeData.getHours() + 7);
+//     const hours = timeData.getHours();
+//     const minutes = timeData.getMinutes();
+//     const formattedHours = hours < 10 ? '0' + hours : hours;
+//     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-    const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
+//     const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
 
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
+//     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
 
-    const userTelegramId = await dbManager.findUserToReq(userRequestId);
+//     const userTelegramId = await dbManager.findUserToReq(userRequestId);
 
-    const messages = await Message.findAll({
-      where: { id: userRequestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
-            }
-          ]
-        }
-      ]
-    });
+//     const messages = await Message.findAll({
+//       where: { id: userRequestId },
+//       include: [
+//         {
+//           model: UserRequest,
+//           include: [
+//             {
+//               model: User,
+//               attributes: ['username', 'address', 'telegramId']
+//             }
+//           ]
+//         }
+//       ]
+//     });
 
-    bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-          [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-        ]
-      }
-    });
+//     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
+//       reply_markup: {
+//         inline_keyboard: [
+//           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
+//           [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
+//         ]
+//       }
+//     });
 
-    bot.sendMessage(operatorId, 'Ответ успешно добавлен.');
-  } catch (error) {
-    console.error('Ошибка при ответе на заявку:', error);
-    console.log(error);
-  }
-});
+//     bot.sendMessage(operatorId, 'Ответ успешно добавлен.');
+//   } catch (error) {
+//     console.error('Ошибка при ответе на заявку:', error);
+//     console.log(error);
+//   }
+// });
 
 app.post('/handleShowPhoto', async (req, res) => {
   const { idMedia, operatorId } = req.body;
@@ -481,7 +482,7 @@ async function resToOperatorTextFunc1(data) {
   try {
     const { userRequestId, reply, chatId, userName, timeMess, messages, textHandler } = data
     waitingUsers[chatId] = false;
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, timeMess);
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, userName, timeMess);
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
     console.log('resToOperatorTextFunc')
     const operatorIds = messages[0].operatorId.split(',');
@@ -1301,7 +1302,6 @@ app.get('/mes', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 app.get('/mes/:userRequestId', async (req, res) => {
   try {
