@@ -1013,7 +1013,7 @@ app.get('/reqPhoto/:id', async (req, res) => {
 
 app.get('/users', async (req, res) => {
   try {
-    const users = await Media.findAll();
+    const users = await User.findAll();
     res.json(users);
   } catch (error) {
     console.error(error);
