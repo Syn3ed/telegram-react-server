@@ -137,7 +137,7 @@ class DatabaseService {
   }
 
 
-  async createUserRequestMessage(UserRequestId, textMessage, idUser, roleUser, username, TimeMessages) {
+  async createUserRequestMessage(UserRequestId, textMessage, idUser, roleUser, username, nicknameOperator, TimeMessages) {
     try {
       const userRequest = await UserRequest.findByPk(UserRequestId);
       if (userRequest) {
@@ -147,6 +147,7 @@ class DatabaseService {
           roleUser,
           UserRequestId,
           username,
+          nicknameOperator,
           TimeMessages
         });
 

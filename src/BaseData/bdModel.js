@@ -105,6 +105,10 @@ const MessageChat = sequelize.define('MessageChat', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
+    nicknameOperator: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
     IdMedia: {
         type: DataTypes.TEXT,
         allowNull: true,

@@ -511,9 +511,9 @@ async function resToOperatorTextFunc1(data) {
 
 async function resToUserTextFunc(data) {
   try {
-    const { userRequestId, reply, timeMess, chatId, messages, textHandler } = data
+    const { userRequestId, reply, timeMess, chatId, messages, textHandler, nicknameOperator, nickname } = data
     waitingUsers[chatId] = false;
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', `${nickname}`, nicknameOperator, timeMess);
     // await processUserRequest(userRequestId, chatId)
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
     console.log('resToUserTextFunc')
@@ -835,22 +835,16 @@ async function MethodToUser(userRequestId, userName, chatId) {
             });
           }
 
-          // const userRequestStatus = await UserRequest.findByPk(userRequestId);
-          // if (userRequestStatus.status === 'ожидает ответа оператора') {
-          //   const status = 'Заявка в обработке';
-          //   await dbManager.changeStatusRes(userRequestId, status);
-          //   const message = `Заявка под номером ${userRequestId} в обработке`;
-          //   await sendMessagesToUsersWithRoleId(message, userRequestId);
-          // }
-          // const existingMessage = await Message.findByPk(userRequestId);
-          // existingMessage.operatorId = chatId;
-          // await existingMessage.save();
-
+          const nickname = reply.from.first_name;
+          const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+          const nicknameOperator = existingUser.nicknameOperator;
           if (reply.caption) {
             caption_text = reply.caption
-            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', 'Оператор', timeMess);
+            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', `${nickname}`, `${nicknameOperator}`, timeMess);
           }
+
           await processUserRequest(userRequestId, chatId)
+
           if (!sentMediaGroups[chatId] && !reply?.text) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
@@ -860,7 +854,9 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 userRequestId,
                 timeMess,
                 textHandler,
-                caption_text
+                caption_text,
+                nicknameOperator,
+                nickname
               }
               resToUserFunc(data);
               console.log(waitingUsers[chatId])
@@ -875,7 +871,9 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 chatId,
                 timeMess,
                 messages,
-                textHandler
+                nicknameOperator,
+                textHandler,
+                nickname
               }
               resToUserTextFunc(data)
               console.log(waitingUsers[chatId])
@@ -943,10 +941,9 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
 )
 
 async function resToUserFunc(data) {
-  const { chatId, userRequestId, timeMess, textHandler, caption_text } = data
+  const { chatId, userRequestId, timeMess, textHandler, caption_text, nicknameOperator, nickname } = data
   const op = 'Operator'
-  const useName = 'Оператор'
-  const dataForMedia = { chatId, useName, userRequestId, timeMess, op, caption_text }
+  const dataForMedia = { chatId, nickname, userRequestId, timeMess, op, caption_text, nicknameOperator }
   await sendMediaGroup1(dataForMedia);
   waitingUsers[chatId] = false;
   bot.off('message', textHandler);
@@ -1029,6 +1026,7 @@ app.get('/chat', async (req, res) => {
       textMessage: chatMes.textMessage,
       idUser: chatMes.idUser,
       roleUser: chatMes.roleUser,
+      nicknameOperator: chatMes.nicknameOperator,
       UserRequestId: chatMes.UserRequestId,
       Time: chatMes.TimeMessages,
     }));
@@ -1477,19 +1475,22 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
 }
 
 async function sendMediaGroup1(data) {
-  const { chatId, userName, userRequestId, timeMess, op, caption_text } = data;
+  const { chatId, nickname, userRequestId, timeMess, op, caption_text, nicknameOperator } = data;
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
     const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
     const str = JSON.stringify(groupPhotos);
     const mediaRecord = await createMediaRecord(userRequestId, str);
+
     await MessageChat.create({
       IdMedia: mediaRecord.id,
       roleUser: op,
-      username: userName,
+      username: nickname,
       UserRequestId: userRequestId,
       TimeMessages: timeMess,
-    })
+      nicknameOperator: nicknameOperator
+    });
+
     const messages = await Message.findAll({
       where: { id: userRequestId },
       include: [
