@@ -445,9 +445,9 @@ async function messagesFunc(userRequestId) {
 
 async function resToOperatorFunc(data) {
   try {
-    const { chatId, userName, userRequestId, timeMess, textHandler, caption_text } = data
+    const { chatId, nickname, userRequestId, timeMess, textHandler, caption_text } = data
     const op = 'User';
-    const dataForMedia = { chatId, userName, userRequestId, timeMess, op, caption_text }
+    const dataForMedia = { chatId, nickname, userRequestId, timeMess, op, caption_text }
 
     await sendMediaGroup1(dataForMedia);
     waitingUsers[chatId] = false;
@@ -480,9 +480,9 @@ async function resToOperatorTextFunc(data) {
 
 async function resToOperatorTextFunc1(data) {
   try {
-    const { userRequestId, reply, chatId, userName, timeMess, messages, textHandler } = data
+    const { userRequestId, reply, chatId, nickname, timeMess, messages, textHandler } = data
     waitingUsers[chatId] = false;
-    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', userName, userName, timeMess);
+    await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', nickname, nickname, timeMess);
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке #${userRequestId}`);
     console.log('resToOperatorTextFunc')
     const operatorIds = messages[0].operatorId.split(',');
@@ -614,9 +614,11 @@ async function MethodToOperator(userRequestId, userName, chatId) {
               mediaGroupId: reply.media_group_id
             });
           }
+          const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+          const nickname = existingUser.username;
           if (reply.caption) {
             caption_text = reply.caption
-            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
+            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
           }
 
           if (!sentMediaGroups[chatId] && !reply?.text) {
@@ -625,7 +627,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
               console.log(sentMediaGroups[chatId])
               const data = {
                 chatId,
-                userName,
+                nickname,
                 userRequestId,
                 timeMess,
                 textHandler,
@@ -641,7 +643,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 userRequestId,
                 reply,
                 chatId,
-                userName,
+                nickname,
                 timeMess,
                 messages,
                 textHandler
@@ -715,9 +717,11 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
               mediaGroupId: reply.media_group_id
             });
           }
+          const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+          const nickname = existingUser.username;
           if (reply.caption) {
             caption_text = reply.caption
-            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', userName, timeMess);
+            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
           }
 
           if (!sentMediaGroups[chatId] && !reply?.text) {
@@ -836,8 +840,8 @@ async function MethodToUser(userRequestId, userName, chatId) {
             });
           }
 
-          const nickname = reply.from.first_name;
           const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+          const nickname = existingUser.username;
           const nicknameOperator = existingUser.nicknameOperator;
           if (reply.caption) {
             caption_text = reply.caption
@@ -1365,6 +1369,7 @@ const createRoles = async () => {
     console.error(error);
   }
 };
+
 const oneWeek = 7 * 24 * 60 * 60 * 1000;
 const min_15 = 15 * 60 * 1000;
 
