@@ -81,7 +81,6 @@ class DatabaseService {
         UserId: userId.id
       });
       await Message.create({
-        text: `${userName}:\n${messageReq}`,
         UserRequestId: req.id
       });
       return req
@@ -89,20 +88,7 @@ class DatabaseService {
       console.log(error);
     }
   }
-  async ReplyToRequest(UserReqId, reply) {
-    try {
-      const message = await Message.findOne({ where: { UserRequestId: UserReqId } });
-      if (!message) {
-        console.log('Сообщение не найдено.');
-        return;
-      }
-      const updatedText = `${message.text}\n${reply}`;
-      await message.update({ text: updatedText });
-      console.log('Ответ успешно добавлен к заявке.');
-    } catch (error) {
-      console.error('Ошибка при добавлении ответа к заявке:', error);
-    }
-  }
+ 
 
   async findUserToReq(UserReqId) {
     try {
@@ -169,7 +155,7 @@ class DatabaseService {
         throw new Error(`Запрос пользователя с ID ${userRequestId} не найден.`);
       }
 
-      return await Message.create({ text, UserRequestId: userRequest.id });
+      return await Message.create({  UserRequestId: userRequest.id });
     } catch (error) {
       throw error;
     }
@@ -200,49 +186,8 @@ class DatabaseService {
     }
   }
 
-  async replyToUser(messageId, newText, newOperatorId) {
-    try {
-      const existingMessage = await Message.findByPk(messageId);
-
-      if (!existingMessage) {
-        console.error('Сообщение не найдено.');
-        return;
-      }
-
-      const operator = `\nОператор:\n` + newText
-      existingMessage.text = (existingMessage.text || '') + (operator || '');
-      existingMessage.operatorId = newOperatorId || existingMessage.operatorId;
-
-      await existingMessage.save();
-
-      console.log('Сообщение успешно обновлено:', existingMessage);
-
-      return existingMessage;
-    } catch (error) {
-      console.error('Ошибка при обновлении сообщения:', error);
-      throw error;
-    }
-  }
-  async replyToOperator(messageId, newText, data) {
-    try {
-      const existingMessage = await Message.findByPk(messageId);
-
-      if (!existingMessage) {
-        throw new Error('Сообщение не найдено.');
-      }
-
-      const user = data[0]?.UserRequest?.User?.username;
-      const userText = `\n${user}:\n${newText}`;
-
-      existingMessage.text = (existingMessage.text || '') + userText;
-      await existingMessage.save();
-
-      //  console.log('Сообщение успешно обновлено:', existingMessage);
-      return existingMessage;
-    } catch (error) {
-      throw error;
-    }
-  }
+  
+  
 
 
 }

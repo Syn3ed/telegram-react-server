@@ -55,10 +55,6 @@ const UserRequest = sequelize.define('UserRequest', {
 });
 
 const Message = sequelize.define('Message', {
-    text: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
     operatorId: {
         type: DataTypes.TEXT,
         allowNull: true,
