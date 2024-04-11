@@ -1018,6 +1018,7 @@ app.get('/users', async (req, res) => {
   }
 });
 
+
 app.get('/chat', async (req, res) => {
   try {
     const chat = await MessageChat.findAll();
@@ -1048,6 +1049,7 @@ app.get('/chat/:id', async (req, res) => {
       roleUser: chatMes.roleUser,
       UserRequestId: chatMes.UserRequestId,
       IdMedia: chatMes.IdMedia,
+      nicknameOperator: chatMes.nicknameOperator,
       username: chatMes.username,
       Time: chatMes.TimeMessages,
     }));
@@ -1341,8 +1343,8 @@ app.get('/mes/:userRequestId', async (req, res) => {
 const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
-    // await sequelize.sync();
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
+    // await sequelize.sync({ force: true });
     console.log('Подключение к БД успешно');
     // const userrole = dbManager.changeRoleUser(1, 3)
     app.listen(PORT, () => {
