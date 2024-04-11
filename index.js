@@ -58,7 +58,6 @@ async function sendMessagesToUsersWithRoleId(message, id) {
 
 }
 
-
 app.get('/messagesChat', async (req, res) => {
   try {
     const users = await MessageChat.findAll();
@@ -67,7 +66,6 @@ app.get('/messagesChat', async (req, res) => {
     console.log(e)
   }
 })
-
 
 app.get('/messages', async (req, res) => {
   try {
@@ -101,9 +99,7 @@ app.get('/test/:id', async (req, res) => {
   }
 })
 
-
 const waitingUsers = {};
-
 
 app.post(`/replyToOperator`, async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
@@ -340,9 +336,6 @@ app.post(`/replyToUser`, async (req, res) => {
   }
 });
 
-
-
-
 app.post('/handleShowPhoto', async (req, res) => {
   const { idMedia, operatorId } = req.body;
   try {
@@ -369,8 +362,6 @@ const hndlMed = async (idMedia, operatorId) => {
   }
 }
 
-
-
 const createMediaRecord = async (userRequestId, idMedia) => {
   try {
     const userRequest = await UserRequest.findByPk(userRequestId);
@@ -393,7 +384,6 @@ const createMediaRecord = async (userRequestId, idMedia) => {
     throw error;
   }
 };
-
 
 function timeFunc() {
   const timeData = new Date();
@@ -970,7 +960,6 @@ app.post(`/resToUserPhoto`, async (req, res) => {
   res.status(200).json({ success: true });
 })
 
-
 app.get('/photo', async (req, res) => {
   try {
     const media = await Media.findAll();
@@ -1003,7 +992,6 @@ app.get('/photo/:id', async (req, res) => {
   }
 })
 
-
 app.get('/reqPhoto/:id', async (req, res) => {
   try {
     const requestId = req.params.id;
@@ -1023,8 +1011,6 @@ app.get('/reqPhoto/:id', async (req, res) => {
   }
 })
 
-
-
 app.get('/users', async (req, res) => {
   try {
     const users = await Media.findAll();
@@ -1034,7 +1020,6 @@ app.get('/users', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 app.get('/chat', async (req, res) => {
   try {
@@ -1053,7 +1038,6 @@ app.get('/chat', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 app.get('/chat/:id', async (req, res) => {
   try {
@@ -1105,7 +1089,6 @@ app.get('/req', async (req, res) => {
   }
 });
 
-
 app.get('/', async (req, res) => {
   try {
     const stat = 'ожидает ответа оператора'
@@ -1127,7 +1110,6 @@ app.get('/', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 app.get('/reqOperator/:id', async (req, res) => {
   try {
@@ -1161,7 +1143,6 @@ app.get('/reqOperator/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 app.get('/adminList', async (req, res) => {
   try {
@@ -1359,13 +1340,11 @@ app.get('/mes/:userRequestId', async (req, res) => {
   }
 });
 
-
-
 const connectToDatabase = async () => {
   try {
     await sequelize.authenticate();
-    await sequelize.sync();
-    // await sequelize.sync({ force: true });
+    // await sequelize.sync();
+    await sequelize.sync({ force: true });
     console.log('Подключение к БД успешно');
     // const userrole = dbManager.changeRoleUser(1, 3)
     app.listen(PORT, () => {
@@ -1430,11 +1409,10 @@ async function notifyOperators(requests) {
     if (!NotificationRequest[request.id]) {
       const message = `Заявка №${request.id} не получила ответа в течение 15 минут`;
       sendMessagesToUsersWithRoleId(message, request.id);
-      NotificationRequest[request.id] = true; 
+      NotificationRequest[request.id] = true;
     }
   });
 }
-
 
 async function checkRequestsMin15() {
   const unansweredRequests = await getUnansweredRequestsMin15();
@@ -1476,8 +1454,6 @@ async function notifyOperatorsOneWeek(requests) {
     await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Ваша заявка №${userRequestId} была закрыта по истечению времени`);
   }
 }
-
-
 
 async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
@@ -1684,10 +1660,16 @@ const startBot = async () => {
     }
 
 
-
     if (msg.text === '/menu') {
+
       try {
-        keyboardRole(chatId)
+        const chatId = msg.chat.id;
+        const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+        if (existingUser) {
+          keyboardRole(chatId)
+        } else {
+          await bot.sendMessage(chatId, 'Незарегистрированный пользователь. Доступ запрещен.');
+        }
       } catch (error) {
         console.error('Ошибка:', error);
         await bot.sendMessage(chatId, 'Произошла ошибка при обработке команды.');
@@ -1709,6 +1691,8 @@ const startBot = async () => {
         if (msg?.web_app_data?.data && regex.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex);
           const idMed = match[1];
+          const chatId = msg.chat.id;
+
           try {
             const med = await Media.findByPk(idMed);
             // await bot.sendPhoto(msg.chat.id, med.idMedia);
@@ -1722,6 +1706,7 @@ const startBot = async () => {
           } catch (e) {
             console(e)
           }
+
           console.log(idMed);
         }
         if (msg?.web_app_data?.data && regex2.test(msg.web_app_data.data)) {
@@ -1976,8 +1961,10 @@ const startBot = async () => {
           const userId = match[1];
           console.log(msg)
           const chRole = dbManager.changeRoleUser(userId, 3)
+          const existingUser = await dbManager.getUserByChatId(`${userId}`);
           await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
-          bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+          await bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+          await existingUser.update({ nicknameOperator: `Оператор#${existingUser.id}` })
           keyboardRole(userId)
         }
         if (msg?.web_app_data?.data && regex9.test(msg.web_app_data.data)) {
@@ -1986,8 +1973,10 @@ const startBot = async () => {
           const userId = match[1];
           console.log(msg)
           const chRole = dbManager.changeRoleUser(userId, 1)
+          const existingUser = await dbManager.getUserByChatId(`${userId}`);
           await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
-          bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+          await bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+          await existingUser.update({ nicknameOperator: `Администратор#${existingUser.id}` })
           keyboardRole(userId)
         }
         const userName = msg.from.first_name;
@@ -2364,7 +2353,7 @@ const startBot = async () => {
         console.log(msg)
         const chRole = dbManager.changeRoleUser(userId, 2)
         await bot.sendMessage(userId, 'Вам присвоена роль "Пользователь"');
-        bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        await bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
         keyboardRole(userId)
       }
       if (regex9.test(data1)) {
@@ -2373,8 +2362,10 @@ const startBot = async () => {
         const userId = match[1];
         console.log(msg)
         const chRole = dbManager.changeRoleUser(userId, 3)
+        const existingUser = await dbManager.getUserByChatId(`${userId}`);
         await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
-        bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        await bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        await existingUser.update({ nicknameOperator: `Оператор#${existingUser.id}` })
         keyboardRole(userId)
       }
       if (regex10.test(data1)) {
@@ -2383,8 +2374,10 @@ const startBot = async () => {
         const userId = match[1];
         console.log(msg)
         const chRole = dbManager.changeRoleUser(userId, 1)
+        const existingUser = await dbManager.getUserByChatId(`${userId}`);
         await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
-        bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        await bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
+        await existingUser.update({ nicknameOperator: `Администратор#${existingUser.id}` })
         keyboardRole(userId)
       }
     }

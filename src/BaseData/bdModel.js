@@ -15,6 +15,19 @@ const User = sequelize.define('User', {
         type: DataTypes.TEXT,
         allowNull: true,
     },
+    nicknameOperator: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    }
+}, {
+    timestamps: false,
+});
+
+const NicknameOperator = sequelize.define('NicknameOperator', {
+    username: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    }
 }, {
     timestamps: false,
 });
@@ -122,6 +135,9 @@ const OperatorReq = sequelize.define('OperatorReq', {
 
 User.belongsTo(Role);
 Role.hasMany(User);
+
+User.belongsTo(NicknameOperator, { foreignKey: 'nicknameOperatorId' });
+NicknameOperator.hasOne(User, { foreignKey: 'nicknameOperatorId' });
 
 User.hasMany(UserRequest);
 UserRequest.belongsTo(User);
