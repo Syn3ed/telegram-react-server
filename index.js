@@ -1648,6 +1648,7 @@ const startBot = async () => {
                 bot.off('text', textHandler);
                 const FullName = response.text;
                 await dbManager.createUserWithRole(`${chatId}`, `${FullName}`, `User`);
+                await bot.sendMessage(chatId, 'Успешно');
               }
             }
           } catch (e) {
