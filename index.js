@@ -1635,30 +1635,35 @@ const startBot = async () => {
       try {
         const chatId = msg.chat.id;
         const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+
         if (existingUser) {
           await bot.sendMessage(chatId, `Добро пожаловать снова, ${msg.from.first_name}!`);
         } else {
           await bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
-          try {
-            waitingUsers[chatId] = true;
-            await bot.sendMessage(chatId, 'Введите своё ФИО:');
-            const textHandler = async (response) => {
+          waitingUsers[chatId] = true;
+          await bot.sendMessage(chatId, 'Введите своё ФИО:');
+
+          const textHandler = async (response) => {
+            try {
               if (chatId === response.from.id && waitingUsers[chatId]) {
                 waitingUsers[chatId] = false;
                 bot.off('text', textHandler);
-                const FullName = response.text;
-                await dbManager.createUserWithRole(`${chatId}`, `${FullName}`, `User`);
+                const fullName = response.text;
+                await dbManager.createUserWithRole(`${chatId}`, `${fullName}`, `User`);
                 await bot.sendMessage(chatId, 'Успешно');
               }
+            } catch (error) {
+              console.error('Ошибка при обработке ответа пользователя:', error);
             }
-          } catch (e) {
-            console.log(e)
-          }
+          };
+
+          bot.on('text', textHandler);
         }
-      } catch (e) {
-        console.log(e);
+      } catch (error) {
+        console.error('Ошибка при обработке команды /start:', error);
       }
     }
+
 
 
     if (msg.text === '/menu') {
