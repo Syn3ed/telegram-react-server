@@ -272,7 +272,20 @@ app.post(`/resumeReq`, async (req, res) => {
     //   }
     // });
     const status = 'ожидает ответа оператора';
-    const messageFunc = messagesFunc(requestId)
+    const messageFunc = await Message.findAll({
+      where: { id: userRequestId },
+      include: [
+        {
+          model: UserRequest,
+          include: [
+            {
+              model: User,
+              attributes: ['username', 'address', 'telegramId']
+            }
+          ]
+        }
+      ]
+    });
     if (messageFunc[0]?.operatorId) {
       const message = `Возобновлена заявка под номером ${requestId}`;
       await bot.sendMessage(messageFunc[0].operatorId, message)
@@ -2002,7 +2015,20 @@ const startBot = async () => {
           const userId = msg.from.id;
           const requestId = match[1];
           const status = 'ожидает ответа оператора';
-          const messageFunc = messagesFunc(requestId)
+          const messageFunc = await Message.findAll({
+            where: { id: requestId },
+            include: [
+              {
+                model: UserRequest,
+                include: [
+                  {
+                    model: User,
+                    attributes: ['username', 'address', 'telegramId']
+                  }
+                ]
+              }
+            ]
+          });
           if (messageFunc[0]?.operatorId) {
             const message = `Возобновлена заявка под номером ${requestId}`;
             await bot.sendMessage(messageFunc[0].operatorId, message)
