@@ -643,7 +643,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
-          if (!response?.entities){
+          if (response?.entities === 'undefined'){
             const timeMess = timeFunc()
             let caption_text;
 
