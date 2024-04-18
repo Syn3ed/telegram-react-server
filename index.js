@@ -643,78 +643,75 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
-          if (response?.entities === 'undefined'){
-            const timeMess = timeFunc()
-            let caption_text;
+          console.log(reply)
+          const timeMess = timeFunc()
+          let caption_text;
 
-            const messages = await messagesFunc(userRequestId)
+          const messages = await messagesFunc(userRequestId)
 
-            if (reply.photo) {
-              userPhotos[chatId] = userPhotos[chatId] || [];
-              userPhotos[chatId].push({
-                type: 'photo',
-                media: reply.photo[0].file_id,
-                mediaGroupId: reply.media_group_id
-              });
-              console.log('Получена фотография:');
-              console.log(userPhotos[chatId]);
-            } else if (reply.document) {
-              userPhotos[chatId] = userPhotos[chatId] || [];
-              userPhotos[chatId].push({
-                type: 'document',
-                media: reply.document.file_id,
-                mediaGroupId: reply.media_group_id
-              });
-            } else if (reply.video) {
-              userPhotos[chatId] = userPhotos[chatId] || [];
-              userPhotos[chatId].push({
-                type: 'video',
-                media: reply.video.file_id,
-                mediaGroupId: reply.media_group_id
-              });
-            }
-            const existingUser = await dbManager.getUserByChatId(`${chatId}`);
-            const nickname = existingUser.username;
-            if (reply.caption) {
-              caption_text = reply.caption
-              dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
-            }
-
-            if (!sentMediaGroups[chatId] && !reply?.text) {
-              sentMediaGroups[chatId] = true;
-              setTimeout(() => {
-                console.log(sentMediaGroups[chatId])
-                const data = {
-                  chatId,
-                  nickname,
-                  userRequestId,
-                  timeMess,
-                  textHandler,
-                  caption_text
-                }
-                resToOperatorFunc(data);
-                console.log(waitingUsers[chatId])
-              }, 500);
-            }
-            if (reply?.text) {
-              setTimeout(() => {
-                const data = {
-                  userRequestId,
-                  reply,
-                  chatId,
-                  nickname,
-                  timeMess,
-                  messages,
-                  textHandler
-                }
-                resToOperatorTextFunc1(data);
-                console.log(waitingUsers[chatId])
-              }, 500);
-            }
-          } else {
-            waitingUsers[chatId] = false;
-            bot.off('message', textHandler);
+          if (reply.photo) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
+            userPhotos[chatId].push({
+              type: 'photo',
+              media: reply.photo[0].file_id,
+              mediaGroupId: reply.media_group_id
+            });
+            console.log('Получена фотография:');
+            console.log(userPhotos[chatId]);
+          } else if (reply.document) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
+            userPhotos[chatId].push({
+              type: 'document',
+              media: reply.document.file_id,
+              mediaGroupId: reply.media_group_id
+            });
+          } else if (reply.video) {
+            userPhotos[chatId] = userPhotos[chatId] || [];
+            userPhotos[chatId].push({
+              type: 'video',
+              media: reply.video.file_id,
+              mediaGroupId: reply.media_group_id
+            });
           }
+          const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+          const nickname = existingUser.username;
+          if (reply.caption) {
+            caption_text = reply.caption
+            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
+          }
+
+          if (!sentMediaGroups[chatId] && !reply?.text) {
+            sentMediaGroups[chatId] = true;
+            setTimeout(() => {
+              console.log(sentMediaGroups[chatId])
+              const data = {
+                chatId,
+                nickname,
+                userRequestId,
+                timeMess,
+                textHandler,
+                caption_text
+              }
+              resToOperatorFunc(data);
+              console.log(waitingUsers[chatId])
+            }, 500);
+          }
+          if (reply?.text) {
+            setTimeout(() => {
+              const data = {
+                userRequestId,
+                reply,
+                chatId,
+                nickname,
+                timeMess,
+                messages,
+                textHandler
+              }
+              resToOperatorTextFunc1(data);
+              console.log(waitingUsers[chatId])
+            }, 500);
+          }
+
         };
         bot.on('message', textHandler);
       }
