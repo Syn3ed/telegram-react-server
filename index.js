@@ -711,6 +711,9 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 console.log(waitingUsers[chatId])
               }, 500);
             }
+          } else {
+            waitingUsers[chatId] = false;
+            bot.off('message', textHandler);
           }
         };
         bot.on('message', textHandler);
