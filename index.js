@@ -626,7 +626,7 @@ async function resToUserTextFunc1(data) {
 async function MethodToOperator(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     try {
-      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -636,7 +636,6 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
-        bot.on('message', textHandler);
         if (chatId === response.from.id && waitingUsers[chatId]) {
 
 
@@ -714,7 +713,8 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
         };
         
-      }
+      };
+      bot.on('message', textHandler);
     } catch (error) {
       console.log(error)
     }
@@ -732,7 +732,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 async function MethodToOperator1(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     try {
-      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'Стоп' }]
