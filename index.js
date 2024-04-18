@@ -208,7 +208,7 @@ app.post('/closeReq', async (req, res) => {
   const requestId = userRequestId
 
   try {
-    console.log(userRequestId, ', ',userId, ', ', operatorId)
+    console.log(userRequestId, ', ', userId, ', ', operatorId)
     const status = 'Заявка закрыта';
     await dbManager.changeStatusRes(requestId, status);
     const messages = await Message.findAll({
@@ -643,77 +643,78 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
+          if (!response?.entities){
+            const timeMess = timeFunc()
+            let caption_text;
 
-          const timeMess = timeFunc()
-          let caption_text;
+            const messages = await messagesFunc(userRequestId)
 
-          const messages = await messagesFunc(userRequestId)
+            if (reply.photo) {
+              userPhotos[chatId] = userPhotos[chatId] || [];
+              userPhotos[chatId].push({
+                type: 'photo',
+                media: reply.photo[0].file_id,
+                mediaGroupId: reply.media_group_id
+              });
+              console.log('Получена фотография:');
+              console.log(userPhotos[chatId]);
+            } else if (reply.document) {
+              userPhotos[chatId] = userPhotos[chatId] || [];
+              userPhotos[chatId].push({
+                type: 'document',
+                media: reply.document.file_id,
+                mediaGroupId: reply.media_group_id
+              });
+            } else if (reply.video) {
+              userPhotos[chatId] = userPhotos[chatId] || [];
+              userPhotos[chatId].push({
+                type: 'video',
+                media: reply.video.file_id,
+                mediaGroupId: reply.media_group_id
+              });
+            }
+            const existingUser = await dbManager.getUserByChatId(`${chatId}`);
+            const nickname = existingUser.username;
+            if (reply.caption) {
+              caption_text = reply.caption
+              dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
+            }
 
-          if (reply.photo) {
-            userPhotos[chatId] = userPhotos[chatId] || [];
-            userPhotos[chatId].push({
-              type: 'photo',
-              media: reply.photo[0].file_id,
-              mediaGroupId: reply.media_group_id
-            });
-            console.log('Получена фотография:');
-            console.log(userPhotos[chatId]);
-          } else if (reply.document) {
-            userPhotos[chatId] = userPhotos[chatId] || [];
-            userPhotos[chatId].push({
-              type: 'document',
-              media: reply.document.file_id,
-              mediaGroupId: reply.media_group_id
-            });
-          } else if (reply.video) {
-            userPhotos[chatId] = userPhotos[chatId] || [];
-            userPhotos[chatId].push({
-              type: 'video',
-              media: reply.video.file_id,
-              mediaGroupId: reply.media_group_id
-            });
+            if (!sentMediaGroups[chatId] && !reply?.text) {
+              sentMediaGroups[chatId] = true;
+              setTimeout(() => {
+                console.log(sentMediaGroups[chatId])
+                const data = {
+                  chatId,
+                  nickname,
+                  userRequestId,
+                  timeMess,
+                  textHandler,
+                  caption_text
+                }
+                resToOperatorFunc(data);
+                console.log(waitingUsers[chatId])
+              }, 500);
+            }
+            if (reply?.text) {
+              setTimeout(() => {
+                const data = {
+                  userRequestId,
+                  reply,
+                  chatId,
+                  nickname,
+                  timeMess,
+                  messages,
+                  textHandler
+                }
+                resToOperatorTextFunc1(data);
+                console.log(waitingUsers[chatId])
+              }, 500);
+            }
           }
-          const existingUser = await dbManager.getUserByChatId(`${chatId}`);
-          const nickname = existingUser.username;
-          if (reply.caption) {
-            caption_text = reply.caption
-            dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
-          }
-
-          if (!sentMediaGroups[chatId] && !reply?.text) {
-            sentMediaGroups[chatId] = true;
-            setTimeout(() => {
-              console.log(sentMediaGroups[chatId])
-              const data = {
-                chatId,
-                nickname,
-                userRequestId,
-                timeMess,
-                textHandler,
-                caption_text
-              }
-              resToOperatorFunc(data);
-              console.log(waitingUsers[chatId])
-            }, 500);
-          }
-          if (reply?.text) {
-            setTimeout(() => {
-              const data = {
-                userRequestId,
-                reply,
-                chatId,
-                nickname,
-                timeMess,
-                messages,
-                textHandler
-              }
-              resToOperatorTextFunc1(data);
-              console.log(waitingUsers[chatId])
-            }, 500);
-          }
-        }
-      };
-      bot.on('message', textHandler);
+        };
+        bot.on('message', textHandler);
+      }
     } catch (error) {
       console.log(error)
     }
@@ -1714,12 +1715,14 @@ const startBot = async () => {
           const textHandler = async (response) => {
             try {
               if (chatId === response.from.id && waitingUsers[chatId]) {
-                waitingUsers[chatId] = false;
-                bot.off('text', textHandler);
-                const fullName = response.text;
-                await dbManager.createUserWithRole(`${chatId}`, `${fullName}`, `User`);
-                await bot.sendMessage(chatId, 'Отлично! Теперь вы можете пользоваться ботом.');
-                keyboardRole(chatId)
+                if (!response?.entities) {
+                  waitingUsers[chatId] = false;
+                  bot.off('text', textHandler);
+                  const fullName = response.text;
+                  await dbManager.createUserWithRole(`${chatId}`, `${fullName}`, `User`);
+                  await bot.sendMessage(chatId, 'Отлично! Теперь вы можете пользоваться ботом.');
+                  keyboardRole(chatId)
+                }
               }
             } catch (error) {
               console.error('Ошибка при обработке ответа пользователя:', error);
