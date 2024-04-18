@@ -208,6 +208,7 @@ app.post('/closeReq', async (req, res) => {
   const requestId = userRequestId
 
   try {
+    console.log(userRequestId, ', ',userId, ', ', operatorId)
     const status = 'Заявка закрыта';
     await dbManager.changeStatusRes(requestId, status);
     const messages = await Message.findAll({
