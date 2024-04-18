@@ -1708,7 +1708,7 @@ const startBot = async () => {
         } else {
           await bot.sendMessage(chatId, `Привет, ${msg.from.first_name}!`);
           waitingUsers[chatId] = true;
-          await bot.sendMessage(chatId, 'Введите своё ФИО:');
+          await bot.sendMessage(chatId, 'Пожалуйста, введите свои ФИО для продолжения работы с ботом:');
 
           const textHandler = async (response) => {
             try {
@@ -1717,7 +1717,7 @@ const startBot = async () => {
                 bot.off('text', textHandler);
                 const fullName = response.text;
                 await dbManager.createUserWithRole(`${chatId}`, `${fullName}`, `User`);
-                await bot.sendMessage(chatId, 'Успешно');
+                await bot.sendMessage(chatId, 'Отлично! Теперь вы можете пользоваться ботом.');
               }
             } catch (error) {
               console.error('Ошибка при обработке ответа пользователя:', error);
@@ -2303,7 +2303,7 @@ const startBot = async () => {
 
               const userRequestStatus = await UserRequest.findByPk(requestId);
               if (userRequestStatus.status === 'ожидает ответа оператора') {
-                const status = 'Заявка в обработке!';
+                const status = 'Заявка в обработке';
                 await dbManager.changeStatusRes(requestId, status);
                 const message = `Заявка №${requestId} в обработке`;
                 await sendMessagesToUsersWithRoleId(message, requestId);
@@ -2391,13 +2391,19 @@ const startBot = async () => {
 
         const messageFunc = messagesFunc(requestId);
         if (messageFunc[0]?.operatorId) {
-          const message = `Возобновлена заявка №${requestId}`;
+          const message = `Пользователь возобновил завку №${requestId}`;
           await bot.sendMessage(messageFunc[0].operatorId, message);
         };
 
         if (messageFunc[0].UserRequest.User.telegramId) {
-          const message = `Ваша заявка №${requestId} возобновлена`;
-          await bot.sendMessage(messageFunc[0].UserRequest.User.telegramId, message)
+          const message = `Вам возобновили заявку №${requestId}`;
+          await bot.sendMessage(messageFunc[0].UserRequest.User.telegramId, message, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
+              ]
+            }
+          })
         };
 
         const message = `Возобновлена заявка №${requestId}`;
