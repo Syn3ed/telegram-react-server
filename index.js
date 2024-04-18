@@ -1617,7 +1617,6 @@ const startBot = async () => {
   setInterval(checkRequestsOneWeek, 60000 * 2);
   bot.on('message', async (msg) => {
 
-    console.log(msg?.entities)
     console.log(msg)
     const chatId = msg.chat.id
     if (msg.text === 'Узнать id' || msg.text === `Мой id`) {
