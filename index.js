@@ -636,14 +636,14 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
+        bot.on('message', textHandler);
         if (chatId === response.from.id && waitingUsers[chatId]) {
 
-          const reply = response;
+
           if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
-          console.log(reply)
           const timeMess = timeFunc()
           let caption_text;
 
@@ -713,7 +713,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           }
 
         };
-        bot.on('message', textHandler);
+        
       }
     } catch (error) {
       console.log(error)
