@@ -1718,6 +1718,7 @@ const startBot = async () => {
                 const fullName = response.text;
                 await dbManager.createUserWithRole(`${chatId}`, `${fullName}`, `User`);
                 await bot.sendMessage(chatId, 'Отлично! Теперь вы можете пользоваться ботом.');
+                keyboardRole(chatId)
               }
             } catch (error) {
               console.error('Ошибка при обработке ответа пользователя:', error);
