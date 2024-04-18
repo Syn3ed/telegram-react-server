@@ -638,7 +638,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
 
-
+          reply = response
           if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
