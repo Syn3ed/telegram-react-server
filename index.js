@@ -2099,7 +2099,7 @@ const startBot = async () => {
                 const fullName = response.text;
                 await dbManager.changeNameUser(userId, fullName);
                 await bot.sendMessage(chatId, 'Отлично!');
-                keyboardRole(chatId);
+                // keyboardRole(chatId);
               }
             } catch (error) {
               console.error('Ошибка при обработке ответа пользователя:', error);
