@@ -170,7 +170,20 @@ class DatabaseService {
         await user.save();
       }
     } catch (e) {
+      console.log(e)
+    }
+  }
 
+  async changeNameUser(userId ,newName){
+    try {
+      const user = await User.findOne({ where: { telegramId: userId } })
+
+      if (user) {
+        user.username = newName;
+        await user.save();
+      }
+    } catch (e) {
+      console.log(e)
     }
   }
 

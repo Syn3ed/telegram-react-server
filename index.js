@@ -712,7 +712,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           }
 
         };
-        
+
       };
       bot.on('message', textHandler);
     } catch (error) {
@@ -975,18 +975,18 @@ async function keyboardRole(chatId) {
 
   if (user.RoleId == '2') {
     keyboard = [
-      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
+      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', callback_data: `/UserProfile/${chatId}` }],
       [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
     ];
   } else if (user.RoleId == '1') {
     keyboard = [
-      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой id', callback_data: `/userId` }],
+      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', callback_data: `/UserProfile/${chatId}` }],
       [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
       [{ text: 'Изменить роль пользователя по его Id', callback_data: `/resRole` }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
     ];
   } else if (user.RoleId == '3') {
     keyboard = [
-      [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Мой id', callback_data: `/userId` }]
+      [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Мой профиль', callback_data: `/UserProfile/${chatId}` }]
     ];
   }
 
@@ -1697,8 +1697,6 @@ const startBot = async () => {
       }
     }
 
-
-
     if (msg.text === '/start') {
       try {
         const chatId = msg.chat.id;
@@ -1714,14 +1712,14 @@ const startBot = async () => {
           const textHandler = async (response) => {
             try {
               if (chatId === response.from.id && waitingUsers[chatId]) {
-                if (!response?.entities) {
-                  waitingUsers[chatId] = false;
-                  bot.off('text', textHandler);
-                  const fullName = response.text;
-                  await dbManager.createUserWithRole(`${chatId}`, `${fullName}`, `User`);
-                  await bot.sendMessage(chatId, 'Отлично! Теперь вы можете пользоваться ботом.');
-                  keyboardRole(chatId)
-                }
+                // if (!response?.entities) {
+                waitingUsers[chatId] = false;
+                bot.off('text', textHandler);
+                const fullName = response.text;
+                await dbManager.createUserWithRole(`${chatId}`, `${fullName}`, `User`);
+                await bot.sendMessage(chatId, 'Отлично! Теперь вы можете пользоваться ботом.');
+                keyboardRole(chatId)
+                // }
               }
             } catch (error) {
               console.error('Ошибка при обработке ответа пользователя:', error);
@@ -1734,8 +1732,6 @@ const startBot = async () => {
         console.error('Ошибка при обработке команды /start:', error);
       }
     }
-
-
 
     if (msg.text === '/menu') {
 
@@ -1765,6 +1761,7 @@ const startBot = async () => {
         const regex7 = /\/changeRoleUser (\d+)/;
         const regex8 = /\/changeRoleOperator (\d+)/;
         const regex9 = /\/changeRoleAdmin (\d+)/;
+        const regex10 = /\/changeName (\d+)/;
         if (msg?.web_app_data?.data && regex.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex);
           const idMed = match[1];
@@ -2079,6 +2076,38 @@ const startBot = async () => {
           await bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
           await existingUser.update({ nicknameOperator: `Администратор#${existingUser.id}` })
           keyboardRole(userId)
+        }
+        if (msg?.web_app_data?.data && regex10.test(msg.web_app_data.data)) {
+          const match = msg.web_app_data.data.match(regex9);
+          const chatId = msg.from.id;
+          const userId = match[1];
+          console.log(msg)
+          waitingUsers[chatId] = true;
+          await bot.sendMessage(chatId, 'Пожалуйста, введите свои ФИО:', {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: 'Стоп', callback_data: 'Стоп' }]
+              ]
+            }
+          });
+
+          const textHandler = async (response) => {
+            try {
+              if (chatId === response.from.id && waitingUsers[chatId]) {
+                waitingUsers[chatId] = false;
+                bot.off('text', textHandler);
+                const fullName = response.text;
+                await dbManager.changeNameUser(userId, fullName);
+                await bot.sendMessage(chatId, 'Отлично!');
+                keyboardRole(chatId);
+              }
+            } catch (error) {
+              console.error('Ошибка при обработке ответа пользователя:', error);
+            }
+          };
+
+          bot.on('text', textHandler);
+          dbManager.changeNameUser(userId,)
         }
         const userName = msg.from.first_name;
         try {
