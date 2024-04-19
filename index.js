@@ -2078,7 +2078,7 @@ const startBot = async () => {
           keyboardRole(userId)
         }
         if (msg?.web_app_data?.data && regex10.test(msg.web_app_data.data)) {
-          const match = msg.web_app_data.data.match(regex9);
+          const match = msg.web_app_data.data.match(regex10);
           const chatId = msg.from.id;
           const userId = match[1];
           console.log(msg)
