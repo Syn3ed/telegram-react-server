@@ -794,6 +794,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 userRequestId,
                 timeMess,
                 textHandler,
+                nickname,
                 caption_text
               }
               resToOperatorFunc(data);
@@ -818,6 +819,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 userName,
                 timeMess,
                 messages,
+                nickname,
                 textHandler
               }
               resToOperatorTextFunc1(data);
