@@ -975,18 +975,18 @@ async function keyboardRole(chatId) {
 
   if (user.RoleId == '2') {
     keyboard = [
-      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', callback_data: `/UserProfile/${chatId}` }],
+      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', web_app: { url: appUrl + `/UserProfile/${chatId}` } }],
       [{ text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }]
     ];
   } else if (user.RoleId == '1') {
     keyboard = [
-      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', callback_data: `/UserProfile/${chatId}` }],
+      [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', web_app: { url: appUrl + `/UserProfile/${chatId}` } }],
       [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
       [{ text: 'Изменить роль пользователя по его Id', callback_data: `/resRole` }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
     ];
   } else if (user.RoleId == '3') {
     keyboard = [
-      [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Мой профиль', callback_data: `/UserProfile/${chatId}` }]
+      [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Мой профиль', web_app: { url: appUrl + `/UserProfile/${chatId}` } }]
     ];
   }
 
