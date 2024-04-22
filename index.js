@@ -2379,7 +2379,9 @@ const startBot = async () => {
           });
           if (userId === messages[0].UserRequest.User.telegramId) {
             bot.sendMessage(userId, `Вы закрыли заявку №${requestId}`);
-            await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId}`);
+            if (messages[0]?.operatorId) {
+              await bot.sendMessage(messages[0]?.operatorId, `Пользователь закрыл заявку №${requestId}`);
+            }
           } else {
             bot.sendMessage(userId, `Вы закрыли заявку №${requestId} `);
             bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`)
