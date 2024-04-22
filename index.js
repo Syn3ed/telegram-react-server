@@ -102,109 +102,10 @@ app.get('/test/:id', async (req, res) => {
 
 const waitingUsers = {};
 
-// app.post(`/replyToOperator`, async (req, res) => {
-//   const { queryId, userRequestId, username, userId, operatorId } = req.body;
-//   const userWebId = operatorId;
-
-//   try {
-//     const user = await User.findByPk(userId);
-//     const userRequest = await dbManager.findReq(userRequestId);
-
-//     if (!userRequest) {
-//       bot.sendMessage(userWebId, 'Заявка не найдена.');
-//       return res.status(400).json({ error: 'Заявка не найдена.' });
-//     }
-
-//     waitingUsers[userWebId] = true;
-
-//     await bot.sendMessage(userWebId, 'Введите сообщение:');
-
-//     const reply = await new Promise((resolve) => {
-//       const textHandler = (msg) => {
-//         const userId = msg.from.id;
-//         if (userId === userWebId && waitingUsers[userWebId]) {
-//           waitingUsers[userWebId] = false;
-//           bot.off('text', textHandler);
-//           resolve(msg);
-//         }
-//       };
-
-
-//       bot.on('text', textHandler);
-//     });
-//     if (reply.text === 'Стоп' || reply.text === 'стоп') {
-//       await bot.sendMessage(userWebId, 'Хорошо');
-//       return;
-//     }
-
-//     const messages = await Message.findAll({
-//       where: { id: userRequestId },
-//       include: [
-//         {
-//           model: UserRequest,
-//           include: [
-//             {
-//               model: User,
-//               attributes: ['username', 'address', 'telegramId']
-//             }
-//           ]
-//         }
-//       ]
-//     });
-
-//     // await dbManager.replyToOperator(userRequestId, reply.text, messages);
-
-//     bot.sendMessage(userWebId, 'Ответ успешно добавлен.');
-//     const timeData = new Date();
-//     const year = timeData.getFullYear();
-//     const month = timeData.getMonth() + 1;
-//     const day = timeData.getDate();
-//     timeData.setHours(timeData.getHours() + 7);
-//     const hours = timeData.getHours();
-//     const minutes = timeData.getMinutes();
-//     const formattedHours = hours < 10 ? '0' + hours : hours;
-//     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-
-//     const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`
-//     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'User', username, timeMess);
-
-//     // await bot.sendMessage(messages[0].operatorId, 'Пришел ответ от пользователя *проверка postRegex4*', {
-//     //   reply_markup: {
-//     //     inline_keyboard: [
-//     //       [{ text: 'Пришел ответ от пользователя', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }]
-//     //     ]
-//     //   }
-//     // });
-//     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ от пользователя заявку №${userRequestId}`, {
-//       reply_markup: {
-//         inline_keyboard: [
-//           [{ text: 'Cсылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-//           [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
-//         ]
-//       }
-//     });
-
-
-//     return res.status(200).json({});
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ error: 'Внутренняя ошибка сервера' });
-//   }
-// });
 
 app.post('/closeReq', async (req, res) => {
   const { queryId, userRequestId, username, userId, operatorId } = req.body;
   const userWebId = operatorId;
-  // try {
-  //   const status = 'Заявка закрыта';
-  //   const message = `Пользователь закрыл заявку №${userRequestId}`
-  //   await sendMessagesToUsersWithRoleId(message, userRequestId);
-  //   await dbManager.changeStatusRes(userRequestId, status);
-  //   await bot.sendMessage(userWebId, `Вы закрыли заявку №${userRequestId}`);
-
-  // } catch (e) {
-  //   console.log(e)
-  // }
   const requestId = userRequestId
 
   try {
@@ -226,19 +127,48 @@ app.post('/closeReq', async (req, res) => {
       ]
     });
     if (operatorId === messages[0].UserRequest.User.telegramId) {
-      bot.sendMessage(operatorId, `Вы закрыли заявку №${requestId}`);
+
+      bot.sendMessage(operatorId, `Вы закрыли заявку №${requestId}`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/Inlinerequests/${id}` } }]
+          ]
+        }
+      })
+
       if (messages[0]?.operatorId) {
-        await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId}`);
+        await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId}`, {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
+            ]
+          }
+        });
       }
     } else {
-      bot.sendMessage(operatorId, `Вы закрыли заявку №${requestId} `);
-      bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`)
+
+      bot.sendMessage(operatorId, `Вы закрыли заявку №${requestId} `, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
+          ]
+        }
+      })
+
+      bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/Inlinerequests/${id}` } }]
+          ]
+        }
+      })
     }
   } catch (e) {
     console.log(e)
   }
   res.status(200).json({ success: true });
 })
+
 
 app.post(`/resumeReq`, async (req, res) => {
   try {
@@ -259,114 +189,37 @@ app.post(`/resumeReq`, async (req, res) => {
         }
       ]
     });
+
     if (messageFunc[0]?.operatorId) {
       const message = `Возобновлена заявка №${requestId}`;
-      await bot.sendMessage(messageFunc[0].operatorId, message)
+      await bot.sendMessage(messageFunc[0].operatorId, message, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `Ссылка на заявку`, url: appUrl + `/InlinerequestsOperator/${requestId}` }]
+          ]
+        }
+      });
     }
     if (messageFunc[0].UserRequest.User.telegramId) {
       const message = `Ваша заявка №${requestId} возобновлена`;
-      await bot.sendMessage(messageFunc[0].operatorId, message)
+      await bot.sendMessage(messageFunc[0].UserRequest.User.telegramId, message, {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: `Ссылка на заявку`, url: appUrl + `/Inlinerequests/${requestId}` }]
+          ]
+        }
+      });
     }
+
     await dbManager.changeStatusRes(requestId, status);
     const message = `Возобновлена заявка №${requestId}`;
-    // await sendMessagesToUsersWithRoleId(message, requestId);
+    await sendMessagesToUsersWithRoleId(message, requestId);
   } catch (e) {
     console.log(e);
   }
   res.status(200).json({ success: true });
-})
+});
 
-// app.post(`/replyToUser`, async (req, res) => {
-//   const { queryId, userRequestId, username, userId, operatorId } = req.body;
-//   const requestId = userRequestId;
-//   const userWebId = operatorId;
-//   try {
-//     const userRequest = await dbManager.findReq(userRequestId);
-//     const user = await User.findByPk(userId);
-//     if (!userRequest) {
-//       bot.sendMessage(operatorId, 'Заявка не найдена.');
-//       return;
-//     }
-
-//     waitingUsers[userWebId] = true;
-
-//     await bot.sendMessage(userWebId, 'Введите сообщение:');
-
-//     const reply = await new Promise((resolve) => {
-//       const textHandler = (msg) => {
-//         const userId = msg.from.id;
-//         if (userId === userWebId && waitingUsers[userWebId]) {
-//           waitingUsers[userWebId] = false;
-//           bot.off('text', textHandler);
-//           resolve(msg);
-//         }
-//       };
-
-
-//       bot.on('text', textHandler);
-//     });
-//     if (reply.text === 'Стоп' || reply.text === 'стоп') {
-//       await bot.sendMessage(userWebId, 'Хорошо');
-//       return;
-//     }
-//     // await dbManager.replyToUser(userRequestId, reply.text, operatorId);
-//     await OperatorReq.create({
-//       IdRequest: userRequestId,
-//       idUser: userWebId
-//     });
-//     const userRequestStatus = await UserRequest.findByPk(requestId);
-//     if (userRequestStatus.status === 'ожидает ответа оператора') {
-//       const status = 'Заявка в обработке';
-//       await dbManager.changeStatusRes(requestId, status);
-//       const message = `Заявка под номером ${requestId} в обработке`
-//       await sendMessagesToUsersWithRoleId(message, requestId);
-//     }
-//     const timeData = new Date();
-//     const year = timeData.getFullYear();
-//     const month = timeData.getMonth() + 1;
-//     const day = timeData.getDate();
-//     timeData.setHours(timeData.getHours() + 7);
-//     const hours = timeData.getHours();
-//     const minutes = timeData.getMinutes();
-//     const formattedHours = hours < 10 ? '0' + hours : hours;
-//     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-
-//     const timeMess = `${formattedHours}:${formattedMinutes} ${day}.${month}.${year}`;
-
-//     await dbManager.createUserRequestMessage(userRequestId, reply.text, operatorId, 'Operator', 'Оператор', timeMess);
-
-//     const userTelegramId = await dbManager.findUserToReq(userRequestId);
-
-//     const messages = await Message.findAll({
-//       where: { id: userRequestId },
-//       include: [
-//         {
-//           model: UserRequest,
-//           include: [
-//             {
-//               model: User,
-//               attributes: ['username', 'address', 'telegramId']
-//             }
-//           ]
-//         }
-//       ]
-//     });
-
-//     bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ на вашу заявку под номером ${userRequestId}`, {
-//       reply_markup: {
-//         inline_keyboard: [
-//           [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-//           [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-//         ]
-//       }
-//     });
-
-//     bot.sendMessage(operatorId, 'Ответ успешно добавлен.');
-//   } catch (error) {
-//     console.error('Ошибка при ответе на заявку:', error);
-//     console.log(error);
-//   }
-// });
 
 app.post('/handleShowPhoto', async (req, res) => {
   const { idMedia, operatorId } = req.body;
@@ -1413,7 +1266,7 @@ async function getUnansweredRequestsMin15() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.lt]: new Date(new Date() - 1 * 60 * 1000)
+          [Sequelize.Op.lt]: new Date(new Date() - 5 * 60 * 1000)
         }
       }
     });
@@ -1430,7 +1283,7 @@ async function getUnansweredRequestsOneWeek() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.lt]: new Date(new Date() - 2 * 60 * 1000)
+          [Sequelize.Op.lt]: new Date(new Date() - 10 * 60 * 1000)
         }
       }
     });
@@ -1588,7 +1441,7 @@ const startBot = async () => {
   await connectToDatabase();
   await createRoles();
   setInterval(checkRequestsMin15, 60000 * 1);
-  setInterval(checkRequestsOneWeek, 60000 * 2);
+  setInterval(checkRequestsOneWeek, 60000 * 1);
   bot.on('message', async (msg) => {
 
     console.log(msg)
@@ -2508,7 +2361,7 @@ const startBot = async () => {
       }
     }
   })
-  await bot.answerCallbackQuery(callbackQueryId);
+  // await bot.answerCallbackQuery(callbackQueryId);
 };
 
 // const botClass = new BotClass(bot)
