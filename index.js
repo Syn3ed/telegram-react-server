@@ -244,34 +244,6 @@ app.post(`/resumeReq`, async (req, res) => {
   try {
     const { userRequestId } = req.body;
     const requestId = userRequestId;
-    // const status = 'ожидает ответа оператора';
-    // await dbManager.changeStatusRes(requestId, status);
-    // const message = `Возобновлена заявка под номером ${requestId}`
-    // await sendMessagesToUsersWithRoleId(message, requestId);
-    // const messages = await Message.findAll({
-    //   where: { id: userRequestId },
-    //   include: [
-    //     {
-    //       model: UserRequest,
-    //       include: [
-    //         {
-    //           model: User,
-    //           attributes: ['telegramId']
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // });
-    // console.log(messages)
-    // console.log(messages[0].UserRequest.User.telegramId)
-    // const masId = messages[0].UserRequest.User.telegramId;
-    // await bot.sendMessage(masId, `Вам возобновили заявку №${requestId}`, {
-    //   reply_markup: {
-    //     inline_keyboard: [
-    //       [{ text: 'Ваша Заявка', web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
-    //     ]
-    //   }
-    // });
     const status = 'ожидает ответа оператора';
     const messageFunc = await Message.findAll({
       where: { id: userRequestId },
@@ -297,7 +269,7 @@ app.post(`/resumeReq`, async (req, res) => {
     }
     await dbManager.changeStatusRes(requestId, status);
     const message = `Возобновлена заявка №${requestId}`;
-    await sendMessagesToUsersWithRoleId(message, requestId);
+    // await sendMessagesToUsersWithRoleId(message, requestId);
   } catch (e) {
     console.log(e);
   }
@@ -2043,7 +2015,7 @@ const startBot = async () => {
           }
           await dbManager.changeStatusRes(requestId, status);
           const message = `Возобновлена заявка №${requestId}`;
-          await sendMessagesToUsersWithRoleId(message, requestId);
+          // await sendMessagesToUsersWithRoleId(message, requestId);
         }
         if (msg?.web_app_data?.data && regex7.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex7);
@@ -2442,7 +2414,7 @@ const startBot = async () => {
         };
 
         const message = `Возобновлена заявка №${requestId}`;
-        await sendMessagesToUsersWithRoleId(message, requestId);
+        // await sendMessagesToUsersWithRoleId(message, requestId);
         await bot.answerCallbackQuery(callbackQueryId);
       }
       if (regex7.test(data1)) {
