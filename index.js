@@ -1286,7 +1286,7 @@ async function getUnansweredRequestsMin15() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.lt]: new Date(new Date() - 5 * 60 * 1000)
+          [Sequelize.Op.lt]: new Date(new Date() - 10 * 60 * 1000)
         }
       }
     });
@@ -1460,8 +1460,8 @@ async function sendMediaGroup1(data) {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  setInterval(checkRequestsMin15, 60000 * 1);
-  setInterval(checkRequestsOneWeek, 60000 * 1);
+  setInterval(checkRequestsMin15, 60 * 1000 * 2);
+  setInterval(checkRequestsOneWeek, 60 * 1000 * 2);
   bot.on('message', async (msg) => {
 
     console.log(msg)
