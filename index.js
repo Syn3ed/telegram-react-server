@@ -479,7 +479,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           ]
         }
       });
-
+      console.log('123321')
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
@@ -491,9 +491,9 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           }
           const timeMess = timeFunc()
           let caption_text;
-
+          console.log('123321')
           const messages = await messagesFunc(userRequestId)
-
+          console.log('123321')
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             userPhotos[chatId].push({
@@ -524,7 +524,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             caption_text = reply.caption
             dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
           }
-
+          console.log('123321')
           if (!sentMediaGroups[chatId] && !reply?.text) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
@@ -558,7 +558,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           }
 
         };
-
+        console.log('123321')
       };
       bot.on('message', textHandler);
     } catch (error) {
@@ -589,18 +589,18 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
-
+          console.log('123321')
           const reply = response;
           if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
-
+          console.log('123321')
           const timeMess = timeFunc()
           let caption_text;
-
+          console.log('123321')
           const messages = await messagesFunc(userRequestId)
-
+          console.log('123321')
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             userPhotos[chatId].push({
@@ -629,7 +629,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
             caption_text = reply.caption
             dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
           }
-
+          console.log('123321')
           if (!sentMediaGroups[chatId] && !reply?.text) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
@@ -682,7 +682,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
             }, 1000);
           }
 
-
+          console.log('123321')
         }
       };
       bot.on('message', textHandler);
@@ -715,14 +715,14 @@ async function MethodToUser(userRequestId, userName, chatId) {
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
-
+          console.log('123321')
           const reply = response;
           if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
           let caption_text;
-
+          console.log('123321')
           const timeMess = timeFunc()
           const messages = await messagesFunc(userRequestId)
           if (reply.photo) {
@@ -747,7 +747,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
               mediaGroupId: reply.media_group_id
             });
           }
-
+          console.log('123321')
           const existingUser = await dbManager.getUserByChatId(`${chatId}`);
           const nickname = existingUser.username;
           const nicknameOperator = existingUser.nicknameOperator;
@@ -755,9 +755,9 @@ async function MethodToUser(userRequestId, userName, chatId) {
             caption_text = reply.caption
             dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Opeartor', `${nickname}`, `${nicknameOperator}`, timeMess);
           }
-
+          console.log('123321')
           await processUserRequest(userRequestId, chatId)
-
+          console.log('123321')
           if (!sentMediaGroups[chatId] && !reply?.text) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
