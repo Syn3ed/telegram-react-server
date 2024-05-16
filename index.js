@@ -164,22 +164,22 @@ async function ResumeReq(requestId) {
         }
       ]
     });
-    if (messageFunc[0]?.operatorId) {
-      const message = `Возобновлена заявка №${requestId}`;
-      await bot.sendMessage(messageFunc[0].operatorId, message, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: `Ссылка на заявку`, url: appUrl + `/InlinerequestsOperator/${requestId}` }]
-          ]
-        }
-      });
-    }
+    // if (messageFunc[0]?.operatorId) {
+    //   const message = `Возобновлена заявка №${requestId}`;
+    //   await bot.sendMessage(messageFunc[0].operatorId, message, {
+    //     reply_markup: {
+    //       inline_keyboard: [
+    //         [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${requestId}` } }]
+    //       ]
+    //     }
+    //   });
+    // }
     if (messageFunc[0].UserRequest.User.telegramId) {
       const message = `Ваша заявка №${requestId} возобновлена`;
       await bot.sendMessage(messageFunc[0].UserRequest.User.telegramId, message, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: `Ссылка на заявку`, url: appUrl + `/Inlinerequests/${requestId}` }]
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
           ]
         }
       });
@@ -216,7 +216,7 @@ async function CloseReq(requestId, operatorId) {
       bot.sendMessage(operatorId, `Вы закрыли заявку №${requestId}`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/Inlinerequests/${id}` } }]
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
           ]
         }
       })
@@ -225,7 +225,7 @@ async function CloseReq(requestId, operatorId) {
         await bot.sendMessage(messages[0].operatorId, `Пользователь закрыл заявку №${requestId}`, {
           reply_markup: {
             inline_keyboard: [
-              [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
+              [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${requestId}` } }]
             ]
           }
         });
@@ -235,7 +235,7 @@ async function CloseReq(requestId, operatorId) {
       bot.sendMessage(operatorId, `Вы закрыли заявку №${requestId} `, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${id}` } }]
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/InlinerequestsOperator/${requestId}` } }]
           ]
         }
       })
@@ -243,7 +243,7 @@ async function CloseReq(requestId, operatorId) {
       bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор закрыл вашу заявку №${requestId}`, {
         reply_markup: {
           inline_keyboard: [
-            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/Inlinerequests/${id}` } }]
+            [{ text: `Ссылка на заявку`, web_app: { url: appUrl + `/Inlinerequests/${requestId}` } }]
           ]
         }
       })
