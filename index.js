@@ -539,7 +539,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
               }
               resToOperatorFunc(data);
               console.log(waitingUsers[chatId])
-            }, 500);
+            }, 1000);
           }
           if (reply?.text) {
             setTimeout(() => {
@@ -773,7 +773,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
               }
               resToUserFunc(data);
               console.log(waitingUsers[chatId])
-            }, 500);
+            }, 1000);
           }
 
           if (reply?.text) {
