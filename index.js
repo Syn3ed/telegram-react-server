@@ -484,7 +484,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
 
-          reply = response
+          const reply = response
           if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
@@ -732,17 +732,22 @@ async function MethodToUser(userRequestId, userName, chatId) {
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
           console.log('123321')
+
           const reply = response;
+
           if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
             waitingUsers[chatId] = false;
             return bot.sendMessage(chatId, 'Хорошо');;
           }
           let caption_text;
           console.log('123321')
+
           const timeMess = timeFunc()
           const messages = await messagesFunc(userRequestId)
+
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
+
             if (!userPhotos[chatId].some(item => item.media === reply.photo[0].file_id)) {
               userPhotos[chatId].push({
                 type: 'photo',
@@ -752,8 +757,10 @@ async function MethodToUser(userRequestId, userName, chatId) {
               console.log('Получена фотография:');
               console.log(userPhotos[chatId]);
             }
+
           } else if (reply.document) {
             userPhotos[chatId] = userPhotos[chatId] || [];
+
             if (!userPhotos[chatId].some(item => item.media === reply.document.file_id)) {
               userPhotos[chatId].push({
                 type: 'document',
@@ -761,6 +768,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 mediaGroupId: reply.media_group_id
               });
             }
+
           } else if (reply.video) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.video.file_id)) {
