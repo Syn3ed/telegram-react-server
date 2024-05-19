@@ -966,7 +966,12 @@ app.get('/users', async (req, res) => {
 
 app.get('/chat', async (req, res) => {
   try {
-    const chat = await MessageChat.findAll();
+    const chat = await MessageChat.findAll({
+      include: [{
+        model: User,
+      }]
+    });
+
     const formattedChat = chat.map(chatMes => ({
       id: chatMes.id,
       textMessage: chatMes.textMessage,
@@ -975,13 +980,16 @@ app.get('/chat', async (req, res) => {
       nicknameOperator: chatMes.nicknameOperator,
       UserRequestId: chatMes.UserRequestId,
       Time: chatMes.TimeMessages,
+      User: chatMes.User  // Информация о пользователе
     }));
+
     res.json(formattedChat);
   } catch (e) {
     console.log(e);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.get('/chat/:id', async (req, res) => {
   try {
