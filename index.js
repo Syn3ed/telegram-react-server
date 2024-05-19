@@ -966,52 +966,56 @@ app.get('/users', async (req, res) => {
 
 app.get('/chat', async (req, res) => {
   try {
+    const chat = await MessageChat.findAll();
+    const formattedChat = chat.map(chatMes => ({
+      id: chatMes.id,
+      textMessage: chatMes.textMessage,
+      idUser: chatMes.idUser,
+      roleUser: chatMes.roleUser,
+      nicknameOperator: chatMes.nicknameOperator,
+      UserRequestId: chatMes.UserRequestId,
+      Time: chatMes.TimeMessages,
+    }));
+    res.json(formattedChat);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/chat/:id', async (req, res) => {
+  try {
+    const userRequestId = parseInt(req.params.id, 10);
     const chat = await MessageChat.findAll({
+      where: { UserRequestId: userRequestId },
       include: [{
         model: User,
+        attributes: ['telegramId', 'username', 'address', 'nicknameOperator']
       }]
     });
 
     const formattedChat = chat.map(chatMes => ({
       id: chatMes.id,
       textMessage: chatMes.textMessage,
-      idUser: chatMes.idUser,
       roleUser: chatMes.roleUser,
       nicknameOperator: chatMes.nicknameOperator,
-      UserRequestId: chatMes.UserRequestId,
-      Time: chatMes.TimeMessages,
-      User: chatMes.User  // Информация о пользователе
-    }));
-
-    res.json(formattedChat);
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-
-app.get('/chat/:id', async (req, res) => {
-  try {
-    const userRequestId = parseInt(req.params.id, 10);
-    const chat = await MessageChat.findAll({ where: { UserRequestId: userRequestId } });
-    const formattedChat = chat.map(chatMes => ({
-      id: chatMes.id,
-      textMessage: chatMes.textMessage,
-      idUser: chatMes.idUser,
-      roleUser: chatMes.roleUser,
-      UserRequestId: chatMes.UserRequestId,
       IdMedia: chatMes.IdMedia,
-      nicknameOperator: chatMes.nicknameOperator,
-      username: chatMes.username,
       Time: chatMes.TimeMessages,
+      user: {
+        telegramId: chatMes.User ? chatMes.User.telegramId : null,
+        username: chatMes.User ? chatMes.User.username : null,
+        address: chatMes.User ? chatMes.User.address : null,
+        nicknameOperator: chatMes.User ? chatMes.User.nicknameOperator : null,
+      }
     }));
+
     res.json(formattedChat);
   } catch (e) {
     console.log(e);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.get('/req', async (req, res) => {
   try {
