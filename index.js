@@ -1449,7 +1449,9 @@ async function sendMediaGroup1(data) {
     await MessageChat.create({
       IdMedia: mediaRecord.id,
       roleUser: op,
+      idUser:chatId,
       username: nickname,
+      // nicknameOperator: nicknameOperator,
       UserRequestId: userRequestId,
       TimeMessages: timeMess,
       nicknameOperator: nicknameOperator
