@@ -986,37 +986,24 @@ app.get('/chat', async (req, res) => {
 app.get('/chat/:id', async (req, res) => {
   try {
     const userRequestId = parseInt(req.params.id, 10);
-    const chat = await MessageChat.findAll({
-      where: { UserRequestId: userRequestId },
-      include: [{
-        model: User,
-        attributes: ['telegramId', 'username', 'address', 'nicknameOperator']
-      }]
-    });
-
+    const chat = await MessageChat.findAll({ where: { UserRequestId: userRequestId } });
     const formattedChat = chat.map(chatMes => ({
       id: chatMes.id,
       textMessage: chatMes.textMessage,
+      idUser: chatMes.idUser,
       roleUser: chatMes.roleUser,
-      nicknameOperator: chatMes.nicknameOperator,
+      UserRequestId: chatMes.UserRequestId,
       IdMedia: chatMes.IdMedia,
-      Time: chatMes.Time, // Заменяем TimeMessages на Time
-      user: {
-        telegramId: chatMes.User ? chatMes.User.telegramId : null,
-        username: chatMes.User ? chatMes.User.username : null,
-        address: chatMes.User ? chatMes.User.address : null,
-        nicknameOperator: chatMes.User ? chatMes.User.nicknameOperator : null,
-      }
+      nicknameOperator: chatMes.nicknameOperator,
+      username: chatMes.username,
+      Time: chatMes.TimeMessages,
     }));
-
     res.json(formattedChat);
   } catch (e) {
     console.log(e);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-
 
 app.get('/req', async (req, res) => {
   try {
