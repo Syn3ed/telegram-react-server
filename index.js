@@ -1000,7 +1000,7 @@ app.get('/chat/:id', async (req, res) => {
       roleUser: chatMes.roleUser,
       nicknameOperator: chatMes.nicknameOperator,
       IdMedia: chatMes.IdMedia,
-      Time: chatMes.TimeMessages,
+      Time: chatMes.Time, // Заменяем TimeMessages на Time
       user: {
         telegramId: chatMes.User ? chatMes.User.telegramId : null,
         username: chatMes.User ? chatMes.User.username : null,
@@ -1015,6 +1015,7 @@ app.get('/chat/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 app.get('/req', async (req, res) => {
