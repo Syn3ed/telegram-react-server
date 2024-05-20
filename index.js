@@ -274,28 +274,17 @@ const hndlMed = async (idMedia, operatorId) => {
 
       const photoChunks = chunkArray(pht, chunkSize);
 
-
-      if (pht.some(photo => photo.mediaGroupId)) {
-        for (const chunk of photoChunks) {
-          await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
-            type: photo.type,
-            media: photo.media,
-          })));
-        }
-      } else {
-        for (const photo of pht) {
-          await bot.sendMediaGroup(operatorId, [{
-            type: photo.type,
-            media: photo.media,
-          }]);
-        }
+      for (const chunk of photoChunks) {
+        await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
+          type: photo.type,
+          media: photo.media,
+        })));
       }
     }
   } catch (error) {
     console.error(error);
   }
 };
-
 
 
 const createMediaRecord = async (userRequestId, idMedia) => {
@@ -524,10 +513,13 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           console.log('123321')
           const messages = await messagesFunc(userRequestId)
           console.log('123321')
+          let fileIdCounter = 1;
+
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.photo[0].file_id)) {
               userPhotos[chatId].push({
+                id: fileIdCounter++,
                 type: 'photo',
                 media: reply.photo[0].file_id,
                 mediaGroupId: reply.media_group_id
@@ -535,25 +527,30 @@ async function MethodToOperator(userRequestId, userName, chatId) {
               console.log('Получена фотография:');
               console.log(userPhotos[chatId]);
             }
-          } else if (reply.document) {
+          }
+          else if (reply.document) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.document.file_id)) {
               userPhotos[chatId].push({
+                id: fileIdCounter++,
                 type: 'document',
                 media: reply.document.file_id,
                 mediaGroupId: reply.media_group_id
               });
             }
-          } else if (reply.video) {
+          }
+          else if (reply.video) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.video.file_id)) {
               userPhotos[chatId].push({
+                id: fileIdCounter++,
                 type: 'video',
                 media: reply.video.file_id,
-                mediaGroupId: reply.media_group_id
+                mediaGroupId: reply.media_group_id,
               });
             }
           }
+
 
           const existingUser = await dbManager.getUserByChatId(`${chatId}`);
           const nickname = existingUser.username;
@@ -777,11 +774,13 @@ async function MethodToUser(userRequestId, userName, chatId) {
           const timeMess = timeFunc()
           const messages = await messagesFunc(userRequestId)
 
+          let fileIdCounter = 1;
+
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
-
             if (!userPhotos[chatId].some(item => item.media === reply.photo[0].file_id)) {
               userPhotos[chatId].push({
+                id: fileIdCounter++,
                 type: 'photo',
                 media: reply.photo[0].file_id,
                 mediaGroupId: reply.media_group_id
@@ -789,28 +788,32 @@ async function MethodToUser(userRequestId, userName, chatId) {
               console.log('Получена фотография:');
               console.log(userPhotos[chatId]);
             }
+          }
 
-          } else if (reply.document) {
+          else if (reply.document) {
             userPhotos[chatId] = userPhotos[chatId] || [];
-
             if (!userPhotos[chatId].some(item => item.media === reply.document.file_id)) {
               userPhotos[chatId].push({
+                id: fileIdCounter++,
                 type: 'document',
                 media: reply.document.file_id,
                 mediaGroupId: reply.media_group_id
               });
             }
-
-          } else if (reply.video) {
+          }
+          // Для видео
+          else if (reply.video) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.video.file_id)) {
               userPhotos[chatId].push({
+                id: fileIdCounter++,
                 type: 'video',
                 media: reply.video.file_id,
-                mediaGroupId: reply.media_group_id
+                mediaGroupId: reply.media_group_id,
               });
             }
           }
+
 
           console.log('123321')
           const existingUser = await dbManager.getUserByChatId(`${chatId}`);
