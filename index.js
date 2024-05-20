@@ -274,17 +274,28 @@ const hndlMed = async (idMedia, operatorId) => {
 
       const photoChunks = chunkArray(pht, chunkSize);
 
-      for (const chunk of photoChunks) {
-        await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
-          type: photo.type,
-          media: photo.media,
-        })));
+
+      if (pht.some(photo => photo.mediaGroupId)) {
+        for (const chunk of photoChunks) {
+          await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
+            type: photo.type,
+            media: photo.media,
+          })));
+        }
+      } else {
+        for (const photo of pht) {
+          await bot.sendMediaGroup(operatorId, [{
+            type: photo.type,
+            media: photo.media,
+          }]);
+        }
       }
     }
   } catch (error) {
     console.error(error);
   }
 };
+
 
 
 const createMediaRecord = async (userRequestId, idMedia) => {
@@ -1469,7 +1480,7 @@ async function sendMediaGroup1(data) {
     console.log('321111111111111111111111111111213123213213123')
     console.log(userPhotos[chatId])
     // const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
-    const groupPhotos = userPhotos[chatId].sort((a, b) => a.mediaGroupId - b.mediaGroupId);
+    const groupPhotos = userPhotos[chatId]
     const str = JSON.stringify(groupPhotos);
     const mediaRecord = await createMediaRecord(userRequestId, str);
 
