@@ -1445,74 +1445,81 @@ async function sendMediaGroup(chatId, userName, userRequestId, timeMess, op) {
 
 async function sendMediaGroup1(data) {
   const { chatId, nickname, userRequestId, timeMess, op, caption_text, nicknameOperator } = data;
+
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
-    const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
-    const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
-    const str = JSON.stringify(groupPhotos);
-    const mediaRecord = await createMediaRecord(userRequestId, str);
+    const mediaGroupIds = [...new Set(userPhotos[chatId].map(photo => photo.mediaGroupId))];
 
-    await MessageChat.create({
-      IdMedia: mediaRecord.id,
-      roleUser: op,
-      idUser:chatId,
-      username: nickname,
-      // nicknameOperator: nicknameOperator,
-      UserRequestId: userRequestId,
-      TimeMessages: timeMess,
-      nicknameOperator: nicknameOperator
-    });
+    for (const mediaGroupId of mediaGroupIds) {
+      const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
+      const str = JSON.stringify(groupPhotos);
+      const mediaRecord = await createMediaRecord(userRequestId, str);
 
-    const messages = await Message.findAll({
-      where: { id: userRequestId },
-      include: [
-        {
-          model: UserRequest,
-          include: [
-            {
-              model: User,
-              attributes: ['username', 'address', 'telegramId']
+      await MessageChat.create({
+        IdMedia: mediaRecord.id,
+        roleUser: op,
+        idUser: chatId,
+        username: nickname,
+        UserRequestId: userRequestId,
+        TimeMessages: timeMess,
+        nicknameOperator: nicknameOperator
+      });
+
+      const messages = await Message.findAll({
+        where: { id: userRequestId },
+        include: [
+          {
+            model: UserRequest,
+            include: [
+              {
+                model: User,
+                attributes: ['username', 'address', 'telegramId']
+              }
+            ]
+          }
+        ]
+      });
+
+      if (op === 'User') {
+        if (messages[0].operatorId) {
+          const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
+          if (caption_text) {
+            await bot.sendMessage(messages[0].operatorId, caption_text);
+          }
+          await bot.sendMessage(messages[0].operatorId, `Пользователь отправил вам файл на заявку №${userRequestId}.`, {
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
+                [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
+              ]
             }
-          ]
+          });
         }
-      ]
-    });
-
-
-    if (op === 'User') {
-      if (messages[0].operatorId) {
-        const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
+      } else {
+        const tt = await hndlMed(mediaRecord.id, messages[0].UserRequest.User.telegramId);
         if (caption_text) {
-          await bot.sendMessage(messages[0].operatorId, caption_text)
+          await bot.sendMessage(messages[0].UserRequest.User.telegramId, caption_text);
         }
-        await bot.sendMessage(messages[0].operatorId, `Пользователь отправил вам файл на заявку №${userRequestId}.`, {
+        await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор отправил вам файл на заявку №${userRequestId}.`, {
           reply_markup: {
             inline_keyboard: [
-              [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/InlinerequestsOperator/${userRequestId}` } }],
-              [{ text: 'Ответить', callback_data: `/resToUserPhoto ${userRequestId}` }]
+              [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
+              [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
             ]
           }
         });
       }
-    } else {
-      const tt = await hndlMed(mediaRecord.id, messages[0].UserRequest.User.telegramId);
-      if (caption_text) {
-        await bot.sendMessage(messages[0].UserRequest.User.telegramId, caption_text)
-      }
-      await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор отправил вам файл на заявку №${userRequestId}.`, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }],
-            [{ text: 'Ответить', callback_data: `/resToOperatorPhoto ${userRequestId}` }]
-          ]
-        }
-      });
+
+      // Удалить обработанные фотографии
+      userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     }
-    console.log('11111111111111111111111111111111111111111111111111111111111111111111111111111111')
-    userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
+
+    // Установить флаг sentMediaGroups в false
     sentMediaGroups[chatId] = false;
   }
+  
   return;
 }
+
 
 const startBot = async () => {
   await connectToDatabase();
