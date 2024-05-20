@@ -479,7 +479,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           ]
         }
       });
-      console.log('123321')
+      console.log('Сообщение от пользователя')
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
@@ -733,7 +733,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
       waitingUsers[chatId] = true;
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
-          console.log('123321')
+          console.log('Сообщение от оператора')
 
           const reply = response;
 
