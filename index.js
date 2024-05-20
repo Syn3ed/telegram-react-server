@@ -828,6 +828,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
         }
       };
+      userPhotos[chatId] = [];
       bot.on('message', textHandler);
     } catch (error) {
       console.log(error)
