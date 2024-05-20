@@ -545,6 +545,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 caption_text
               }
               resToOperatorFunc(data);
+              userPhotos[chatId] = [];
               console.log(waitingUsers[chatId])
             }, 1000);
           }
@@ -559,6 +560,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 messages,
                 textHandler
               }
+              userPhotos[chatId] = [];
               resToOperatorTextFunc1(data);
               console.log(waitingUsers[chatId])
             }, 500);
@@ -806,6 +808,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
               }
               resToUserFunc(data);
               console.log(waitingUsers[chatId])
+              userPhotos[chatId] = [];
             }, 1000);
           }
 
@@ -823,12 +826,13 @@ async function MethodToUser(userRequestId, userName, chatId) {
               }
               resToUserTextFunc(data)
               console.log(waitingUsers[chatId])
+              userPhotos[chatId] = [];
             }, 500);
           }
 
         }
       };
-      userPhotos[chatId] = [];
+
       bot.on('message', textHandler);
     } catch (error) {
       console.log(error)
