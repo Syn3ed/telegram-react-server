@@ -1451,6 +1451,9 @@ async function sendMediaGroup1(data) {
 
     for (const mediaGroupId of mediaGroupIds) {
       const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
+
+      if (groupPhotos.length === 0) continue;  // Пропустить пустые группы
+
       const str = JSON.stringify(groupPhotos);
       const mediaRecord = await createMediaRecord(userRequestId, str);
 
@@ -1479,12 +1482,21 @@ async function sendMediaGroup1(data) {
         ]
       });
 
+      const media = groupPhotos.map(photo => ({
+        type: 'photo',
+        media: photo.fileId,  // Предполагается, что в объекте photo есть поле fileId
+      }));
+
+      if (media.length === 0) continue;  // Пропустить отправку, если массив media пуст
+
       if (op === 'User') {
         if (messages[0].operatorId) {
-          const tt = await hndlMed(mediaRecord.id, messages[0].operatorId);
+          await bot.sendMediaGroup(messages[0].operatorId, media);
+
           if (caption_text) {
             await bot.sendMessage(messages[0].operatorId, caption_text);
           }
+
           await bot.sendMessage(messages[0].operatorId, `Пользователь отправил вам файл на заявку №${userRequestId}.`, {
             reply_markup: {
               inline_keyboard: [
@@ -1495,10 +1507,12 @@ async function sendMediaGroup1(data) {
           });
         }
       } else {
-        const tt = await hndlMed(mediaRecord.id, messages[0].UserRequest.User.telegramId);
+        await bot.sendMediaGroup(messages[0].UserRequest.User.telegramId, media);
+
         if (caption_text) {
           await bot.sendMessage(messages[0].UserRequest.User.telegramId, caption_text);
         }
+
         await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Оператор отправил вам файл на заявку №${userRequestId}.`, {
           reply_markup: {
             inline_keyboard: [
@@ -1514,9 +1528,10 @@ async function sendMediaGroup1(data) {
 
     sentMediaGroups[chatId] = false;
   }
-  
+
   return;
 }
+
 
 
 const startBot = async () => {
