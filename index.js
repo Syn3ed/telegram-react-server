@@ -264,6 +264,19 @@ const hndlMed = async (idMedia, operatorId) => {
       const pht = JSON.parse(med.idMedia);
       const chunkSize = 10;
 
+      // Функция для группировки медиа по mediaGroupId
+      const groupByMediaGroupId = (array) => {
+        return array.reduce((groups, item) => {
+          const groupId = item.mediaGroupId || 'default'; // Если нет mediaGroupId, используем 'default'
+          if (!groups[groupId]) {
+            groups[groupId] = [];
+          }
+          groups[groupId].push(item);
+          return groups;
+        }, {});
+      };
+
+      // Функция для разбивки массива на части
       const chunkArray = (array, size) => {
         const result = [];
         for (let i = 0; i < array.length; i += size) {
@@ -272,19 +285,27 @@ const hndlMed = async (idMedia, operatorId) => {
         return result;
       };
 
-      const photoChunks = chunkArray(pht, chunkSize);
+      // Группируем медиа по mediaGroupId
+      const groupedMedia = groupByMediaGroupId(pht);
 
-      for (const chunk of photoChunks) {
-        await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
-          type: photo.type,
-          media: photo.media,
-        })));
+      // Отправляем медиа в Telegram
+      for (const groupId in groupedMedia) {
+        const mediaGroup = groupedMedia[groupId];
+        const mediaChunks = chunkArray(mediaGroup, chunkSize);
+
+        for (const chunk of mediaChunks) {
+          await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
+            type: photo.type,
+            media: photo.media,
+          })));
+        }
       }
     }
   } catch (error) {
     console.error(error);
   }
 };
+
 
 
 const createMediaRecord = async (userRequestId, idMedia) => {
