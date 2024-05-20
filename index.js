@@ -1509,11 +1509,9 @@ async function sendMediaGroup1(data) {
         });
       }
 
-      // Удалить обработанные фотографии
       userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     }
 
-    // Установить флаг sentMediaGroups в false
     sentMediaGroups[chatId] = false;
   }
   
