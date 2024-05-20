@@ -519,7 +519,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.photo[0].file_id)) {
               userPhotos[chatId].push({
-                id: fileIdCounter++,
+                id: userPhotos[chatId].length + 1,
                 type: 'photo',
                 media: reply.photo[0].file_id,
                 mediaGroupId: reply.media_group_id
@@ -532,7 +532,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.document.file_id)) {
               userPhotos[chatId].push({
-                id: fileIdCounter++,
+                id: userPhotos[chatId].length + 1,
                 type: 'document',
                 media: reply.document.file_id,
                 mediaGroupId: reply.media_group_id
@@ -543,7 +543,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.video.file_id)) {
               userPhotos[chatId].push({
-                id: fileIdCounter++,
+                id: userPhotos[chatId].length + 1,
                 type: 'video',
                 media: reply.video.file_id,
                 mediaGroupId: reply.media_group_id,
@@ -774,13 +774,12 @@ async function MethodToUser(userRequestId, userName, chatId) {
           const timeMess = timeFunc()
           const messages = await messagesFunc(userRequestId)
 
-          let fileIdCounter = 1;
 
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.photo[0].file_id)) {
               userPhotos[chatId].push({
-                id: fileIdCounter++,
+                id: userPhotos[chatId].length + 1,
                 type: 'photo',
                 media: reply.photo[0].file_id,
                 mediaGroupId: reply.media_group_id
@@ -794,19 +793,18 @@ async function MethodToUser(userRequestId, userName, chatId) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.document.file_id)) {
               userPhotos[chatId].push({
-                id: fileIdCounter++,
+                id: userPhotos[chatId].length + 1,
                 type: 'document',
                 media: reply.document.file_id,
                 mediaGroupId: reply.media_group_id
               });
             }
           }
-          // Для видео
           else if (reply.video) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.video.file_id)) {
               userPhotos[chatId].push({
-                id: fileIdCounter++,
+                id: userPhotos[chatId].length + 1,
                 type: 'video',
                 media: reply.video.file_id,
                 mediaGroupId: reply.media_group_id,
@@ -923,6 +921,7 @@ app.post(`/replyToOperatorPhoto`, async (req, res) => {
   res.status(200).json({ success: true });
 }
 );
+let fileIdCounter = 1;
 
 async function resToUserFunc(data) {
   const { chatId, userRequestId, timeMess, textHandler, caption_text, nicknameOperator, nickname } = data
