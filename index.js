@@ -254,19 +254,38 @@ async function CloseReq(requestId, operatorId) {
 }
 
 const hndlMed = async (idMedia, operatorId) => {
-  console.log(idMedia)
-  const med = await Media.findByPk(idMedia);
-  console.log(med)
-  if (med) {
-    console.log('asdPHT')
-    console.log(med)
-    const pht = JSON.parse(med.idMedia);
-    await bot.sendMediaGroup(operatorId, pht.map(photo => ({
-      type: photo.type,
-      media: photo.media,
-    })));
+  try {
+    console.log(idMedia);
+    const med = await Media.findByPk(idMedia);
+    console.log(med);
+    if (med) {
+      console.log('asdPHT');
+      console.log(med);
+      const pht = JSON.parse(med.idMedia);
+      const chunkSize = 10;
+
+      const chunkArray = (array, size) => {
+        const result = [];
+        for (let i = 0; i < array.length; i += size) {
+          result.push(array.slice(i, i + size));
+        }
+        return result;
+      };
+
+      const photoChunks = chunkArray(pht, chunkSize);
+
+      for (const chunk of photoChunks) {
+        await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
+          type: photo.type,
+          media: photo.media,
+        })));
+      }
+    }
+  } catch (error) {
+    console.error(error);
   }
 };
+
 
 const createMediaRecord = async (userRequestId, idMedia) => {
   try {
@@ -999,7 +1018,7 @@ app.get('/chat/:id', async (req, res) => {
 
     const userIdsArray = Array.from(uniqueUserIds);
     const users = await User.findAll({
-      where: { telegramId: userIdsArray } 
+      where: { telegramId: userIdsArray }
     });
 
     const usersMap = {};
@@ -1457,7 +1476,7 @@ async function sendMediaGroup1(data) {
     await MessageChat.create({
       IdMedia: mediaRecord.id,
       roleUser: op,
-      idUser:chatId,
+      idUser: chatId,
       username: nickname,
       // nicknameOperator: nicknameOperator,
       UserRequestId: userRequestId,
