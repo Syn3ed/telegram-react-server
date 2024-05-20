@@ -288,12 +288,27 @@ const hndlMed = async (idMedia, operatorId) => {
       // Группируем медиа по mediaGroupId
       const groupedMedia = groupByMediaGroupId(pht);
 
-      // Отправляем медиа в Telegram
+      // Отправляем медиа с mediaGroupId
       for (const groupId in groupedMedia) {
-        const mediaGroup = groupedMedia[groupId];
-        const mediaChunks = chunkArray(mediaGroup, chunkSize);
+        if (groupId !== 'default') {
+          const mediaGroup = groupedMedia[groupId];
+          const mediaChunks = chunkArray(mediaGroup, chunkSize);
 
-        for (const chunk of mediaChunks) {
+          for (const chunk of mediaChunks) {
+            await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
+              type: photo.type,
+              media: photo.media,
+            })));
+          }
+        }
+      }
+
+      // Отправляем медиа без mediaGroupId
+      if (groupedMedia['default']) {
+        const defaultMediaGroup = groupedMedia['default'];
+        const defaultMediaChunks = chunkArray(defaultMediaGroup, chunkSize);
+
+        for (const chunk of defaultMediaChunks) {
           await bot.sendMediaGroup(operatorId, chunk.map(photo => ({
             type: photo.type,
             media: photo.media,
