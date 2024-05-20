@@ -1447,7 +1447,8 @@ async function sendMediaGroup1(data) {
   const { chatId, nickname, userRequestId, timeMess, op, caption_text, nicknameOperator } = data;
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
-    console.log(mediaGroupId)
+    console.log('321111111111111111111111111111213123213213123')
+    console.log(userPhotos[chatId])
     const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
     const str = JSON.stringify(groupPhotos);
     const mediaRecord = await createMediaRecord(userRequestId, str);
