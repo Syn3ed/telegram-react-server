@@ -527,7 +527,7 @@ async function resToUserTextFunc1(data) {
 async function MethodToOperator(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     try {
-      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
+      const sentMessage = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
@@ -639,7 +639,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           waitingUsers[chatId] = false;
           await bot.sendMessage(chatId, 'Действие отменено.');
           bot.off('message', messageHandlers[chatId]);
-
+          await bot.deleteMessage(chatId, sentMessage.message_id);
 
           delete messageHandlers[chatId];
         }
