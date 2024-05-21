@@ -634,7 +634,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
           await bot.sendMessage(chatId, 'Действие отменено.');
-          bot.on('message', textHandler);
+          bot.off('message', textHandler);
         }
       });
     } catch (error) {
