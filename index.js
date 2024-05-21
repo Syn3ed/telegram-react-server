@@ -640,9 +640,10 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           await bot.sendMessage(chatId, 'Действие отменено.');
           bot.off('message', messageHandlers[chatId]);
 
-          await bot.answerCallbackQuery(callbackQuery.id);
-          delete messageHandlers[chatId]; 
+
+          delete messageHandlers[chatId];
         }
+        await bot.answerCallbackQuery(callbackQuery.id);
       });
     } catch (error) {
       console.log(error);
@@ -918,9 +919,10 @@ async function MethodToUser(userRequestId, userName, chatId) {
           waitingUsers[chatId] = false;
           await bot.sendMessage(chatId, 'Действие отменено.');
           bot.off('message', messageHandlers[chatId]);
-          delete messageHandlers[chatId]; 
-          await bot.answerCallbackQuery(callbackQuery.id);
+          delete messageHandlers[chatId];
+
         }
+        await bot.answerCallbackQuery(callbackQuery.id);
       });
     } catch (error) {
       console.log(error);
