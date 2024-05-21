@@ -523,33 +523,31 @@ async function resToUserTextFunc1(data) {
   }
   return;
 };
-
 async function MethodToOperator(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     try {
       await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
-            [{ text: 'Стоп', callback_data: 'Стоп' }]
+            [{ text: 'Стоп', callback_data: 'stop_action' }]
           ]
         }
       });
-      console.log('Сообщение от пользователя')
+      console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
+
       const textHandler = async (response) => {
         if (chatId === response.from.id && waitingUsers[chatId]) {
-
-          const reply = response
+          const reply = response;
           if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
             waitingUsers[chatId] = false;
-            return bot.sendMessage(chatId, 'Хорошо');;
+            return bot.sendMessage(chatId, 'Хорошо');
           }
-          const timeMess = timeFunc()
+          const timeMess = timeFunc();
           let caption_text;
-          console.log('123321')
-          const messages = await messagesFunc(userRequestId)
-          console.log('123321')
-          let fileIdCounter = 1;
+          console.log('123321');
+          const messages = await messagesFunc(userRequestId);
+          console.log('123321');
 
           if (reply.photo) {
             userPhotos[chatId] = userPhotos[chatId] || [];
@@ -563,8 +561,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
               console.log('Получена фотография:');
               console.log(userPhotos[chatId]);
             }
-          }
-          else if (reply.document) {
+          } else if (reply.document) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.document.file_id)) {
               userPhotos[chatId].push({
@@ -574,8 +571,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 mediaGroupId: reply.media_group_id
               });
             }
-          }
-          else if (reply.video) {
+          } else if (reply.video) {
             userPhotos[chatId] = userPhotos[chatId] || [];
             if (!userPhotos[chatId].some(item => item.media === reply.video.file_id)) {
               userPhotos[chatId].push({
@@ -587,18 +583,17 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             }
           }
 
-
           const existingUser = await dbManager.getUserByChatId(`${chatId}`);
           const nickname = existingUser.username;
           if (reply.caption) {
-            caption_text = reply.caption
+            caption_text = reply.caption;
             dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
           }
-          console.log('123321')
+          console.log('123321');
           if (!sentMediaGroups[chatId] && !reply?.text) {
             sentMediaGroups[chatId] = true;
             setTimeout(() => {
-              console.log(sentMediaGroups[chatId])
+              console.log(sentMediaGroups[chatId]);
               const data = {
                 chatId,
                 nickname,
@@ -606,10 +601,10 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 timeMess,
                 textHandler,
                 caption_text
-              }
+              };
               resToOperatorFunc(data);
               userPhotos[chatId] = [];
-              console.log(waitingUsers[chatId])
+              console.log(waitingUsers[chatId]);
             }, 1000);
           }
           if (reply?.text) {
@@ -622,30 +617,40 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 timeMess,
                 messages,
                 textHandler
-              }
+              };
               userPhotos[chatId] = [];
               resToOperatorTextFunc1(data);
-              console.log(waitingUsers[chatId])
+              console.log(waitingUsers[chatId]);
             }, 500);
           }
-
-        };
-        console.log('123321')
+        }
+        console.log('123321');
       };
+
       bot.on('message', textHandler);
+
+      bot.on('callback_query', async (callbackQuery) => {
+        const data = callbackQuery.data;
+        if (data === 'stop_action' && waitingUsers[chatId]) {
+          waitingUsers[chatId] = false;
+          await bot.sendMessage(chatId, 'Действие отменено.');
+          bot.on('message', textHandler);
+        }
+      });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдушие действие. Хотите завершить?`, {
+    await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Стоп', callback_data: 'Стоп' }]
+          [{ text: 'Стоп', callback_data: 'stop_action' }]
         ]
       }
     });
   }
 };
+
 
 async function MethodToOperator1(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
