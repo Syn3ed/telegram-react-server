@@ -525,6 +525,7 @@ async function resToUserTextFunc1(data) {
 };
 
 async function MethodToOperator(userRequestId, userName, chatId) {
+  let sentMessage2;
   if (!waitingUsers[chatId]) {
     try {
       const sentMessage = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
@@ -643,13 +644,15 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
           delete messageHandlers[chatId];
         }
+        await bot.deleteMessage(chatId, sentMessage.message_id);
+        await bot.deleteMessage(chatId, sentMessage2.message_id);
         await bot.answerCallbackQuery(callbackQuery.id);
       });
     } catch (error) {
       console.log(error);
     }
   } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
+    sentMessage2 = await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Стоп', callback_data: 'stop_action' }]
