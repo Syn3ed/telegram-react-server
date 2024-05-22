@@ -637,7 +637,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          await bot.sendMessage(chatId, 'Действие отменено.');
+          await bot.sendMessage(chatId, 'Вы завершили предыдушие действие.');
           bot.off('message', messageHandlers[chatId]);
           await bot.deleteMessage(chatId, sentMessage.message_id);
 
@@ -925,7 +925,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          await bot.sendMessage(chatId, 'Действие отменено.');
+          await bot.sendMessage(chatId, 'Вы завершили предыдушие действие.');
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
 
