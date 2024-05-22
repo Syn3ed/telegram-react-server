@@ -808,7 +808,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
       });
 
       waitingUsers[chatId] = true;
-
+      const tt = true;
       
       if (!messageHandlers[chatId]) {
         const textHandler = async (response) => {
@@ -870,7 +870,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
               dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Operator', `${nickname}`, `${nicknameOperator}`, timeMess);
             }
             console.log('123321');
-            const tt = true;
+        
             if (tt) {
               await processUserRequest(userRequestId, chatId);
               tt = false;
