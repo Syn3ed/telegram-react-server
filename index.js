@@ -809,10 +809,10 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
       let tt = true;
-      
+
       if (!messageHandlers[chatId]) {
         const textHandler = async (response) => {
-          
+
           if (chatId === response.from.id && waitingUsers[chatId]) {
             console.log('Сообщение от оператора');
             const reply = response;
@@ -870,12 +870,12 @@ async function MethodToUser(userRequestId, userName, chatId) {
               dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Operator', `${nickname}`, `${nicknameOperator}`, timeMess);
             }
             console.log('123321');
-        
+
             if (tt) {
-              await processUserRequest(userRequestId, chatId);
+              // await processUserRequest(userRequestId, chatId);
               tt = false;
             }
-          
+
             console.log('123321');
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
@@ -891,6 +891,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                   nickname
                 };
                 resToUserFunc(data);
+                processUserRequest(userRequestId, chatId);
                 console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
               }, 1000);
@@ -909,6 +910,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                   nickname
                 };
                 resToUserTextFunc(data);
+                processUserRequest(userRequestId, chatId);
                 console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
               }, 500);
@@ -916,7 +918,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
           }
         };
 
-      
+
         messageHandlers[chatId] = textHandler;
         bot.on('message', messageHandlers[chatId]);
       }
