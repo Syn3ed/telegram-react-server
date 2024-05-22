@@ -808,7 +808,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
       });
 
       waitingUsers[chatId] = true;
-      const tt = true;
+      let tt = true;
       
       if (!messageHandlers[chatId]) {
         const textHandler = async (response) => {
