@@ -639,7 +639,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           waitingUsers[chatId] = false;
           await bot.sendMessage(chatId, 'Вы завершили предыдушие действие.');
           bot.off('message', messageHandlers[chatId]);
-          await bot.deleteMessage(chatId, sentMessage.message_id);
+          // await bot.deleteMessage(chatId, sentMessage.message_id);
 
           delete messageHandlers[chatId];
         }
