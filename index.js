@@ -809,9 +809,10 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
 
-      // Проверяем, есть ли уже зарегистрированный обработчик сообщений для данного chatId
+      
       if (!messageHandlers[chatId]) {
         const textHandler = async (response) => {
+          
           if (chatId === response.from.id && waitingUsers[chatId]) {
             console.log('Сообщение от оператора');
             const reply = response;
@@ -869,7 +870,12 @@ async function MethodToUser(userRequestId, userName, chatId) {
               dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Operator', `${nickname}`, `${nicknameOperator}`, timeMess);
             }
             console.log('123321');
-            await processUserRequest(userRequestId, chatId);
+            const tt = true;
+            if (tt) {
+              await processUserRequest(userRequestId, chatId);
+              tt = false;
+            }
+          
             console.log('123321');
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
@@ -910,7 +916,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
           }
         };
 
-        // Сохраняем обработчик в объекте
+      
         messageHandlers[chatId] = textHandler;
         bot.on('message', messageHandlers[chatId]);
       }
