@@ -536,6 +536,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
       });
       console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
+      sentMediaGroups[chatId] = false;
       console.log(waitingUsers[chatId], 'MethodToOperator');
 
       if (!messageHandlers[chatId]) {
@@ -811,6 +812,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
       let tt = true;
+      sentMediaGroups[chatId] = false;
       console.log(sentMediaGroups[chatId],'MethodToUsersentMediaGroups')
       console.log(waitingUsers[chatId], 'MethodToUser');
       if (!messageHandlers[chatId]) {
