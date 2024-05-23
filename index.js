@@ -932,7 +932,6 @@ async function MethodToUser(userRequestId, userName, chatId) {
           await bot.sendMessage(chatId, 'Вы завершили предыдушие действие.');
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
-
         }
         await bot.answerCallbackQuery(callbackQuery.id);
       });
