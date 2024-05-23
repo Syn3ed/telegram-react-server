@@ -810,18 +810,17 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
       let tt = true;
-      console.log(waitingUsers[chatId], 'MethodToUser')
+      console.log(waitingUsers[chatId], 'MethodToUser');
       if (!messageHandlers[chatId]) {
-        const textHandler = async (response) => {
-
+        messageHandlers[chatId] = async (response) => {
           if (chatId === response.from.id && waitingUsers[chatId]) {
             console.log('Сообщение от оператора');
-            messageHandlers[chatId] = textHandler;
             const reply = response;
 
             if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
               waitingUsers[chatId] = false;
-              return bot.sendMessage(chatId, 'Хорошо');
+              await bot.sendMessage(chatId, 'Хорошо');
+              return;
             }
             let caption_text;
             console.log('123321');
@@ -887,7 +886,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                   chatId,
                   userRequestId,
                   timeMess,
-                  textHandler,
+                  textHandler: messageHandlers[chatId],
                   caption_text,
                   nicknameOperator,
                   nickname
@@ -908,7 +907,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                   timeMess,
                   messages,
                   nicknameOperator,
-                  textHandler,
+                  textHandler: messageHandlers[chatId],
                   nickname
                 };
                 resToUserTextFunc(data);
@@ -920,8 +919,6 @@ async function MethodToUser(userRequestId, userName, chatId) {
           }
         };
 
-
-      
         bot.on('message', messageHandlers[chatId]);
       }
 
@@ -929,7 +926,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          await bot.sendMessage(chatId, 'Вы завершили предыдушие действие.');
+          await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
         }
@@ -948,6 +945,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
     });
   }
 }
+
 
 async function keyboardRole(chatId) {
   // const chatId = msg.chat.id;
