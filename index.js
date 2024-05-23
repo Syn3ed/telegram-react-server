@@ -550,7 +550,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
             const timeMess = timeFunc();
             let caption_text;
-            console.log('123321');
+            console.log(reply);
             const messages = await messagesFunc(userRequestId);
             console.log('123321');
 
@@ -597,6 +597,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
+              console.log('sentMediaGroups')
               setTimeout(() => {
                 console.log(sentMediaGroups[chatId]);
                 const data = {
@@ -614,6 +615,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
             }
 
             if (reply?.text) {
+              console.log(reply.text);
               setTimeout(() => {
                 const data = {
                   userRequestId,
