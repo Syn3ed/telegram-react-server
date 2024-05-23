@@ -612,6 +612,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 resToOperatorFunc(data);
                 userPhotos[chatId] = [];
                 console.log(waitingUsers[chatId]);
+                delete messageHandlers[chatId];
               }, 1000);
             }
 
@@ -630,6 +631,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 userPhotos[chatId] = [];
                 resToOperatorTextFunc1(data);
                 console.log(waitingUsers[chatId]);
+                delete messageHandlers[chatId];
               }, 500);
             }
           }
@@ -901,6 +903,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 processUserRequest(userRequestId, chatId);
                 console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
+                delete messageHandlers[chatId];
               }, 1000);
             }
 
@@ -920,6 +923,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 processUserRequest(userRequestId, chatId);
                 console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
+                delete messageHandlers[chatId];
               }, 500);
             }
           }
