@@ -536,10 +536,11 @@ async function MethodToOperator(userRequestId, userName, chatId) {
       });
       console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
-
+      console.log(waitingUsers[chatId], 'MethodToOperator')
       if (!messageHandlers[chatId]) {
         const textHandler = async (response) => {
           if (chatId === response.from.id && waitingUsers[chatId]) {
+            messageHandlers[chatId] = textHandler;
             const reply = response;
             if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
               waitingUsers[chatId] = false;
@@ -629,7 +630,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           console.log('123321');
         };
 
-        messageHandlers[chatId] = textHandler;
+
         bot.on('message', messageHandlers[chatId]);
       }
 
@@ -809,12 +810,13 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
       let tt = true;
-
+      console.log(waitingUsers[chatId], 'MethodToUser')
       if (!messageHandlers[chatId]) {
         const textHandler = async (response) => {
 
           if (chatId === response.from.id && waitingUsers[chatId]) {
             console.log('Сообщение от оператора');
+            messageHandlers[chatId] = textHandler;
             const reply = response;
 
             if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
@@ -919,7 +921,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
         };
 
 
-        messageHandlers[chatId] = textHandler;
+      
         bot.on('message', messageHandlers[chatId]);
       }
 
@@ -1686,12 +1688,11 @@ const startBot = async () => {
                   }
                 });
 
-                // Удаляем обработчик события text после обработки сообщения
+
                 bot.off('text', textHandler);
               } else {
                 bot.sendMessage(userId, 'Ошибка: Введенное значение не соответствует ожидаемому формату ID-телеграма. Пожалуйста, введите корректный ID пользователя.');
 
-                // Удаляем обработчик события text после обработки сообщения
                 bot.off('text', textHandler);
               }
             }
@@ -2104,9 +2105,9 @@ const startBot = async () => {
 
   bot.on('callback_query', async (msg) => {
 
-    console.log(msg)
+    // console.log(msg)
     console.log('11111111111111111111111111111111111111111111111111111111111111111111111111')
-    console.log(msg.data)
+    // console.log(msg.data)
     const data1 = msg.data;
     const callbackQueryId = msg.id
     const chatId = msg.from.id;
