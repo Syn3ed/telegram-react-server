@@ -811,6 +811,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
       waitingUsers[chatId] = true;
       let tt = true;
+      console.log(sentMediaGroups[chatId],'MethodToUsersentMediaGroups')
       console.log(waitingUsers[chatId], 'MethodToUser');
       if (!messageHandlers[chatId]) {
         messageHandlers[chatId] = async (response) => {
