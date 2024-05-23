@@ -536,16 +536,18 @@ async function MethodToOperator(userRequestId, userName, chatId) {
       });
       console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
-      console.log(waitingUsers[chatId], 'MethodToOperator')
+      console.log(waitingUsers[chatId], 'MethodToOperator');
+
       if (!messageHandlers[chatId]) {
-        const textHandler = async (response) => {
+        messageHandlers[chatId] = async (response) => {
           if (chatId === response.from.id && waitingUsers[chatId]) {
-            messageHandlers[chatId] = textHandler;
             const reply = response;
             if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
               waitingUsers[chatId] = false;
-              return bot.sendMessage(chatId, 'Хорошо');
+              await bot.sendMessage(chatId, 'Хорошо');
+              return;
             }
+
             const timeMess = timeFunc();
             let caption_text;
             console.log('123321');
@@ -592,7 +594,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
               caption_text = reply.caption;
               dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'User', nickname, nickname, timeMess);
             }
-            console.log('123321');
+
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
               setTimeout(() => {
@@ -602,7 +604,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                   nickname,
                   userRequestId,
                   timeMess,
-                  textHandler,
+                  textHandler: messageHandlers[chatId],
                   caption_text
                 };
                 resToOperatorFunc(data);
@@ -610,6 +612,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 console.log(waitingUsers[chatId]);
               }, 1000);
             }
+
             if (reply?.text) {
               setTimeout(() => {
                 const data = {
@@ -619,7 +622,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                   nickname,
                   timeMess,
                   messages,
-                  textHandler
+                  textHandler: messageHandlers[chatId]
                 };
                 userPhotos[chatId] = [];
                 resToOperatorTextFunc1(data);
@@ -630,7 +633,6 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           console.log('123321');
         };
 
-
         bot.on('message', messageHandlers[chatId]);
       }
 
@@ -638,21 +640,17 @@ async function MethodToOperator(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          await bot.sendMessage(chatId, 'Вы завершили предыдушие действие.');
+          await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
           bot.off('message', messageHandlers[chatId]);
-          // await bot.deleteMessage(chatId, sentMessage.message_id);
-
           delete messageHandlers[chatId];
         }
-        // await bot.deleteMessage(chatId, sentMessage.message_id);
-        // await bot.deleteMessage(chatId, sentMessage2.message_id);
         await bot.answerCallbackQuery(callbackQuery.id);
       });
     } catch (error) {
       console.log(error);
     }
   } else {
-    sentMessage2 = await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
+    await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Стоп', callback_data: 'stop_action' }]
@@ -661,6 +659,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
     });
   }
 }
+
 
 async function MethodToOperator1(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
