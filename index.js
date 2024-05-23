@@ -637,6 +637,8 @@ async function MethodToOperator(userRequestId, userName, chatId) {
         };
 
         bot.on('message', messageHandlers[chatId]);
+      } else {
+        console.log('888888888888888888888888888888888888888888')
       }
 
       bot.on('callback_query', async (callbackQuery) => {
@@ -813,7 +815,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
       waitingUsers[chatId] = true;
       let tt = true;
       sentMediaGroups[chatId] = false;
-      console.log(sentMediaGroups[chatId],'MethodToUsersentMediaGroups')
+      console.log(sentMediaGroups[chatId], 'MethodToUsersentMediaGroups')
       console.log(waitingUsers[chatId], 'MethodToUser');
       if (!messageHandlers[chatId]) {
         messageHandlers[chatId] = async (response) => {
@@ -924,6 +926,8 @@ async function MethodToUser(userRequestId, userName, chatId) {
         };
 
         bot.on('message', messageHandlers[chatId]);
+      } else {
+        console.log('888888888888888888888888888888888888888888')
       }
 
       bot.on('callback_query', async (callbackQuery) => {
