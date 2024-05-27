@@ -669,19 +669,16 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
 
 async function MethodToOperator1(userRequestId, userName, chatId) {
-  let stopMessageIds = [];
-  let stopButton1;
+
   if (!waitingUsers[chatId]) {
     try {
-      stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
           ]
         }
       });
-
-      stopMessageIds = [stopButton1.message_id];
 
       console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
@@ -762,7 +759,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 userPhotos[chatId] = [];
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
-
+                bot.deleteMessage(chatId, stopButton1.message_id);
               }, 1000);
             }
 
@@ -782,6 +779,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 resToOperatorTextFunc1(data);
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
+                bot.deleteMessage(chatId, stopButton1.message_id);
               }, 500);
             }
           }
@@ -797,11 +795,10 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          for (const messageId of stopMessageIds) {
-            await bot.deleteMessage(chatId, messageId);
-          }
+          await bot.deleteMessage(chatId, stopButton1.message_id);
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
+
         }
         await bot.answerCallbackQuery(callbackQuery.id);
       });
@@ -820,9 +817,6 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
       const data = callbackQuery.data;
       if (data === 'stop_action2' && waitingUsers[chatId]) {
         waitingUsers[chatId] = false;
-        for (const messageId of stopMessageIds) {
-          await bot.deleteMessage(chatId, messageId);
-        }
         await bot.deleteMessage(chatId, stopMessage.message_id);
         bot.off('message', messageHandlers[chatId]);
         delete messageHandlers[chatId];
@@ -833,23 +827,17 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
   }
 };
 
-let stopMessageIds = {};
-
 async function MethodToUser(userRequestId, userName, chatId) {
-
-  let stopButton1;
   if (!waitingUsers[chatId]) {
     const username = userName;
     try {
-      stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
           ]
         }
       });
-      const stopMessageIds2 = stopButton1.message_id;
-      stopMessageIds[chatId] = stopMessageIds2
       waitingUsers[chatId] = true;
       let tt = true;
       sentMediaGroups[chatId] = false;
@@ -940,6 +928,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
                 delete messageHandlers[chatId];
+                bot.deleteMessage(chatId, stopButton1.message_id);
               }, 1000);
             }
 
@@ -960,6 +949,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
                 delete messageHandlers[chatId];
+                bot.deleteMessage(chatId, stopButton1.message_id);
               }, 500);
             }
           }
@@ -975,14 +965,8 @@ async function MethodToUser(userRequestId, userName, chatId) {
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
           // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-          const messageIds = stopMessageIds[chatId]; // Получаем массив message_id по chatId
-          if (messageIds) {
-            for (const messageId of Object.values(messageIds)) {
-              await bot.deleteMessage(chatId, messageId);
-            }
-            delete stopMessageIds[chatId];
-          }
           bot.off('message', messageHandlers[chatId]);
+          await bot.deleteMessage(chatId, stopButton1.message_id);
           delete messageHandlers[chatId];
         }
         await bot.answerCallbackQuery(callbackQuery.id);
@@ -1004,13 +988,6 @@ async function MethodToUser(userRequestId, userName, chatId) {
         waitingUsers[chatId] = false;
         console.log(stopMessageIds);
         // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-        const messageIds = stopMessageIds[chatId]; // Получаем массив message_id по chatId
-        if (messageIds) {
-          for (const messageId of Object.values(messageIds)) {
-            await bot.deleteMessage(chatId, messageId);
-          }
-          delete stopMessageIds[chatId];
-        }
         await bot.deleteMessage(chatId, stopButton2.message_id);
         bot.off('message', messageHandlers[chatId]);
         delete messageHandlers[chatId];
