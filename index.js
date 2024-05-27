@@ -848,7 +848,8 @@ async function MethodToUser(userRequestId, userName, chatId) {
           ]
         }
       });
-      stopMessageIds = [stopButton1.message_id];
+      const stopMessageIds2 = stopButton1.message_id;
+      stopMessageIds.push(stopMessageIds2);
       waitingUsers[chatId] = true;
       let tt = true;
       sentMediaGroups[chatId] = false;
