@@ -977,7 +977,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
           // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
           const messageIds = stopMessageIds[chatId]; // Получаем массив message_id по chatId
           if (messageIds) {
-            for (const messageId of messageIds) {
+            for (const messageId of Object.values(messageIds)) {
               await bot.deleteMessage(chatId, messageId);
             }
             delete stopMessageIds[chatId];
@@ -1006,7 +1006,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
         // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
         const messageIds = stopMessageIds[chatId]; // Получаем массив message_id по chatId
         if (messageIds) {
-          for (const messageId of messageIds) {
+          for (const messageId of Object.values(messageIds)) {
             await bot.deleteMessage(chatId, messageId);
           }
           delete stopMessageIds[chatId];
