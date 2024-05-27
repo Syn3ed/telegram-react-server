@@ -669,15 +669,19 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
 
 async function MethodToOperator1(userRequestId, userName, chatId) {
+  let stopMessageIds = [];
   if (!waitingUsers[chatId]) {
     try {
-      const sentMessage = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
           ]
         }
       });
+
+      stopMessageIds = [stopButton1.message_id];
+
       console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
       sentMediaGroups[chatId] = false;
@@ -742,7 +746,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
-              console.log('sentMediaGroups')
+              console.log('sentMediaGroups');
               setTimeout(() => {
                 console.log(sentMediaGroups[chatId]);
                 const data = {
@@ -757,15 +761,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 userPhotos[chatId] = [];
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
-                const message = `Создана новая заявка №${userRequestId}`
-                bot.sendMessage(chatId, `Ваша заявка создана №${userRequestId}`, {
-                  reply_markup: {
-                    inline_keyboard: [
-                      [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-                    ]
-                  }
-                });
-                sendMessagesToUsersWithRoleId(message, userRequestId)
+
               }, 1000);
             }
 
@@ -785,15 +781,6 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 resToOperatorTextFunc1(data);
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
-                const message = `Создана новая заявка №${userRequestId}`
-                bot.sendMessage(chatId, `Ваша заявка создана №${userRequestId}`, {
-                  reply_markup: {
-                    inline_keyboard: [
-                      [{ text: 'Ссылка на заявку', web_app: { url: appUrl + `/Inlinerequests/${userRequestId}` } }]
-                    ]
-                  }
-                });
-                sendMessagesToUsersWithRoleId(message, userRequestId)
               }, 500);
             }
           }
@@ -802,7 +789,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 
         bot.on('message', messageHandlers[chatId]);
       } else {
-        console.log('888888888888888888888888888888888888888888')
+        console.log('888888888888888888888888888888888888888888');
       }
 
       bot.on('callback_query', async (callbackQuery) => {
@@ -810,6 +797,9 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
           await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+          for (const messageId of stopMessageIds) {
+            await bot.deleteMessage(chatId, messageId);
+          }
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
         }
@@ -819,15 +809,20 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
       console.log(error);
     }
   } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
+    const stopMessage = await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Стоп', callback_data: 'stop_action' }]
         ]
       }
     });
+
+    const stopMessageId = stopMessage.message_id;
+    stopMessageIds.push(stopMessageId);
   }
 };
+
+
 
 async function MethodToUser(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
