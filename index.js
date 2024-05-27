@@ -613,7 +613,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 userPhotos[chatId] = [];
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
-                bot.deleteMessage(chatId,sentMessage.message_id)
+                bot.deleteMessage(chatId, sentMessage.message_id)
               }, 1000);
             }
 
@@ -633,7 +633,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 resToOperatorTextFunc1(data);
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
-                bot.deleteMessage(chatId,sentMessage.message_id)
+                bot.deleteMessage(chatId, sentMessage.message_id)
               }, 500);
             }
           }
@@ -649,7 +649,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          await bot.deleteMessage(chatId,sentMessage.message_id)
+          await bot.deleteMessage(chatId, sentMessage.message_id)
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
         }
@@ -1700,7 +1700,7 @@ const startBot = async () => {
       try {
         const userId = msg.from.id;
 
-        await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+        await bot.sendMessage(userId, 'Пожалуйста, введите id пользователя.\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
           reply_markup: {
             inline_keyboard: [
               [{ text: 'Стоп', callback_data: 'Стоп' }]
@@ -2109,24 +2109,24 @@ const startBot = async () => {
               ]
             }
           });
-
-          const textHandler = async (response) => {
-            try {
-              if (chatId === response.from.id && waitingUsers[chatId]) {
-                waitingUsers[chatId] = false;
-                bot.off('text', textHandler);
-                const fullName = response.text;
-                await dbManager.changeNameUser(userId, fullName);
-                await bot.sendMessage(chatId, 'ФИО успешно изменено!');
-                // keyboardRole(chatId);
+          if (!messageHandlers[chatId]) {
+            messageHandlers[chatId] = async (response) => {
+              try {
+                if (chatId === response.from.id && waitingUsers[chatId]) {
+                  waitingUsers[chatId] = false;
+                  bot.off('text', textHandler);
+                  const fullName = response.text;
+                  await dbManager.changeNameUser(userId, fullName);
+                  await bot.sendMessage(chatId, 'ФИО успешно изменено!');
+                  delete messageHandlers[chatId];
+                }
+              } catch (error) {
+                console.error('Ошибка при обработке ответа пользователя:', error);
               }
-            } catch (error) {
-              console.error('Ошибка при обработке ответа пользователя:', error);
-            }
-          };
+            };
 
-          bot.on('text', textHandler);
-          dbManager.changeNameUser(userId,)
+            bot.on('text',  messageHandlers[chatId]);
+          }
         }
         const userName = msg.from.first_name;
         try {
@@ -2179,6 +2179,7 @@ const startBot = async () => {
       const userId = msg.from.id;
       if (waitingUsers[userId]) {
         waitingUsers[userId] = false
+        delete messageHandlers[chatId];
         await bot.answerCallbackQuery(callbackQueryId);
         await bot.sendMessage(chatId, `Вы завершили предыдущие действия.`)
       } else {
