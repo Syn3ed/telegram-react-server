@@ -975,8 +975,12 @@ async function MethodToUser(userRequestId, userName, chatId) {
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
           // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-          for (const messageId of stopMessageIds) {
-            await bot.deleteMessage(chatId, messageId);
+          const messageIds = stopMessageIds[chatId]; // Получаем массив message_id по chatId
+          if (messageIds) {
+            for (const messageId of messageIds) {
+              await bot.deleteMessage(chatId, messageId);
+            }
+            delete stopMessageIds[chatId];
           }
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
@@ -1000,8 +1004,12 @@ async function MethodToUser(userRequestId, userName, chatId) {
         waitingUsers[chatId] = false;
         console.log(stopMessageIds);
         // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-        for (const messageId of stopMessageIds) {
-          await bot.deleteMessage(chatId, messageId);
+        const messageIds = stopMessageIds[chatId]; // Получаем массив message_id по chatId
+        if (messageIds) {
+          for (const messageId of messageIds) {
+            await bot.deleteMessage(chatId, messageId);
+          }
+          delete stopMessageIds[chatId];
         }
         await bot.deleteMessage(chatId, stopButton2.message_id);
         bot.off('message', messageHandlers[chatId]);
