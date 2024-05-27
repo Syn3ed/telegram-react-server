@@ -613,6 +613,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 userPhotos[chatId] = [];
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
+                bot.deleteMessage(chatId,sentMessage.message_id)
               }, 1000);
             }
 
@@ -632,6 +633,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 resToOperatorTextFunc1(data);
                 console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
+                bot.deleteMessage(chatId,sentMessage.message_id)
               }, 500);
             }
           }
@@ -647,7 +649,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+          await bot.deleteMessage(chatId,sentMessage.message_id)
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
         }
@@ -657,12 +659,23 @@ async function MethodToOperator(userRequestId, userName, chatId) {
       console.log(error);
     }
   } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
+    const stopButton2 = await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Стоп', callback_data: 'stop_action' }]
+          [{ text: 'Стоп', callback_data: 'stop_action2' }]
         ]
       }
+    });
+    bot.on('callback_query', async (callbackQuery) => {
+      const data = callbackQuery.data;
+      if (data === 'stop_action2' && waitingUsers[chatId]) {
+        waitingUsers[chatId] = false;
+        // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+        await bot.deleteMessage(chatId, stopButton2.message_id);
+        bot.off('message', messageHandlers[chatId]);
+        delete messageHandlers[chatId];
+      }
+      await bot.answerCallbackQuery(callbackQuery.id);
     });
   }
 }
