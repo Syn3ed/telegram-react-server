@@ -833,7 +833,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
   }
 };
 
-let stopMessageIds = [];
+let stopMessageIds = {};
 
 async function MethodToUser(userRequestId, userName, chatId) {
 
