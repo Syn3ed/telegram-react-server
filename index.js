@@ -1449,7 +1449,7 @@ const min_15 = 15 * 60 * 1000;
 
 async function getUnansweredRequestsMin15() {
   try {
-    const fifteenMinutesAgo = new Date(Date.now() - 2 * 60 * 1000); 
+    const fifteenMinutesAgo = new Date(Date.now() - 5 * 60 * 1000); 
 
     const unansweredRequests = await UserRequest.findAll({
       where: {
@@ -1473,7 +1473,7 @@ async function getUnansweredRequestsOneWeek() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.lt]: new Date(new Date() - 3 * 60 * 1000)
+          [Sequelize.Op.lt]: new Date(new Date() - 6 * 60 * 1000)
         }
       }
     });
