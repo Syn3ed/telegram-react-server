@@ -998,10 +998,10 @@ async function MethodToUser(userRequestId, userName, chatId) {
       const data = callbackQuery.data;
       if (data === 'stop_action2' && waitingUsers[chatId]) {
         waitingUsers[chatId] = false;
-        console.log(stopMessageIds[1]);
+        console.log(stopMessageIds);
         // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
         for (const messageId of stopMessageIds) {
-          await bot.deleteMessage(chatId, messageId[1]);
+          await bot.deleteMessage(chatId, messageId);
         }
         await bot.deleteMessage(chatId, stopButton2.message_id);
         bot.off('message', messageHandlers[chatId]);
