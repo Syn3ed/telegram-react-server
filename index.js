@@ -815,8 +815,6 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
         ]
       }
     });
-    const stopMessageId = stopMessage.message_id;
-    stopMessageIds.push(stopMessageId);
     bot.on('callback_query', async (callbackQuery) => {
       const data = callbackQuery.data;
       if (data === 'stop_action2' && waitingUsers[chatId]) {
@@ -824,6 +822,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
         for (const messageId of stopMessageIds) {
           await bot.deleteMessage(chatId, messageId);
         }
+        await bot.deleteMessage(chatId, stopMessage.message_id);
         bot.off('message', messageHandlers[chatId]);
         delete messageHandlers[chatId];
       }
