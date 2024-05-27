@@ -2101,15 +2101,15 @@ const startBot = async () => {
           const chatId = msg.from.id;
           const userId = match[1];
           console.log(msg)
-          waitingUsers[chatId] = true;
-          await bot.sendMessage(chatId, 'Пожалуйста, введите свои ФИО:', {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: 'Стоп', callback_data: 'Стоп' }]
-              ]
-            }
-          });
           if (!messageHandlers[chatId]) {
+            waitingUsers[chatId] = true;
+            await bot.sendMessage(chatId, 'Пожалуйста, введите свои ФИО:', {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: 'Стоп', callback_data: 'Стоп' }]
+                ]
+              }
+            });
             messageHandlers[chatId] = async (response) => {
               try {
                 if (chatId === response.from.id && waitingUsers[chatId]) {
@@ -2125,7 +2125,7 @@ const startBot = async () => {
               }
             };
 
-            bot.on('text',  messageHandlers[chatId]);
+            bot.on('text', messageHandlers[chatId]);
           }
         }
         const userName = msg.from.first_name;
