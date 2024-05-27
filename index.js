@@ -1453,7 +1453,7 @@ async function getUnansweredRequestsMin15() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.lt]: new Date(new Date() - 300000)
+          [Sequelize.Op.gt]: new Date(new Date() - 300000)
         }
       }
     });
@@ -1470,7 +1470,7 @@ async function getUnansweredRequestsOneWeek() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.lt]: new Date(new Date() - 600000)
+          [Sequelize.Op.gt]: new Date(new Date() - 600000)
         }
       }
     });
@@ -1632,8 +1632,8 @@ async function sendMediaGroup1(data) {
 const startBot = async () => {
   await connectToDatabase();
   await createRoles();
-  // setInterval(checkRequestsMin15, 60 * 1000 * 2);
-  // setInterval(checkRequestsOneWeek, 60 * 1000 * 3);
+  setInterval(checkRequestsMin15, 60 * 1000 * 2);
+  setInterval(checkRequestsOneWeek, 60 * 1000 * 3);
   bot.on('message', async (msg) => {
 
     console.log(msg)
@@ -2063,7 +2063,7 @@ const startBot = async () => {
                 bot.off('text', textHandler);
                 const fullName = response.text;
                 await dbManager.changeNameUser(userId, fullName);
-                await bot.sendMessage(chatId, 'Отлично!');
+                await bot.sendMessage(chatId, 'ФИО успешно изменено!');
                 // keyboardRole(chatId);
               }
             } catch (error) {
@@ -2126,10 +2126,10 @@ const startBot = async () => {
       if (waitingUsers[userId]) {
         waitingUsers[userId] = false
         await bot.answerCallbackQuery(callbackQueryId);
-        await bot.sendMessage(chatId, `Вы завершили предыдушие действие.`)
+        await bot.sendMessage(chatId, `Вы завершили предыдущие действия.`)
       } else {
         await bot.answerCallbackQuery(callbackQueryId);
-        await bot.sendMessage(chatId, `Вы уже завершили предыдушие действие.`)
+        await bot.sendMessage(chatId, `Вы уже завершили предыдущие действия.`)
       }
     }
     if (data1 === '/userId') {
