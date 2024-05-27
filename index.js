@@ -1453,7 +1453,7 @@ async function getUnansweredRequestsMin15() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.gt]: new Date(new Date() - 300000)
+          [Sequelize.Op.gt]: new Date(new Date() + 300000)
         }
       }
     });
@@ -1470,7 +1470,7 @@ async function getUnansweredRequestsOneWeek() {
       where: {
         status: 'ожидает ответа оператора',
         createdAt: {
-          [Sequelize.Op.gt]: new Date(new Date() - 600000)
+          [Sequelize.Op.gt]: new Date(new Date() + 600000)
         }
       }
     });
