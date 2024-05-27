@@ -836,6 +836,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 let stopMessageIds = [];
 
 async function MethodToUser(userRequestId, userName, chatId) {
+
   let stopButton1;
   if (!waitingUsers[chatId]) {
     const username = userName;
@@ -848,7 +849,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
         }
       });
       const stopMessageIds2 = stopButton1.message_id;
-      stopMessageIds[chatId].push(stopMessageIds2);
+      stopMessageIds[chatId] = stopMessageIds2
       waitingUsers[chatId] = true;
       let tt = true;
       sentMediaGroups[chatId] = false;
