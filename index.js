@@ -670,9 +670,10 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
 async function MethodToOperator1(userRequestId, userName, chatId) {
   let stopMessageIds = [];
+  let stopButton1;
   if (!waitingUsers[chatId]) {
     try {
-      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
@@ -836,10 +837,11 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 
 async function MethodToUser(userRequestId, userName, chatId) {
   let stopMessageIds = [];
+  let stopButton1;
   if (!waitingUsers[chatId]) {
     const username = userName;
     try {
-      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
@@ -984,7 +986,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
       console.log(error);
     }
   } else {
-    const stopButton2 =  await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
+    const stopButton2 = await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
           [{ text: 'Стоп', callback_data: 'stop_action2' }]
