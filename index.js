@@ -835,17 +835,18 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 
 
 async function MethodToUser(userRequestId, userName, chatId) {
+  let stopMessageIds = [];
   if (!waitingUsers[chatId]) {
     const username = userName;
     try {
-      await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
           ]
         }
       });
-
+      stopMessageIds = [stopButton1.message_id];
       waitingUsers[chatId] = true;
       let tt = true;
       sentMediaGroups[chatId] = false;
@@ -970,7 +971,10 @@ async function MethodToUser(userRequestId, userName, chatId) {
         const data = callbackQuery.data;
         if (data === 'stop_action' && waitingUsers[chatId]) {
           waitingUsers[chatId] = false;
-          await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+          // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+          for (const messageId of stopMessageIds) {
+            await bot.deleteMessage(chatId, messageId);
+          }
           bot.off('message', messageHandlers[chatId]);
           delete messageHandlers[chatId];
         }
@@ -980,12 +984,26 @@ async function MethodToUser(userRequestId, userName, chatId) {
       console.log(error);
     }
   } else {
-    await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
+    const stopButton2 =  await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Стоп', callback_data: 'stop_action' }]
+          [{ text: 'Стоп', callback_data: 'stop_action2' }]
         ]
       }
+    });
+    bot.on('callback_query', async (callbackQuery) => {
+      const data = callbackQuery.data;
+      if (data === 'stop_action2' && waitingUsers[chatId]) {
+        waitingUsers[chatId] = false;
+        // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+        for (const messageId of stopMessageIds) {
+          await bot.deleteMessage(chatId, messageId);
+        }
+        await bot.deleteMessage(chatId, stopButton2.message_id);
+        bot.off('message', messageHandlers[chatId]);
+        delete messageHandlers[chatId];
+      }
+      await bot.answerCallbackQuery(callbackQuery.id);
     });
   }
 }
