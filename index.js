@@ -2114,7 +2114,7 @@ const startBot = async () => {
               try {
                 if (chatId === response.from.id && waitingUsers[chatId]) {
                   waitingUsers[chatId] = false;
-                  bot.off('text', textHandler);
+                  bot.off('text',  messageHandlers[chatId]);
                   const fullName = response.text;
                   await dbManager.changeNameUser(userId, fullName);
                   await bot.sendMessage(chatId, 'ФИО успешно изменено!');
