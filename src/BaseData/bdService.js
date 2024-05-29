@@ -192,6 +192,7 @@ class DatabaseService {
       const userRequest = await UserRequest.findByPk(userRequestId);
       if (userRequest) {
         userRequest.status = newStatus;
+        userRequest.createdAt = new Date();
         await userRequest.save();
       }
     } catch (e) {

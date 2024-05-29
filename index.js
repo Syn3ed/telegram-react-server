@@ -1046,12 +1046,7 @@ async function keyboardRole(chatId) {
   return
 };
 
-app.post(`/replyToOperatorPhoto`, async (req, res) => {
-  const { queryId, userRequestId, username, operatorId } = req.body;
-  MethodToOperator(userRequestId, username, operatorId)
-  res.status(200).json({ success: true });
-}
-);
+
 let fileIdCounter = 1;
 
 async function resToUserFunc(data) {
@@ -1065,6 +1060,12 @@ async function resToUserFunc(data) {
   return;
 };
 
+app.post(`/replyToOperatorPhoto`, async (req, res) => {
+  const { queryId, userRequestId, username, operatorId } = req.body;
+  MethodToOperator(userRequestId, username, operatorId)
+  res.status(200).json({ success: true });
+}
+);
 app.post(`/resToUserPhoto`, async (req, res) => {
   const { queryId, userRequestId, username, operatorId } = req.body;
   MethodToUser(userRequestId, username, operatorId)
@@ -1192,15 +1193,7 @@ app.get('/chat/:id', async (req, res) => {
 
 app.get('/req', async (req, res) => {
   try {
-    // const stat = 'ожидает ответа оператора';
-    // const stat1 = 'Заявка в обработке!';
     const usersReq = await UserRequest.findAll({
-      // where: {
-      //   [Op.or]: [
-      //     { status: stat },
-      //     { status: stat1 }
-      //   ]
-      // },
       include: User,
       order: [['id', 'ASC']],
     });
