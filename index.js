@@ -1516,7 +1516,7 @@ async function getUnansweredRequestsOneWeek() {
     const unansweredRequests = await UserRequest.findAll({
       where: {
         status: 'ожидает ответа оператора',
-        createdAt: {
+        updatedAt: {
           [Sequelize.Op.lt]: new Date(new Date() - 6 * 60 * 1000)
         }
       }
