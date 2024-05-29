@@ -46,6 +46,15 @@ const UserRequest = sequelize.define('UserRequest', {
     timestamps: true,
 });
 
+const Message = sequelize.define('Message', {
+    operatorId: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    }
+}, {
+    timestamps: false
+});
+
 const Role = sequelize.define('Role', {
     name: {
         type: DataTypes.STRING,
@@ -124,6 +133,9 @@ MessageChat.hasMany(User, { foreignKey: 'idUser', targetKey: 'telegramId' });
 
 User.hasMany(UserRequest);
 UserRequest.belongsTo(User);
+
+UserRequest.hasMany(Message);
+Message.belongsTo(UserRequest);
 
 UserRequest.hasMany(Media);
 Media.belongsTo(UserRequest);
