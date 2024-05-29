@@ -1,5 +1,5 @@
 const sequelize = require('./bdConnect');
-const { Message, UserRequest, User, MessageChat } = require('./bdModel');
+const { UserRequest, User, MessageChat } = require('./bdModel');
 
 class DatabaseService {
   constructor(sequelize) {

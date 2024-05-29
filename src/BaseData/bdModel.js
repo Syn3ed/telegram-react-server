@@ -23,14 +23,6 @@ const User = sequelize.define('User', {
     timestamps: false,
 });
 
-const NicknameOperator = sequelize.define('NicknameOperator', {
-    username: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    }
-}, {
-    timestamps: false,
-});
 
 const UserRequest = sequelize.define('UserRequest', {
     status: {
@@ -52,15 +44,6 @@ const UserRequest = sequelize.define('UserRequest', {
     },
 }, {
     timestamps: true,
-});
-
-const Message = sequelize.define('Message', {
-    operatorId: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    }
-}, {
-    timestamps: false
 });
 
 const Role = sequelize.define('Role', {
@@ -139,14 +122,8 @@ Role.hasMany(User);
 User.belongsTo(MessageChat,{ foreignKey: 'idUser', sourceKey: 'telegramId' });
 MessageChat.hasMany(User, { foreignKey: 'idUser', targetKey: 'telegramId' });
 
-User.belongsTo(NicknameOperator, { foreignKey: 'nicknameOperatorId' });
-NicknameOperator.hasOne(User, { foreignKey: 'nicknameOperatorId' });
-
 User.hasMany(UserRequest);
 UserRequest.belongsTo(User);
-
-UserRequest.hasMany(Message);
-Message.belongsTo(UserRequest);
 
 UserRequest.hasMany(Media);
 Media.belongsTo(UserRequest);
