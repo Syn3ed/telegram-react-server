@@ -128,8 +128,8 @@ const OperatorReq = sequelize.define('OperatorReq', {
 User.belongsTo(Role)
 Role.hasMany(User);
 
-User.belongsTo(MessageChat,{ foreignKey: 'idUser', sourceKey: 'telegramId' });
-MessageChat.hasMany(User, { foreignKey: 'idUser', targetKey: 'telegramId' });
+User.belongsTo(MessageChat);
+MessageChat.hasMany(User);
 
 User.hasMany(UserRequest);
 UserRequest.belongsTo(User);

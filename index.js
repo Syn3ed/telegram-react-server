@@ -255,12 +255,8 @@ async function CloseReq(requestId, operatorId) {
 
 const hndlMed = async (idMedia, operatorId) => {
   try {
-    console.log(idMedia);
     const med = await Media.findByPk(idMedia);
-    console.log(med);
     if (med) {
-      console.log('asdPHT');
-      console.log(med);
       const pht = JSON.parse(med.idMedia);
       const chunkSize = 10;
 
@@ -424,7 +420,6 @@ async function resToOperatorTextFunc(data) {
   waitingUsers[chatId] = false;
   await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', username, timeMess);
   await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке №${userRequestId}`);
-  console.log('resToOperatorTextFunc')
   await bot.sendMessage(messages[0].operatorId, `Вам пришел ответ ответ от пользователя заявку №${userRequestId}\n${reply.text}`, {
     reply_markup: {
       inline_keyboard: [
@@ -433,7 +428,6 @@ async function resToOperatorTextFunc(data) {
       ]
     }
   });
-  console.log('resToOperatorTextFunc')
   bot.off('message', textHandler);
   return;
 };
@@ -444,10 +438,7 @@ async function resToOperatorTextFunc1(data) {
     waitingUsers[chatId] = false;
     await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'User', nickname, nickname, timeMess);
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке №${userRequestId}`);
-    console.log('resToOperatorTextFunc')
     const operatorIds = messages[0].operatorId.split(',');
-    console.log('9999999999999999999999999')
-    console.log(operatorIds)
     for (const operatorId of operatorIds) {
       await bot.sendMessage(operatorId.trim(), `Вам пришел ответ от пользователя на заявку №${userRequestId}\n${reply.text}`, {
         reply_markup: {
@@ -458,7 +449,6 @@ async function resToOperatorTextFunc1(data) {
         }
       });
     }
-    console.log('resToOperatorTextFunc')
 
     bot.off('message', textHandler);
   } catch (e) {
@@ -477,7 +467,6 @@ async function resToUserTextFunc(data) {
     await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', `${nickname}`, nicknameOperator, timeMess);
     // await processUserRequest(userRequestId, chatId)
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке №${userRequestId}`);
-    console.log('resToUserTextFunc')
     await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку №${userRequestId}\n${reply.text}`, {
       reply_markup: {
         inline_keyboard: [
@@ -486,7 +475,6 @@ async function resToUserTextFunc(data) {
         ]
       }
     });
-    console.log('resToUserTextFunc')
     bot.off('message', textHandler);
   } catch (e) {
     console.log(e)
@@ -504,7 +492,6 @@ async function resToUserTextFunc1(data) {
     await dbManager.createUserRequestMessage(userRequestId, reply.text, chatId, 'Operator', 'Оператор', timeMess);
     await processUserRequest(userRequestId, chatId)
     await bot.sendMessage(chatId, `Ответ успешно добавлен к заявке №${userRequestId}`);
-    console.log('resToUserTextFunc')
     await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Вам пришел ответ ответ на заявку №${userRequestId}\n${reply.text}`, {
       reply_markup: {
         inline_keyboard: [
@@ -513,7 +500,6 @@ async function resToUserTextFunc1(data) {
         ]
       }
     });
-    console.log('resToUserTextFunc')
     bot.off('message', textHandler);
   } catch (e) {
     console.log(e)
@@ -534,10 +520,8 @@ async function MethodToOperator(userRequestId, userName, chatId) {
           ]
         }
       });
-      console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
       sentMediaGroups[chatId] = false;
-      console.log(waitingUsers[chatId], 'MethodToOperator');
 
       if (!messageHandlers[chatId]) {
         messageHandlers[chatId] = async (response) => {
@@ -551,9 +535,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
             const timeMess = timeFunc();
             let caption_text;
-            console.log(reply);
             const messages = await messagesFunc(userRequestId);
-            console.log('123321');
 
             if (reply.photo) {
               userPhotos[chatId] = userPhotos[chatId] || [];
@@ -564,8 +546,6 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                   media: reply.photo[0].file_id,
                   mediaGroupId: reply.media_group_id
                 });
-                console.log('Получена фотография:');
-                console.log(userPhotos[chatId]);
               }
             } else if (reply.document) {
               userPhotos[chatId] = userPhotos[chatId] || [];
@@ -598,9 +578,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
-              console.log('sentMediaGroups')
               setTimeout(() => {
-                console.log(sentMediaGroups[chatId]);
                 const data = {
                   chatId,
                   nickname,
@@ -611,14 +589,12 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 };
                 resToOperatorFunc(data);
                 userPhotos[chatId] = [];
-                console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
                 bot.deleteMessage(chatId, sentMessage.message_id)
               }, 1000);
             }
 
             if (reply?.text) {
-              console.log(reply.text);
               setTimeout(() => {
                 const data = {
                   userRequestId,
@@ -631,18 +607,16 @@ async function MethodToOperator(userRequestId, userName, chatId) {
                 };
                 userPhotos[chatId] = [];
                 resToOperatorTextFunc1(data);
-                console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
                 bot.deleteMessage(chatId, sentMessage.message_id)
               }, 500);
             }
           }
-          console.log('123321');
         };
 
         bot.on('message', messageHandlers[chatId]);
       } else {
-        console.log('888888888888888888888888888888888888888888')
+
       }
 
       bot.on('callback_query', async (callbackQuery) => {
@@ -693,10 +667,8 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
         }
       });
 
-      console.log('Сообщение от пользователя');
       waitingUsers[chatId] = true;
       sentMediaGroups[chatId] = false;
-      console.log(waitingUsers[chatId], 'MethodToOperator');
 
       if (!messageHandlers[chatId]) {
         messageHandlers[chatId] = async (response) => {
@@ -710,9 +682,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 
             const timeMess = timeFunc();
             let caption_text;
-            console.log(reply);
             const messages = await messagesFunc(userRequestId);
-            console.log('123321');
 
             if (reply.photo) {
               userPhotos[chatId] = userPhotos[chatId] || [];
@@ -723,8 +693,6 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                   media: reply.photo[0].file_id,
                   mediaGroupId: reply.media_group_id
                 });
-                console.log('Получена фотография:');
-                console.log(userPhotos[chatId]);
               }
             } else if (reply.document) {
               userPhotos[chatId] = userPhotos[chatId] || [];
@@ -757,9 +725,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
-              console.log('sentMediaGroups');
               setTimeout(() => {
-                console.log(sentMediaGroups[chatId]);
                 const data = {
                   chatId,
                   nickname,
@@ -770,14 +736,12 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 };
                 resToOperatorFunc(data);
                 userPhotos[chatId] = [];
-                console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
                 bot.deleteMessage(chatId, stopButton1.message_id);
               }, 1000);
             }
 
             if (reply?.text) {
-              console.log(reply.text);
               setTimeout(() => {
                 const data = {
                   userRequestId,
@@ -790,18 +754,15 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
                 };
                 userPhotos[chatId] = [];
                 resToOperatorTextFunc1(data);
-                console.log(waitingUsers[chatId]);
                 delete messageHandlers[chatId];
                 bot.deleteMessage(chatId, stopButton1.message_id);
               }, 500);
             }
           }
-          console.log('123321');
         };
 
         bot.on('message', messageHandlers[chatId]);
       } else {
-        console.log('888888888888888888888888888888888888888888');
       }
 
       bot.on('callback_query', async (callbackQuery) => {
@@ -854,12 +815,9 @@ async function MethodToUser(userRequestId, userName, chatId) {
       waitingUsers[chatId] = true;
       let tt = true;
       sentMediaGroups[chatId] = false;
-      console.log(sentMediaGroups[chatId], 'MethodToUsersentMediaGroups')
-      console.log(waitingUsers[chatId], 'MethodToUser');
       if (!messageHandlers[chatId]) {
         messageHandlers[chatId] = async (response) => {
           if (chatId === response.from.id && waitingUsers[chatId]) {
-            console.log('Сообщение от оператора');
             const reply = response;
 
             if ((reply?.text === 'Стоп' || reply?.text === 'стоп') && waitingUsers[chatId]) {
@@ -868,7 +826,6 @@ async function MethodToUser(userRequestId, userName, chatId) {
               return;
             }
             let caption_text;
-            console.log('123321');
 
             const timeMess = timeFunc();
             const messages = await messagesFunc(userRequestId);
@@ -882,8 +839,6 @@ async function MethodToUser(userRequestId, userName, chatId) {
                   media: reply.photo[0].file_id,
                   mediaGroupId: reply.media_group_id
                 });
-                console.log('Получена фотография:');
-                console.log(userPhotos[chatId]);
               }
             } else if (reply.document) {
               userPhotos[chatId] = userPhotos[chatId] || [];
@@ -907,7 +862,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
               }
             }
 
-            console.log('123321');
+
             const existingUser = await dbManager.getUserByChatId(`${chatId}`);
             const nickname = existingUser.username;
             const nicknameOperator = existingUser.nicknameOperator;
@@ -915,18 +870,15 @@ async function MethodToUser(userRequestId, userName, chatId) {
               caption_text = reply.caption;
               dbManager.createUserRequestMessage(userRequestId, caption_text, chatId, 'Operator', `${nickname}`, `${nicknameOperator}`, timeMess);
             }
-            console.log('123321');
 
             if (tt) {
               // await processUserRequest(userRequestId, chatId);
               tt = false;
             }
 
-            console.log('123321');
             if (!sentMediaGroups[chatId] && !reply?.text) {
               sentMediaGroups[chatId] = true;
               setTimeout(() => {
-                console.log(sentMediaGroups[chatId]);
                 const data = {
                   chatId,
                   userRequestId,
@@ -938,7 +890,6 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 };
                 resToUserFunc(data);
                 processUserRequest(userRequestId, chatId);
-                console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
                 delete messageHandlers[chatId];
                 bot.deleteMessage(chatId, stopButton1.message_id);
@@ -959,7 +910,6 @@ async function MethodToUser(userRequestId, userName, chatId) {
                 };
                 resToUserTextFunc(data);
                 processUserRequest(userRequestId, chatId);
-                console.log(waitingUsers[chatId]);
                 userPhotos[chatId] = [];
                 delete messageHandlers[chatId];
                 bot.deleteMessage(chatId, stopButton1.message_id);
@@ -970,7 +920,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
         bot.on('message', messageHandlers[chatId]);
       } else {
-        console.log('888888888888888888888888888888888888888888')
+    
       }
 
       bot.on('callback_query', async (callbackQuery) => {
@@ -1575,8 +1525,6 @@ async function notifyOperatorsOneWeek(requests) {
     });
     await sendMessagesToUsersWithRoleId(message, userRequestId);
     await dbManager.changeStatusRes(userRequestId, status);
-    console.log(messages)
-    console.log(messages[0])
     await bot.sendMessage(messages[0].UserRequest.User.telegramId, `Ваша заявка №${userRequestId} была закрыта по истечению времени`);
   }
 }
@@ -1606,8 +1554,7 @@ async function sendMediaGroup1(data) {
   const { chatId, nickname, userRequestId, timeMess, op, caption_text, nicknameOperator } = data;
   if (userPhotos[chatId] && userPhotos[chatId].length > 0) {
     const mediaGroupId = userPhotos[chatId][0].mediaGroupId;
-    console.log('321111111111111111111111111111213123213213123')
-    console.log(userPhotos[chatId])
+
     // const groupPhotos = userPhotos[chatId].filter(photo => photo.mediaGroupId === mediaGroupId);
     const groupPhotos = userPhotos[chatId]
     const str = JSON.stringify(groupPhotos);
@@ -1669,7 +1616,6 @@ async function sendMediaGroup1(data) {
         }
       });
     }
-    console.log('11111111111111111111111111111111111111111111111111111111111111111111111111111111')
     userPhotos[chatId] = userPhotos[chatId].filter(photo => photo.mediaGroupId !== mediaGroupId);
     sentMediaGroups[chatId] = false;
   }
@@ -1835,8 +1781,7 @@ const startBot = async () => {
           try {
             const med = await Media.findByPk(idMed);
             // await bot.sendPhoto(msg.chat.id, med.idMedia);
-            console.log('asdPHT')
-            console.log(med)
+
             const pht = JSON.parse(med.idMedia);
             await bot.sendMediaGroup(chatId, pht.map(photo => ({
               type: photo.type,
@@ -1846,7 +1791,6 @@ const startBot = async () => {
             console(e)
           }
 
-          console.log(idMed);
         }
         if (regex2.test(msg.web_app_data.data)) {
           const match = msg.web_app_data.data.match(regex2);
@@ -2059,7 +2003,6 @@ const startBot = async () => {
           const match = msg.web_app_data.data.match(regex7);
           const chatId = msg.from.id;
           const userId = match[1];
-          console.log(msg)
           const chRole = dbManager.changeRoleUser(userId, 2)
           await bot.sendMessage(userId, 'Вам присвоена роль "Пользователь"');
           bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
@@ -2069,7 +2012,6 @@ const startBot = async () => {
           const match = msg.web_app_data.data.match(regex8);
           const chatId = msg.from.id;
           const userId = match[1];
-          console.log(msg)
           const chRole = dbManager.changeRoleUser(userId, 3)
           const existingUser = await dbManager.getUserByChatId(`${userId}`);
           await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
@@ -2081,7 +2023,7 @@ const startBot = async () => {
           const match = msg.web_app_data.data.match(regex9);
           const chatId = msg.from.id;
           const userId = match[1];
-          console.log(msg)
+
           const chRole = dbManager.changeRoleUser(userId, 1)
           const existingUser = await dbManager.getUserByChatId(`${userId}`);
           await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
@@ -2093,7 +2035,6 @@ const startBot = async () => {
           const match = msg.web_app_data.data.match(regex10);
           const chatId = msg.from.id;
           const userId = match[1];
-          console.log(msg)
           if (!messageHandlers[chatId]) {
             waitingUsers[chatId] = true;
             await bot.sendMessage(chatId, 'Пожалуйста, введите свои ФИО:', {
@@ -2126,9 +2067,7 @@ const startBot = async () => {
           const data = JSON.parse(msg?.web_app_data?.data);
           if (data.isSwitchOn) {
             const userId = msg.from.id;
-            console.log('asd3')
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
-            console.log(createdRequest)
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
             MethodToOperator1(userRequestId, userName, userId)
@@ -2160,10 +2099,6 @@ const startBot = async () => {
   });
 
   bot.on('callback_query', async (msg) => {
-
-    // console.log(msg)
-    console.log('11111111111111111111111111111111111111111111111111111111111111111111111111')
-    // console.log(msg.data)
     const data1 = msg.data;
     const callbackQueryId = msg.id
     const chatId = msg.from.id;
@@ -2200,8 +2135,6 @@ const startBot = async () => {
         const idMed = match[1];
         try {
           const med = await Media.findByPk(idMed);
-          console.log('asdPHT')
-          console.log(med)
           const pht = JSON.parse(med.idMedia);
           await bot.sendMediaGroup(chatId, pht.map(photo => ({
             type: photo.type,
@@ -2210,7 +2143,6 @@ const startBot = async () => {
         } catch (e) {
           console(e)
         }
-        console.log(idMed);
       }
       if (regex2.test(data1)) {
         const match = data1.match(regex2);
@@ -2465,7 +2397,6 @@ const startBot = async () => {
         const match = data1.match(regex8);
         const chatId = msg.from.id;
         const userId = match[1];
-        console.log(msg)
         const chRole = dbManager.changeRoleUser(userId, 2)
         await bot.sendMessage(userId, 'Вам присвоена роль "Пользователь"');
         await bot.sendMessage(chatId, 'Роль пользователя успешно изменена');
@@ -2475,7 +2406,6 @@ const startBot = async () => {
         const match = data1.match(regex9);
         const chatId = msg.from.id;
         const userId = match[1];
-        console.log(msg)
         const chRole = dbManager.changeRoleUser(userId, 3)
         const existingUser = await dbManager.getUserByChatId(`${userId}`);
         await bot.sendMessage(userId, 'Вам присвоена роль "Оператор"');
@@ -2487,7 +2417,6 @@ const startBot = async () => {
         const match = data1.match(regex10);
         const chatId = msg.from.id;
         const userId = match[1];
-        console.log(msg)
         const chRole = dbManager.changeRoleUser(userId, 1)
         const existingUser = await dbManager.getUserByChatId(`${userId}`);
         await bot.sendMessage(userId, 'Вам присвоена роль "Администратор"');
