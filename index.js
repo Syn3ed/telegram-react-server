@@ -1498,7 +1498,7 @@ async function getUnansweredRequestsMin15() {
     const unansweredRequests = await UserRequest.findAll({
       where: {
         status: 'ожидает ответа оператора',
-        createdAt: {
+        updatedAt: {
           [Sequelize.Op.lt]: fifteenMinutesAgo
         }
       }
