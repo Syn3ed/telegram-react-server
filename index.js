@@ -2122,7 +2122,6 @@ const startBot = async () => {
     if (msg.data === 'stop_action') {
       waitingUsers[chatId] = false;
       // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-      console.log(stopButton1);
       bot.off('message', messageHandlers[chatId]);
       await bot.deleteMessage(chatId, msg.message.message_id);
       delete messageHandlers[chatId];
