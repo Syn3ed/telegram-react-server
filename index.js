@@ -116,7 +116,7 @@ app.post(`/resumeReq`, async (req, res) => {
 
   const { userRequestId } = req.body;
   const requestId = userRequestId;
-  const status = 'ожидает ответа оператора';
+  const status = 'Ожидает ответа оператора';
   const messageFunc = await Message.findAll({
     where: { id: userRequestId },
     include: [
@@ -184,7 +184,7 @@ async function ResumeReq(requestId) {
         }
       });
     }
-    const status = 'ожидает ответа оператора'
+    const status = 'Ожидает ответа оператора'
     await dbManager.changeStatusRes(requestId, status);
     const message = `Возобновлена заявка №${requestId}`;
     await sendMessagesToUsersWithRoleId(message, requestId);
@@ -358,7 +358,7 @@ function timeFunc() {
 
 async function processUserRequest(requestId, userId) {
   const userRequestStatus = await UserRequest.findByPk(requestId);
-  if (userRequestStatus.status === 'ожидает ответа оператора') {
+  if (userRequestStatus.status === 'Ожидает ответа оператора') {
     const status = 'Заявка в обработке';
     await dbManager.changeStatusRes(requestId, status);
     const message = `Заявка №${requestId} в обработке`;
@@ -1164,7 +1164,7 @@ app.get('/req', async (req, res) => {
 
 app.get('/', async (req, res) => {
   try {
-    const stat = 'ожидает ответа оператора'
+    const stat = 'Ожидает ответа оператора'
     const usersReq = await UserRequest.findAll({
       where: { status: stat },
       include: User,
@@ -1447,7 +1447,7 @@ async function getUnansweredRequestsMin15() {
 
     const unansweredRequests = await UserRequest.findAll({
       where: {
-        status: 'ожидает ответа оператора',
+        status: 'Ожидает ответа оператора',
         updatedAt: {
           [Sequelize.Op.lt]: fifteenMinutesAgo
         }
@@ -1465,7 +1465,7 @@ async function getUnansweredRequestsOneWeek() {
   try {
     const unansweredRequests = await UserRequest.findAll({
       where: {
-        status: 'ожидает ответа оператора',
+        status: 'Ожидает ответа оператора',
         updatedAt: {
           [Sequelize.Op.lt]: new Date(new Date() - 6 * 60 * 1000)
         }
@@ -1929,7 +1929,7 @@ const startBot = async () => {
                 });
 
                 const userRequestStatus = await UserRequest.findByPk(requestId);
-                if (userRequestStatus.status === 'ожидает ответа оператора') {
+                if (userRequestStatus.status === 'Ожидает ответа оператора') {
                   const status = 'Заявка в обработке';
                   await dbManager.changeStatusRes(requestId, status);
                   const message = `Заявка №${requestId} в обработке`;
@@ -2067,17 +2067,17 @@ const startBot = async () => {
           const data = JSON.parse(msg?.web_app_data?.data);
           if (data.isSwitchOn) {
             const userId = msg.from.id;
-            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'Ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
             MethodToOperator1(userRequestId, userName, userId)
-            const message = `Уведомляею о создании новой заявки №${createdRequestId}`
+            const message = `Уведомляю о создании новой заявки №${createdRequestId}`
             sendMessagesToUsersWithRoleId(message, createdRequestId)
           } else {
-            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'ожидает ответа оператора', data.description, data.category, data.address);
+            const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'Ожидает ответа оператора', data.description, data.category, data.address);
             const createdRequestId = createdRequest.dataValues.id;
             const userRequestId = createdRequestId;
-            const message = `Уведомляею о создании новой заявки №${createdRequestId}`
+            const message = `Уведомляю о создании новой заявки №${createdRequestId}`
             bot.sendMessage(chatId, `Ваша заявка создана №${userRequestId}`, {
               reply_markup: {
                 inline_keyboard: [
@@ -2280,7 +2280,7 @@ const startBot = async () => {
               });
 
               const userRequestStatus = await UserRequest.findByPk(requestId);
-              if (userRequestStatus.status === 'ожидает ответа оператора') {
+              if (userRequestStatus.status === 'Ожидает ответа оператора') {
                 const status = 'Заявка в обработке';
                 await dbManager.changeStatusRes(requestId, status);
                 const message = `Заявка №${requestId} в обработке`;

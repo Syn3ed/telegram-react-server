@@ -23,12 +23,22 @@ const User = sequelize.define('User', {
     timestamps: false,
 });
 
+const AdresPZU = sequelize.define('AdresPZU', {
+    address: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        unique: true,
+    }
+}, {
+    timestamps: false,
+})
+
 
 const UserRequest = sequelize.define('UserRequest', {
     status: {
         type: DataTypes.TEXT,
         allowNull: false,
-        defaultValue: 'ожидает ответа оператора',
+        defaultValue: 'Ожидает ответа оператора',
     },
     messageReq: {
         type: DataTypes.TEXT,
@@ -143,10 +153,7 @@ Media.belongsTo(UserRequest);
 UserRequest.hasMany(MessageChat);
 MessageChat.belongsTo(UserRequest);
 
-UserRequest.hasMany(Media);
-Media.belongsTo(UserRequest);
-
 UserRequest.hasMany(OperatorReq);
 OperatorReq.belongsTo(UserRequest);
 
-module.exports = { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq };
+module.exports = { User, UserRequest, Message, Role, Media, MessageChat, OperatorReq, AdresPZU };
