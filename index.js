@@ -938,6 +938,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
             waitingUsers[chatId] = false;
             // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+            console.log(stopButton1);
             bot.off('message', messageHandlers[chatId]);
             await bot.deleteMessage(chatId, stopButton1.message_id);
             delete messageHandlers[chatId];
