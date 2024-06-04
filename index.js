@@ -940,7 +940,7 @@ async function MethodToUser(userRequestId, userName, chatId) {
             // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
             console.log(stopButton1);
             bot.off('message', messageHandlers[chatId]);
-            await bot.deleteMessage(chatId, stopButton1.message_id);
+            // await bot.deleteMessage(chatId, stopButton1.message_id);
             delete messageHandlers[chatId];
           }
           await bot.answerCallbackQuery(callbackQuery.id);
