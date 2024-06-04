@@ -931,26 +931,26 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
       }
 
-      bot.on('callback_query', async (callbackQuery) => {
-        const data = callbackQuery.data;
-        try {
-          if (data === 'stop_action' && waitingUsers[chatId]) {
+      // bot.on('callback_query', async (callbackQuery) => {
+      //   const data = callbackQuery.data;
+      //   try {
+      //     if (data === 'stop_action' && waitingUsers[chatId]) {
 
-            waitingUsers[chatId] = false;
-            // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-            console.log(stopButton1);
-            bot.off('message', messageHandlers[chatId]);
-            if (stopButton1.message_id) {
-              await bot.deleteMessage(chatId, stopButton1.message_id);
-            }
+      //       waitingUsers[chatId] = false;
+      //       // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+      //       console.log(stopButton1);
+      //       bot.off('message', messageHandlers[chatId]);
+      //       if (stopButton1.message_id) {
+      //         await bot.deleteMessage(chatId, stopButton1.message_id);
+      //       }
 
-            delete messageHandlers[chatId];
-          }
-          await bot.answerCallbackQuery(callbackQuery.id);
-        } catch (error) {
-          console.log(error);
-        }
-      });
+      //       delete messageHandlers[chatId];
+      //     }
+      //     await bot.answerCallbackQuery(callbackQuery.id);
+      //   } catch (error) {
+      //     console.log(error);
+      //   }
+      // });
     } catch (error) {
       console.log(error);
     }
@@ -2119,6 +2119,16 @@ const startBot = async () => {
     const callbackQueryId = msg.id
     const chatId = msg.from.id;
     const userName = msg.from.first_name
+    if (msg.data === 'stop_action') {
+      waitingUsers[chatId] = false;
+      // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+      console.log(stopButton1);
+      bot.off('message', messageHandlers[chatId]);
+      await bot.deleteMessage(chatId, msg.message.message_id);
+      delete messageHandlers[chatId];
+      await bot.answerCallbackQuery(msg.id);
+    }
+
     if (data1 === 'Стоп') {
       const userId = msg.from.id;
       if (waitingUsers[userId]) {
