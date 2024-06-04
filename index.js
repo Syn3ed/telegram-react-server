@@ -4,7 +4,15 @@ const multer = require('multer');
 const { Sequelize, DataTypes } = require('sequelize');
 const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, {
+  polling: {
+    interval: 1000, 
+    polling: true,
+    params: {
+      timeout: 10, 
+    },
+  },
+});
 const appUrl = process.env.WEB_APP_URL;
 const sequelize = require('./src/BaseData/bdConnect');
 const DatabaseService = require(`./src/BaseData/bdService`)
@@ -513,7 +521,7 @@ async function resToUserTextFunc1(data) {
 async function MethodToOperator(userRequestId, userName, chatId) {
   if (!waitingUsers[chatId]) {
     try {
-      const sentMessage = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      const sentMessage = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
@@ -659,7 +667,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
 
   if (!waitingUsers[chatId]) {
     try {
-      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\n Вы также можете отменить действие, нажав на кнопку "Стоп"', {
+      const stopButton1 = await bot.sendMessage(chatId, 'Пожалуйста, введите сообщение или прикрепите файл(ы).\nВы также можете отменить действие, нажав на кнопку "Стоп"', {
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Стоп', callback_data: 'stop_action' }]
