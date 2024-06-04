@@ -1595,7 +1595,7 @@ const startBot = async () => {
   setInterval(checkRequestsMin15, 60 * 1000 * 1);
   setInterval(checkRequestsOneWeek, 60 * 1000 * 1);
   bot.on('message', async (msg) => {
-
+    console.log(msg);
     const chatId = msg.chat.id
     if (msg.text === 'Узнать id' || msg.text === `Мой id`) {
       await bot.sendMessage(chatId, `Ваш id \n${chatId}`)
