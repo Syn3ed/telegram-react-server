@@ -2114,6 +2114,7 @@ const startBot = async () => {
   });
 
   bot.on('callback_query', async (msg) => {
+    console.log(msg);
     const data1 = msg.data;
     const callbackQueryId = msg.id
     const chatId = msg.from.id;
