@@ -627,16 +627,6 @@ async function MethodToOperator(userRequestId, userName, chatId) {
 
       }
 
-      bot.on('callback_query', async (callbackQuery) => {
-        const data = callbackQuery.data;
-        if (data === 'stop_action' && waitingUsers[chatId]) {
-          waitingUsers[chatId] = false;
-          await bot.deleteMessage(chatId, sentMessage.message_id)
-          bot.off('message', messageHandlers[chatId]);
-          delete messageHandlers[chatId];
-        }
-        await bot.answerCallbackQuery(callbackQuery.id);
-      });
     } catch (error) {
       console.log(error);
     }
@@ -648,17 +638,7 @@ async function MethodToOperator(userRequestId, userName, chatId) {
         ]
       }
     });
-    bot.on('callback_query', async (callbackQuery) => {
-      const data = callbackQuery.data;
-      if (data === 'stop_action2' && waitingUsers[chatId]) {
-        waitingUsers[chatId] = false;
-        // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-        await bot.deleteMessage(chatId, stopButton2.message_id);
-        bot.off('message', messageHandlers[chatId]);
-        delete messageHandlers[chatId];
-      }
-      await bot.answerCallbackQuery(callbackQuery.id);
-    });
+
   }
 }
 
@@ -773,17 +753,7 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
       } else {
       }
 
-      bot.on('callback_query', async (callbackQuery) => {
-        const data = callbackQuery.data;
-        if (data === 'stop_action' && waitingUsers[chatId]) {
-          waitingUsers[chatId] = false;
-          await bot.deleteMessage(chatId, stopButton1.message_id);
-          bot.off('message', messageHandlers[chatId]);
-          delete messageHandlers[chatId];
 
-        }
-        await bot.answerCallbackQuery(callbackQuery.id);
-      });
     } catch (error) {
       console.log(error);
     }
@@ -791,20 +761,11 @@ async function MethodToOperator1(userRequestId, userName, chatId) {
     const stopMessage = await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Стоп', callback_data: 'stop_action2' }]
+          [{ text: 'Стоп', callback_data: 'stop_action' }]
         ]
       }
     });
-    bot.on('callback_query', async (callbackQuery) => {
-      const data = callbackQuery.data;
-      if (data === 'stop_action2' && waitingUsers[chatId]) {
-        waitingUsers[chatId] = false;
-        await bot.deleteMessage(chatId, stopMessage.message_id);
-        bot.off('message', messageHandlers[chatId]);
-        delete messageHandlers[chatId];
-      }
-      await bot.answerCallbackQuery(callbackQuery.id);
-    });
+
 
   }
 };
@@ -958,20 +919,9 @@ async function MethodToUser(userRequestId, userName, chatId) {
     const stopButton2 = await bot.sendMessage(chatId, `Вы не завершили предыдущее действие. Хотите завершить?`, {
       reply_markup: {
         inline_keyboard: [
-          [{ text: 'Стоп', callback_data: 'stop_action2' }]
+          [{ text: 'Стоп', callback_data: 'stop_action' }]
         ]
       }
-    });
-    bot.on('callback_query', async (callbackQuery) => {
-      const data = callbackQuery.data;
-      if (data === 'stop_action2' && waitingUsers[chatId]) {
-        waitingUsers[chatId] = false;
-        // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-        await bot.deleteMessage(chatId, stopButton2.message_id);
-        bot.off('message', messageHandlers[chatId]);
-        delete messageHandlers[chatId];
-      }
-      await bot.answerCallbackQuery(callbackQuery.id);
     });
   }
 }
