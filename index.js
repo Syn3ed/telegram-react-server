@@ -6,10 +6,10 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, {
   polling: {
-    interval: 1000, 
+    interval: 1000,
     polling: true,
     params: {
-      timeout: 10, 
+      timeout: 10,
     },
   },
 });
@@ -928,19 +928,24 @@ async function MethodToUser(userRequestId, userName, chatId) {
 
         bot.on('message', messageHandlers[chatId]);
       } else {
-    
+
       }
 
       bot.on('callback_query', async (callbackQuery) => {
         const data = callbackQuery.data;
-        if (data === 'stop_action' && waitingUsers[chatId]) {
-          waitingUsers[chatId] = false;
-          // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-          bot.off('message', messageHandlers[chatId]);
-          await bot.deleteMessage(chatId, stopButton1.message_id);
-          delete messageHandlers[chatId];
+        try {
+          if (data === 'stop_action' && waitingUsers[chatId]) {
+
+            waitingUsers[chatId] = false;
+            // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
+            bot.off('message', messageHandlers[chatId]);
+            await bot.deleteMessage(chatId, stopButton1.message_id);
+            delete messageHandlers[chatId];
+          }
+          await bot.answerCallbackQuery(callbackQuery.id);
+        } catch (error) {
+          console.log(error);
         }
-        await bot.answerCallbackQuery(callbackQuery.id);
       });
     } catch (error) {
       console.log(error);
@@ -988,7 +993,7 @@ async function keyboardRole(chatId) {
     keyboard = [
       [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', web_app: { url: appUrl + `/UserProfile/${chatId}` } }],
       [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
-      [ { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+      [{ text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
     ];
   } else if (user.RoleId == '3') {
     keyboard = [
@@ -2054,7 +2059,7 @@ const startBot = async () => {
               try {
                 if (chatId === response.from.id && waitingUsers[chatId]) {
                   waitingUsers[chatId] = false;
-                  bot.off('text',  messageHandlers[chatId]);
+                  bot.off('text', messageHandlers[chatId]);
                   const fullName = response.text;
                   await dbManager.changeNameUser(userId, fullName);
                   await bot.sendMessage(chatId, 'ФИО успешно изменено!');
