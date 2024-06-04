@@ -2070,11 +2070,15 @@ const startBot = async () => {
     const chatId = msg.from.id;
     const userName = msg.from.first_name
     if (msg.data === 'stop_action') {
-      waitingUsers[chatId] = false;
-      // await bot.sendMessage(chatId, 'Вы завершили предыдущее действие.');
-      bot.off('message', messageHandlers[chatId]);
+
+      if (waitingUsers[chatId]) {
+        waitingUsers[chatId] = false;
+      }
+      if (messageHandlers[chatId]) {
+        bot.off('message', messageHandlers[chatId]);
+        delete messageHandlers[chatId];
+      }
       await bot.deleteMessage(chatId, msg.message.message_id);
-      delete messageHandlers[chatId];
       await bot.answerCallbackQuery(msg.id);
     }
 
