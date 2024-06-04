@@ -988,7 +988,7 @@ async function keyboardRole(chatId) {
     keyboard = [
       [{ text: 'Мои заявки', web_app: { url: appUrl + `/RequestUserList/${chatId}` } }, { text: 'Мой профиль', web_app: { url: appUrl + `/UserProfile/${chatId}` } }],
       [{ text: `Текущие заявки`, web_app: { url: appUrl } }, { text: 'Создание заявки', web_app: { url: appUrl + '/FormReq' } }],
-      [{ text: 'Изменить роль пользователя по его Id', callback_data: `/resRole` }, { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
+      [ { text: 'Меню админа', web_app: { url: appUrl + `/AdminIndex` } }]
     ];
   } else if (user.RoleId == '3') {
     keyboard = [
@@ -1637,7 +1637,6 @@ const startBot = async () => {
   setInterval(checkRequestsOneWeek, 60 * 1000 * 1);
   bot.on('message', async (msg) => {
 
-    console.log(msg)
     const chatId = msg.chat.id
     if (msg.text === 'Узнать id' || msg.text === `Мой id`) {
       await bot.sendMessage(chatId, `Ваш id \n${chatId}`)
@@ -1664,7 +1663,6 @@ const startBot = async () => {
 
               console.log(`Изменить роль пользователя по его Id`)
               const chatId = response.text;
-              console.log(chatId)
               waitingUsers[userId] = false;
 
               if (!isNaN(chatId)) {
@@ -2072,7 +2070,7 @@ const startBot = async () => {
         }
         const userName = msg.from.first_name;
         try {
-          const data = JSON.parse(msg?.web_app_data?.data);
+          const data = msg?.web_app_data?.data;
           if (data.isSwitchOn) {
             const userId = msg.from.id;
             const createdRequest = await dbManager.createUserRequest(`${msg.from.id}`, 'Ожидает ответа оператора', data.description, data.category, data.address);
